@@ -21,8 +21,9 @@ public class MenuUI : MonoBehaviour
     }
     #endregion
     [Header("MenuSide")]
-    [SerializeField] private GameObject joinSide;
-    [SerializeField] private GameObject createSide;
+    [SerializeField] public GameObject joinSide;
+    [SerializeField] public GameObject createSide;
+    [SerializeField] public GameObject menuSide;
 
     [Header("CreateRoom")]
     [SerializeField] public TMP_InputField roomName;
@@ -72,6 +73,8 @@ public class MenuUI : MonoBehaviour
         else if(roomName.text.Length > 0)
         {
             LobbyManager.Instance.CreateRoom(roomName.text);
+            createSide.SetActive(false);
+            menuSide.SetActive(false);
         }
     }
 

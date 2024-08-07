@@ -70,11 +70,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public void CreateRoom(string roomName)
     {
+        Debug.Log("CreateRoom");
         PhotonNetwork.CreateRoom(roomName);
     }
     public override void OnCreatedRoom()
     {
-        
+        Debug.Log("OnCreatedRoom");
     }
 
 
