@@ -21,10 +21,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    
+    public List<RoomInfo> cachedRoom = new List<RoomInfo>();
 
-
-    [SerializeField]public List<RoomInfo> cachedRoom = new List<RoomInfo>();
 
     private void Start()
     {
@@ -34,6 +32,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         PhotonNetwork.JoinLobby();
+    }
+    public override void OnJoinedLobby()
+    {
+        PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -73,19 +75,25 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("CreateRoom");
         PhotonNetwork.CreateRoom(roomName);
+        MenuUI.Instance.RoomSideInitiate();
     }
 
     public void JoinRoom(string roomName)
     {
         PhotonNetwork.JoinRoom(roomName);
-    }
-
-    public override void OnJoinedRoom()
-    {
         MenuUI.Instance.RoomSideInitiate();
     }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        MenuUI.Instance.PlayerUpdateUI(newPlayer);
+        Debug.Log("OnPlayerEnteredRoom");
+
+    }
+
     public override void OnLeftRoom()
     {
+        MenuUI.Instance.MenuSideInitiate();
         
     }
 }
