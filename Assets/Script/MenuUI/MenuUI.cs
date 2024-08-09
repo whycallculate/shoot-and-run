@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -32,6 +33,12 @@ public class MenuUI : MonoBehaviour
     [Header("JoinRoomUI")]
     public Transform roomListParent;
     [SerializeField] public GameObject roomItemPrefab;
+
+
+    [Header("RoomSide")]
+    [SerializeField] public Transform playerListParent;
+    [SerializeField] public GameObject playerItemList;
+    
 
     private void Update()
     {
@@ -97,12 +104,25 @@ public class MenuUI : MonoBehaviour
 
         }
     }
+
     public void RoomSideInitiate()
     {
         menuSide.SetActive(false);
         roomSide.SetActive(true);
     }
 
+    public void MenuSideInitiate()
+    {
+        menuSide.SetActive(true);
+        roomSide.SetActive(false);
+    }
+
+    public void PlayerUpdateUI(Player newPlayer)
+    {
+        Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
+        Debug.Log(newPlayer.NickName);
+        Debug.Log("PlayerUpdateUI");
 
 
+    }
 }

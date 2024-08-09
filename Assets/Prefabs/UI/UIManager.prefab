@@ -52,3 +52,6 @@ MonoBehaviour:
   roomListParent: {fileID: 0}
   roomItemPrefab: {fileID: 2794018691882710443, guid: f435c01ee2c1ab84eb224fb1ebc08502,
     type: 3}
+  playerListParent: {fileID: 0}
+  playerItemList: {fileID: 1046149394783374987, guid: d25766fc8b5995344a263e9aaf2a4a8c,
+    type: 3}
