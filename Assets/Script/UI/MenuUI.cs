@@ -21,8 +21,10 @@ public class MenuUI : MonoBehaviour
     }
     #endregion
     [Header("MenuSide")]
-    [SerializeField] private GameObject joinSide;
-    [SerializeField] private GameObject createSide;
+    [SerializeField] public GameObject joinSide;
+    [SerializeField] public GameObject createSide;
+    [SerializeField] public GameObject menuSide;
+    [SerializeField] public GameObject roomSide;
 
     [Header("CreateRoom")]
     [SerializeField] public TMP_InputField roomName;
@@ -72,6 +74,8 @@ public class MenuUI : MonoBehaviour
         else if(roomName.text.Length > 0)
         {
             LobbyManager.Instance.CreateRoom(roomName.text);
+            createSide.SetActive(false);
+            menuSide.SetActive(false);
         }
     }
 
@@ -88,9 +92,17 @@ public class MenuUI : MonoBehaviour
 
             roomItem.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = room.Name;
             roomItem.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = room.PlayerCount + "/" + room.MaxPlayers;
+            roomItem.transform.GetComponent<JoinButtonByName>().roomName = room.Name;
 
 
         }
     }
+    public void RoomSideInitiate()
+    {
+        menuSide.SetActive(false);
+        roomSide.SetActive(true);
+    }
+
+
 
 }
