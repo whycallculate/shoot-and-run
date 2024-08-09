@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     #region Singleton
@@ -23,7 +24,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     
 
 
-    public List<RoomInfo> cachedRoom = new List<RoomInfo>();
+    [SerializeField]public List<RoomInfo> cachedRoom = new List<RoomInfo>();
 
     private void Start()
     {
@@ -73,11 +74,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         Debug.Log("CreateRoom");
         PhotonNetwork.CreateRoom(roomName);
     }
-    public override void OnCreatedRoom()
+
+    public void JoinRoom(string roomName)
     {
-        Debug.Log("OnCreatedRoom");
+        PhotonNetwork.JoinRoom(roomName);
     }
 
-
-
+    public override void OnJoinedRoom()
+    {
+        MenuUI.Instance.RoomSideInitiate();
+    }
+    public override void OnLeftRoom()
+    {
+        
+    }
 }
