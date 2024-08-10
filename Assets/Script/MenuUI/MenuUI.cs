@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MenuUI : MonoBehaviour
@@ -39,11 +40,14 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
     private PhotonView pw;
+
+    [Header("ChatSide")]
+    [SerializeField] public GameObject chatSide;
     
 
     private void Update()
     {
-        
+        ChatSideIsOpen();
     }
     public void OpenJoinSide()
     {
@@ -142,5 +146,18 @@ public class MenuUI : MonoBehaviour
             
         }
         
+    }
+
+    public void ChatSideIsOpen()
+    {
+        
+        if(roomSide.active == true)
+        {
+            chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(true);
+        }
+        else if(roomSide.active == false)
+        {
+            chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(false);
+        }
     }
 }
