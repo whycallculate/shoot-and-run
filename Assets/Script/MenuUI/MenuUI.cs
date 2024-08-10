@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MenuUI : MonoBehaviour
@@ -38,11 +39,15 @@ public class MenuUI : MonoBehaviour
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
+    private PhotonView pw;
+
+    [Header("ChatSide")]
+    [SerializeField] public GameObject chatSide;
     
 
     private void Update()
     {
-        
+        ChatSideIsOpen();
     }
     public void OpenJoinSide()
     {
@@ -117,12 +122,42 @@ public class MenuUI : MonoBehaviour
         roomSide.SetActive(false);
     }
 
-    public void PlayerUpdateUI(Player newPlayer)
+    public void PlayerAddUI(Player newPlayer)
     {
+
+    
         Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
         Debug.Log(newPlayer.NickName);
         Debug.Log("PlayerUpdateUI");
+    }
 
+    public void PlayerUpdateUI(Player[] newPlayer)
+    {
+        for(int i = 0; i < newPlayer.Length; i++)
+        {
+            if (newPlayer[i].NickName == playerItemList.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
+            {
+                Destroy(playerItemList);
+            }
+            else
+            {
+                Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer[i]);
+            }
+            
+        }
+        
+    }
 
+    public void ChatSideIsOpen()
+    {
+        
+        if(roomSide.active == true)
+        {
+            chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(true);
+        }
+        else if(roomSide.active == false)
+        {
+            chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(false);
+        }
     }
 }
