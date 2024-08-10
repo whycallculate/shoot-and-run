@@ -38,6 +38,7 @@ public class MenuUI : MonoBehaviour
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
+    private PhotonView pw;
     
 
     private void Update()
@@ -117,12 +118,29 @@ public class MenuUI : MonoBehaviour
         roomSide.SetActive(false);
     }
 
-    public void PlayerUpdateUI(Player newPlayer)
+    public void PlayerAddUI(Player newPlayer)
     {
+
+    
         Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
         Debug.Log(newPlayer.NickName);
         Debug.Log("PlayerUpdateUI");
+    }
 
-
+    public void PlayerUpdateUI(Player[] newPlayer)
+    {
+        for(int i = 0; i < newPlayer.Length; i++)
+        {
+            if (newPlayer[i].NickName == playerItemList.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
+            {
+                Destroy(playerItemList);
+            }
+            else
+            {
+                Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer[i]);
+            }
+            
+        }
+        
     }
 }

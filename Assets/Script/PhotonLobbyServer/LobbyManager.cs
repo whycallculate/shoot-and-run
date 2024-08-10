@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
+using System.Linq;
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     #region Singleton
@@ -86,14 +87,25 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        MenuUI.Instance.PlayerUpdateUI(newPlayer);
-        Debug.Log("OnPlayerEnteredRoom");
+        MenuUI.Instance.PlayerAddUI(newPlayer);
+        
 
     }
+    public override void OnJoinedRoom()
+    {
 
+        PlayerCheckUpdateList();
+    }
     public override void OnLeftRoom()
     {
         MenuUI.Instance.MenuSideInitiate();
         
+    }
+
+
+    public void PlayerCheckUpdateList()
+    {
+        Player[] players = PhotonNetwork.PlayerList;
+        MenuUI.Instance.PlayerUpdateUI(players);
     }
 }
