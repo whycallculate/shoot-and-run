@@ -28,13 +28,16 @@ public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
     public bool joinFailed = false;
 
     private LoadBalancingClient loadBalancingClient;
-
-    public void CreateRoomForMatchmaking(byte mapKey, byte playerLevel)
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+    public void CreateRoomForMatchmaking(byte mapKey, byte playerLevel, int expectedPlayers)
     {
         Hashtable expectedCustomRoomProp = new Hashtable { { MAP_KEY, mapKey }, { PLAYER_LEVEL, playerLevel } };
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.CustomRoomProperties = expectedCustomRoomProp;
-        roomOptions.MaxPlayers = 2;
+        roomOptions.MaxPlayers = expectedPlayers;
         EnterRoomParams enterRoomParams = new EnterRoomParams();
         enterRoomParams.RoomOptions = roomOptions;
         Debug.Log("CreateRoomForMatchmaking");
@@ -42,7 +45,10 @@ public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
         //loadBalancingClient.OpCreateRoom(enterRoomParams);
         PhotonNetwork.JoinRandomOrCreateRoom(roomOptions: roomOptions);
         
+
     }
+    
+
     
     public void JoinRandonMatchmaking(byte mapKey, byte playerLevel)
     {
