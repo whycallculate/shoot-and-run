@@ -24,7 +24,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public List<RoomInfo> cachedRoom = new List<RoomInfo>();
 
-
     private void Start()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -33,9 +32,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         PhotonNetwork.JoinLobby();
+        Debug.Log("OnConnectedToMaster");
     }
     public override void OnJoinedLobby()
     {
+        Debug.Log("OnJoinedLobby");
         PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
     }
 
@@ -71,6 +72,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         MenuUI.Instance.RoomUpdateUI();
     }
+
+    public void MatchMaking()
+    {
+   
+    }
+
 
     public void CreateRoom(string roomName)
     {

@@ -43,12 +43,17 @@ public class MenuUI : MonoBehaviour
 
     [Header("ChatSide")]
     [SerializeField] public GameObject chatSide;
+
+    [Header("MatchMaking")]
+    [SerializeField] public GameObject MatchFoundUI;
+
     
 
     private void Update()
     {
         ChatSideIsOpen();
     }
+    #region menuSideAndRoomSide
     public void OpenJoinSide()
     {
         if (createSide.activeSelf == true)
@@ -115,12 +120,14 @@ public class MenuUI : MonoBehaviour
         menuSide.SetActive(false);
         roomSide.SetActive(true);
     }
-
+    
     public void MenuSideInitiate()
     {
         menuSide.SetActive(true);
         roomSide.SetActive(false);
     }
+    #endregion
+    #region playerlistSide
 
     public void PlayerAddUI(Player newPlayer)
     {
@@ -148,6 +155,8 @@ public class MenuUI : MonoBehaviour
         
     }
 
+    #endregion
+    #region chatSide
     public void ChatSideIsOpen()
     {
         
@@ -160,4 +169,14 @@ public class MenuUI : MonoBehaviour
             chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(false);
         }
     }
+    #endregion
+    public void FindMatchMakingButton()
+    {
+
+
+        //MatchMaking.Instance.CreateRoomForMatchmaking(1, 2);
+        
+    }
+
+    
 }
