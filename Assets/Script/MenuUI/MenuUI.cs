@@ -1,10 +1,12 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+
 
 public class MenuUI : MonoBehaviour
 {
@@ -40,15 +42,30 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
     private PhotonView pw;
+    private Player player;
+    
+
 
     [Header("ChatSide")]
     [SerializeField] public GameObject chatSide;
-    
+
+    [Header("MatchMaking")]
+    [SerializeField] public GameObject MatchFoundUI;
+    public bool acceptOrDecline;
+    List<bool> playerBoolCheck = new List<bool>();
+    bool gameStart = false;
+
+    private void Awake()
+    {
+        pw = GetComponent<PhotonView>();
+    }
+
 
     private void Update()
     {
         ChatSideIsOpen();
     }
+    #region menuSideAndRoomSide
     public void OpenJoinSide()
     {
         if (createSide.activeSelf == true)
@@ -115,12 +132,14 @@ public class MenuUI : MonoBehaviour
         menuSide.SetActive(false);
         roomSide.SetActive(true);
     }
-
+    
     public void MenuSideInitiate()
     {
         menuSide.SetActive(true);
         roomSide.SetActive(false);
     }
+    #endregion
+    #region playerlistSide
 
     public void PlayerAddUI(Player newPlayer)
     {
@@ -148,6 +167,8 @@ public class MenuUI : MonoBehaviour
         
     }
 
+    #endregion
+    #region chatSide
     public void ChatSideIsOpen()
     {
         
@@ -160,4 +181,111 @@ public class MenuUI : MonoBehaviour
             chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(false);
         }
     }
+    #endregion
+    #region MatchMakingUI
+    public void AcceptButton()
+    {
+        pw.RPC("AcceptButtonPunRPCMethod", RpcTarget.All);
+    }
+    public void DeclineButton() 
+    {
+        pw.RPC("DeclineButtonPunRPCMethod", RpcTarget.All);
+    }
+    
+    [PunRPC]
+    public void AcceptButtonPunRPCMethod()
+    {
+        acceptOrDecline = true;
+        playerBoolCheck.Add(acceptOrDecline);
+    }
+    [PunRPC]
+    public void DeclineButtonPunRPCMethod()
+    {
+        acceptOrDecline = false;
+        playerBoolCheck.Add(acceptOrDecline);
+    }
+    public void FindMatchMakingButton()
+    {
+
+        StartCoroutine(SearchingMatch(1,1,2));
+        
+    }
+    
+
+    IEnumerator SearchingMatch(byte mapType, byte playerLevel , int expectedPlayers)
+    {
+        int waitForSecond = 1;
+        
+        while(waitForSecond <100)
+        {
+            //MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
+            if (PhotonNetwork.CurrentRoom != null)
+            {
+                Debug.Log(PhotonNetwork.CurrentRoom.MaxPlayers);
+                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+
+                if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    MenuSideInitiate();
+                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                    MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() +" Sn";
+                    waitForSecond++;
+                    yield return new WaitForSeconds(1);
+                }
+                else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
+                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                    MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
+                    if (playerBoolCheck.Count == expectedPlayers) 
+                    {
+                        
+                        pw.RPC("MatchFound", RpcTarget.All);
+
+                        break;
+                    }
+                    
+                    
+
+                }
+                
+            }
+            else if (PhotonNetwork.CurrentRoom == null)
+            {
+                MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
+
+            }
+            yield return new WaitForSeconds(1);
+        }
+
+    }
+    [PunRPC]
+    public void MatchFound()
+    {
+        
+
+        for (int i = 0; i < playerBoolCheck.Count; i++)
+        {
+            if (playerBoolCheck.All(x => x == true))
+            {
+                RoomSideInitiate();
+                Debug.Log("MatchFound If true");
+            }
+            else if (playerBoolCheck.All(x => x == false))
+            {
+                Debug.Log("MatchFound If false");
+                playerBoolCheck.RemoveAll(t => t);
+                
+                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MenuSideInitiate();
+                PhotonNetwork.LeaveRoom();
+            }
+        }
+
+     
+        
+    }
+    #endregion
 }
