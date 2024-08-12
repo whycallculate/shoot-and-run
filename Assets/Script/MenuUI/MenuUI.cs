@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -41,7 +42,7 @@ public class MenuUI : MonoBehaviour
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
-    private PhotonView pw;
+    public PhotonView pw;
     private Player player;
     
 
@@ -53,7 +54,7 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public GameObject MatchFoundUI;
     public bool acceptOrDecline;
     List<bool> playerBoolCheck = new List<bool>();
-    bool gameStart = false;
+    
 
     private void Awake()
     {
@@ -64,6 +65,9 @@ public class MenuUI : MonoBehaviour
     private void Update()
     {
         ChatSideIsOpen();
+        if(PhotonNetwork.CurrentRoom != null )
+            Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
+        
     }
     #region menuSideAndRoomSide
     public void OpenJoinSide()
@@ -131,6 +135,7 @@ public class MenuUI : MonoBehaviour
     {
         menuSide.SetActive(false);
         roomSide.SetActive(true);
+
     }
     
     public void MenuSideInitiate()
@@ -143,8 +148,6 @@ public class MenuUI : MonoBehaviour
 
     public void PlayerAddUI(Player newPlayer)
     {
-
-    
         Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
         Debug.Log(newPlayer.NickName);
         Debug.Log("PlayerUpdateUI");
@@ -172,11 +175,11 @@ public class MenuUI : MonoBehaviour
     public void ChatSideIsOpen()
     {
         
-        if(roomSide.active == true)
+        if(roomSide.activeSelf == true)
         {
             chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(true);
         }
-        else if(roomSide.active == false)
+        else if(roomSide.activeSelf == false)
         {
             chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(false);
         }
@@ -218,44 +221,57 @@ public class MenuUI : MonoBehaviour
         
         while(waitForSecond <100)
         {
-            //MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
-            if (PhotonNetwork.CurrentRoom != null)
+            
+            if (!MatchMaking.Instance.joinFailed)
             {
-                Debug.Log(PhotonNetwork.CurrentRoom.MaxPlayers);
+                if (PhotonNetwork.CurrentRoom != null)
+                {
+                    
+                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+
+                    if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
+                    {
+                        MenuSideInitiate();
+                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                        MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() + " Sn";
+                        waitForSecond++;
+                        yield return new WaitForSeconds(1);
+                    }
+                    else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+                    {
+                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
+                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                        MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
+                        if (playerBoolCheck.Count == expectedPlayers)
+                        {
+                            
+                            pw.RPC("MatchFound", RpcTarget.All);
+
+                            break;
+                        }
+
+
+
+                    }
+
+                }
+                else if (PhotonNetwork.CurrentRoom == null)
+                {
+                    MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
+                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                }
+
+            }
+            else if(MatchMaking.Instance.joinFailed)
+            {
                 MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
                 MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
-
-                if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
-                {
-                    MenuSideInitiate();
-                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
-                    MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() +" Sn";
-                    waitForSecond++;
-                    yield return new WaitForSeconds(1);
-                }
-                else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-                {
-                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
-                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
-                    MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
-                    if (playerBoolCheck.Count == expectedPlayers) 
-                    {
-                        
-                        pw.RPC("MatchFound", RpcTarget.All);
-
-                        break;
-                    }
-                    
-                    
-
-                }
-                
+                MatchMaking.Instance.joinFailed = false;
+                break;
             }
-            else if (PhotonNetwork.CurrentRoom == null)
-            {
-                MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
-
-            }
+            
             yield return new WaitForSeconds(1);
         }
 
@@ -263,28 +279,38 @@ public class MenuUI : MonoBehaviour
     [PunRPC]
     public void MatchFound()
     {
-        
 
-        for (int i = 0; i < playerBoolCheck.Count; i++)
+        if(PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             if (playerBoolCheck.All(x => x == true))
             {
+                Debug.Log("Kac Defa calisti");
+                //LobbyManager.Instance.PlayerCheckUpdateList();
                 RoomSideInitiate();
-                Debug.Log("MatchFound If true");
-            }
-            else if (playerBoolCheck.All(x => x == false))
-            {
-                Debug.Log("MatchFound If false");
-                playerBoolCheck.RemoveAll(t => t);
                 
+            }
+            else if (!playerBoolCheck.All(x => x == false))
+            {
+                
+                playerBoolCheck.Clear();
+                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MenuSideInitiate();
+                PhotonNetwork.LeaveRoom();
+                
+
+            }
+            else if(playerBoolCheck.All(x => x == false))
+            {
+                playerBoolCheck.Clear();
                 MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
                 MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
                 MenuSideInitiate();
                 PhotonNetwork.LeaveRoom();
             }
+
         }
 
-     
         
     }
     #endregion

@@ -11,6 +11,7 @@ public class PlayerListItem : MonoBehaviourPunCallbacks
 
     public void PlayerListInitiate(Player pm)
     {
+        
         player = pm;
         transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = pm.NickName;      
     }
@@ -20,6 +21,8 @@ public class PlayerListItem : MonoBehaviourPunCallbacks
         {
             Destroy(gameObject);
         }
+
+        
     }
     public override void OnLeftRoom()
     {

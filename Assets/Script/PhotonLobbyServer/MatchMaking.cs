@@ -5,7 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
+public class MatchMaking : MonoBehaviourPunCallbacks
 {
     #region singletion
     private static MatchMaking instance;
@@ -26,12 +26,17 @@ public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
     public const string GAME_MOD = "gm";
     public const string PLAYER_LEVEL = "lvl";
     public bool joinFailed = false;
+    Player player;
+    Player otherPlayer;
+
+
 
     private LoadBalancingClient loadBalancingClient;
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
     }
+    
     public void CreateRoomForMatchmaking(byte mapKey, byte playerLevel, int expectedPlayers)
     {
         Hashtable expectedCustomRoomProp = new Hashtable { { MAP_KEY, mapKey }, { PLAYER_LEVEL, playerLevel } };
@@ -40,9 +45,6 @@ public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
         roomOptions.MaxPlayers = expectedPlayers;
         EnterRoomParams enterRoomParams = new EnterRoomParams();
         enterRoomParams.RoomOptions = roomOptions;
-        Debug.Log("CreateRoomForMatchmaking");
-        //loadBalancingClient = new LoadBalancingClient();
-        //loadBalancingClient.OpCreateRoom(enterRoomParams);
         PhotonNetwork.JoinRandomOrCreateRoom(roomOptions: roomOptions);
         
 
@@ -61,39 +63,18 @@ public class MatchMaking : MonoBehaviour, IMatchmakingCallbacks
     }
 
     #region IMatchmakingCallbacks
-    public void OnFriendListUpdate(List<FriendInfo> friendList)
-    {
-        throw new System.NotImplementedException();
-    }
 
-    public void OnCreatedRoom()
+    public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log("OnCreatedRoom");
-    }
-
-    public void OnCreateRoomFailed(short returnCode, string message)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void OnJoinedRoom()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void OnJoinRandomFailed(short returnCode, string message)
-    {
+        
+        if (player != otherPlayer)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
         joinFailed = true;
     }
 
-    public void OnLeftRoom()
-    {
-        throw new System.NotImplementedException();
-    }
 
-    public void OnJoinRoomFailed(short returnCode, string message)
-    {
-        throw new System.NotImplementedException();
-    }
+
     #endregion
 }

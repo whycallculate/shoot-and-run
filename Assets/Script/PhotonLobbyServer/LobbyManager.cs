@@ -37,7 +37,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
-        PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
+        if (PhotonNetwork.NickName == "")
+        {
+            PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
+        }
+        
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -73,12 +77,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         MenuUI.Instance.RoomUpdateUI();
     }
 
-    public void MatchMaking()
-    {
-   
-    }
-
-
     public void CreateRoom(string roomName)
     {
         Debug.Log("CreateRoom");
@@ -94,8 +92,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+
         MenuUI.Instance.PlayerAddUI(newPlayer);
-        
 
     }
     public override void OnJoinedRoom()
