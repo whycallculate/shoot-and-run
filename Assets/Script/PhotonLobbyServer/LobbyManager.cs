@@ -23,6 +23,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     #endregion
 
     public List<RoomInfo> cachedRoom = new List<RoomInfo>();
+   
+
 
     private void Start()
     {
@@ -36,7 +38,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedLobby()
     {
-        Debug.Log("OnJoinedLobby");
+
+        
         if (PhotonNetwork.NickName == "")
         {
             PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
