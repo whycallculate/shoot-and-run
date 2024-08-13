@@ -54,10 +54,19 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public GameObject MatchFoundUI;
     public bool acceptOrDecline;
     List<bool> playerBoolCheck = new List<bool>();
+
+    [Header("PlayerCustomize")]
+    [SerializeField] private GameObject profilSide;
+    [SerializeField] private GameObject playerObject;
+    [SerializeField] private PlayerCustomize PmCustomize;
+    [SerializeField] Color[] defaultColors;
+    public int pmParam;    
+
     
 
     private void Awake()
     {
+        pmParam = 0;
         pw = GetComponent<PhotonView>();
     }
 
@@ -95,6 +104,29 @@ public class MenuUI : MonoBehaviour
         {
 
             createSide.SetActive(true);
+        }
+    }
+    public void OpenProfilSide()
+    {
+
+
+        if(profilSide.activeSelf == false)
+        {
+            profilSide.SetActive(true);
+        }
+        if (joinSide.activeSelf == true)
+        {
+            joinSide.SetActive(false);
+            createSide.SetActive(false);
+        }
+        if (createSide.activeSelf == true)
+        {
+            joinSide.SetActive(false);
+            createSide.SetActive(false);
+        }
+        if (pw.IsMine)
+        {
+            Instantiate(playerObject);
         }
     }
 
@@ -311,7 +343,30 @@ public class MenuUI : MonoBehaviour
 
         }
 
-        
+
     }
+    #endregion
+    #region PlayerCustomize
+    public void ChangeColorOnBody(int param)
+    {
+
+        PlayerData.Instance.pmData.Body += param;
+        Debug.Log(PlayerData.Instance.pmData.Body);
+        if (PlayerData.Instance.pmData.Body > defaultColors.Length)
+        {
+
+            MenuUI.Instance.pmParam = 0;
+            PlayerData.Instance.pmData.Body = 0;
+        }
+        if (PlayerData.Instance.pmData.Body < 0)
+        {
+            PlayerData.Instance.pmData.Body = defaultColors.Length - 1;
+        }
+        PlayerPrefs.SetInt("Body", PlayerData.Instance.pmData.Body);
+        int i = PlayerData.Instance.pmData.Body;
+        PmCustomize.SetPlayerBodyColor(PlayerData.Instance.pmData, i);
+    }
+    
+
     #endregion
 }
