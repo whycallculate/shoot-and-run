@@ -22,27 +22,21 @@ public class PlayerData : MonoBehaviour
 
     private void OnEnable()
     {
-        Debug.Log("Burasi Calisti");
         pmData = new Data();
         DontDestroyOnLoad(gameObject);
-        
-
     }
     private void Update()
     {
-        Debug.Log(PlayerDataToString());
-        PlayerPrefs.Save();
+        
     }
     public string PlayerDataToString()
     {
         pmData.nickName = PlayerPrefs.GetString("nickName");
         pmData.Body = PlayerPrefs.GetInt("Body");
         string returnString = JsonUtility.ToJson(pmData);
-        Debug.Log(returnString);
-        return returnString;
         
+        return returnString;
     }
-
 }
 
 public class Data

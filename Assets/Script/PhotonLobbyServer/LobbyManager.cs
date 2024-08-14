@@ -42,7 +42,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         if (pw.IsMine)
         {
-            Debug.Log("LobbyManager pw is mine true");
+            
             Instantiate(MenuUI.Instance.playerObject);
             
             PlayerManager.Instance.SyncEverytingData();

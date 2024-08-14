@@ -36,12 +36,7 @@ public class PlayerManager : MonoBehaviour
         myData = PlayerData.Instance.pmData;
 
     }
-    private void Update()
-    {
-        Debug.Log(PhotonNetwork.NickName);
-        Debug.Log(myData.nickName);
-        
-    }
+
     public void SyncEverytingData()
     {
         
@@ -59,7 +54,7 @@ public class PlayerManager : MonoBehaviour
     public void SyncPlayerCustomizeData(PlayerData pmData)
     {
         string syncString = pmData.PlayerDataToString();
-        Debug.Log(syncString);
+        
         myData = JsonUtility.FromJson<Data>(syncString);
         pv.RPC("RPCSyncPlayerCustomizeData", RpcTarget.AllBuffered, syncString);
         
