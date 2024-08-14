@@ -60,6 +60,7 @@ MonoBehaviour:
   chatSide: {fileID: 0}
   MatchFoundUI: {fileID: 0}
   acceptOrDecline: 0
+  cancelMatchMaking: 0
   profilSide: {fileID: 0}
   playerObject: {fileID: 5637190378807021222, guid: 9f3ad95429b77ac4782a70d0a9e2f7d8,
     type: 3}
@@ -70,6 +71,7 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0, a: 0}
   - {r: 0.9293332, g: 0, b: 1, a: 0}
   pmParam: 0
+  nickNameInputText: {fileID: 0}
 --- !u!114 &8110540878864559523
 MonoBehaviour:
   m_ObjectHideFlags: 0

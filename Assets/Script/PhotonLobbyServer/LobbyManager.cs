@@ -23,11 +23,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     #endregion
 
     public List<RoomInfo> cachedRoom = new List<RoomInfo>();
+    public PhotonView pw;
    
 
 
     private void Start()
     {
+        pw = GetComponent<PhotonView>();
         PhotonNetwork.ConnectUsingSettings();
     }
 
@@ -38,15 +40,19 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedLobby()
     {
-
-        
-        if (PhotonNetwork.NickName == "")
+        if (pw.IsMine)
         {
-            PhotonNetwork.NickName = "Player" + Random.Range(0, 100).ToString();
+            Debug.Log("LobbyManager pw is mine true");
+            Instantiate(MenuUI.Instance.playerObject);
+            
+            PlayerManager.Instance.SyncEverytingData();
+
         }
         
+        
+        
     }
-
+    
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         if(cachedRoom.Count <= 0) 
@@ -101,7 +107,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-
+        PlayerManager.Instance.SyncEverytingData();
         PlayerCheckUpdateList();
     }
     public override void OnLeftRoom()

@@ -43,7 +43,6 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
     public PhotonView pw;
-    private Player player;
     
 
 
@@ -53,14 +52,17 @@ public class MenuUI : MonoBehaviour
     [Header("MatchMaking")]
     [SerializeField] public GameObject MatchFoundUI;
     public bool acceptOrDecline;
+    public bool cancelMatchMaking = false;
     List<bool> playerBoolCheck = new List<bool>();
 
-    [Header("PlayerCustomize")]
+    [Header("PlayerCustomizeAndPlayerStuff")]
     [SerializeField] private GameObject profilSide;
-    [SerializeField] private GameObject playerObject;
+    [SerializeField] public GameObject playerObject;
     [SerializeField] private PlayerCustomize PmCustomize;
     [SerializeField] Color[] defaultColors;
-    public int pmParam;    
+    public int pmParam;
+    [SerializeField] private TMP_InputField nickNameInputText;
+    
 
     
 
@@ -114,6 +116,10 @@ public class MenuUI : MonoBehaviour
         {
             profilSide.SetActive(true);
         }
+        else if(profilSide.activeSelf == true)
+        {
+            profilSide.SetActive(false);
+        }
         if (joinSide.activeSelf == true)
         {
             joinSide.SetActive(false);
@@ -124,10 +130,7 @@ public class MenuUI : MonoBehaviour
             joinSide.SetActive(false);
             createSide.SetActive(false);
         }
-        if (pw.IsMine)
-        {
-            Instantiate(playerObject);
-        }
+
     }
 
     public void CreateRoomUISide()
@@ -241,69 +244,89 @@ public class MenuUI : MonoBehaviour
     }
     public void FindMatchMakingButton()
     {
-
-        StartCoroutine(SearchingMatch(1,1,2));
+        if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
+        {
+            StartCoroutine(SearchingMatch(1, 1, 2));
+        }
+        else
+        {
+            Debug.Log("set you nickname");
+        }
+        
         
     }
-    
+    public void CancelMatchMakingButton()
+    {
+        cancelMatchMaking = true;
+    }
 
-    IEnumerator SearchingMatch(byte mapType, byte playerLevel , int expectedPlayers)
+
+    IEnumerator SearchingMatch(byte mapType, byte playerLevel, int expectedPlayers)
     {
         int waitForSecond = 1;
-        
-        while(waitForSecond <100)
+
+        while (waitForSecond < 100)
         {
-            
-            if (!MatchMaking.Instance.joinFailed)
+
+            if (!cancelMatchMaking)
             {
-                if (PhotonNetwork.CurrentRoom != null)
+                if (!MatchMaking.Instance.joinFailed)
                 {
-                    
-                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                    if (PhotonNetwork.CurrentRoom != null)
+                    {
 
-                    if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
-                    {
-                        MenuSideInitiate();
-                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
-                        MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() + " Sn";
-                        waitForSecond++;
-                        yield return new WaitForSeconds(1);
-                    }
-                    else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-                    {
-                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
-                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
-                        MatchFoundUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
-                        if (playerBoolCheck.Count == expectedPlayers)
+                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+
+                        if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
-                            
-                            pw.RPC("MatchFound", RpcTarget.All);
+                            MenuSideInitiate();
+                            MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                            MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() + " Sn";
+                            waitForSecond++;
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                        else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+                        {
+                            MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
+                            MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                            MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
+                            if (playerBoolCheck.Count == expectedPlayers)
+                            {
 
-                            break;
+                                pw.RPC("MatchFound", RpcTarget.All);
+
+                                break;
+                            }
+
+
+
                         }
 
-
-
+                    }
+                    else if (PhotonNetwork.CurrentRoom == null)
+                    {
+                        MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
+                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
                     }
 
                 }
-                else if (PhotonNetwork.CurrentRoom == null)
+                else if (MatchMaking.Instance.joinFailed)
                 {
-                    MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
                     MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
                     MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                    MatchMaking.Instance.joinFailed = false;
+                    break;
                 }
-
             }
-            else if(MatchMaking.Instance.joinFailed)
+            else if (cancelMatchMaking) 
             {
-                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
-                MatchMaking.Instance.joinFailed = false;
+                cancelMatchMaking = false;
                 break;
             }
             
+
             yield return new WaitForSeconds(1);
         }
 
@@ -346,7 +369,7 @@ public class MenuUI : MonoBehaviour
 
     }
     #endregion
-    #region PlayerCustomize
+    #region PlayerCustomizeAndPlayerStuff
     public void ChangeColorOnBody(int param)
     {
 
@@ -365,6 +388,29 @@ public class MenuUI : MonoBehaviour
         PlayerPrefs.SetInt("Body", PlayerData.Instance.pmData.Body);
         int i = PlayerData.Instance.pmData.Body;
         PmCustomize.SetPlayerBodyColor(PlayerData.Instance.pmData, i);
+        PlayerPrefs.Save();
+
+    }
+    public void SetPlayerNickname()
+    {
+        if(pw.IsMine)
+        {
+            if (nickNameInputText.text.Length > 4 && nickNameInputText.text.Length <= 14)
+            {
+                Debug.Log("Dogru");
+                PlayerData.Instance.pmData.nickName = nickNameInputText.text;
+            }
+            else
+            {
+                Debug.Log("Yanlis girdiniz la");
+
+            }
+        }
+        PlayerPrefs.SetString("nickName", PlayerData.Instance.pmData.nickName);
+        string name = PlayerData.Instance.pmData.nickName;
+        PmCustomize.SetPlayerNickname(PlayerData.Instance.pmData, name);
+        PlayerPrefs.Save();
+
     }
     
 

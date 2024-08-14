@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,4 +21,11 @@ public class PlayerCustomize : MonoBehaviour
         
         
     }
+    public void SetPlayerNickname(Data pmData,string nickName)
+    {
+
+        PhotonNetwork.NickName = nickName;
+        pmData.nickName = nickName;
+    }
+
 }
