@@ -31,22 +31,23 @@ public class PlayerData : MonoBehaviour
     }
     public string PlayerDataToString()
     {
-        pmData.nickName = PlayerPrefs.GetString("nickName");
+        //pmData.username = PlayerPrefs.GetString("nickName");
         pmData.Body = PlayerPrefs.GetInt("Body");
         string returnString = JsonUtility.ToJson(pmData);
         
         return returnString;
     }
 }
-
+[System.Serializable]
 public class Data
 {
-    [Header("PlayerData")]
-    public string nickName;
-    int playerLevel;
-    Sprite avatar;
 
-    [Header("PlayerCustomizeData")]
+    public string username;
+    public string password;
+    public int level;
+    public int mmr;
+
+
     public Color BodyColor;
     public int Body;
 

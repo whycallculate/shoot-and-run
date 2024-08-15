@@ -25,7 +25,7 @@ public class PlayerCustomize : MonoBehaviour
     {
 
         PhotonNetwork.NickName = nickName;
-        pmData.nickName = nickName;
+        pmData.username = nickName;
     }
 
 }

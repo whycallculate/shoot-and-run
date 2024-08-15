@@ -1,60 +1,82 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class Web : MonoBehaviour
 {
-    private void Start()
+
+    public string feedbackText;
+
+    IEnumerator RegisterUser(string username, string password)
     {
-        //StartCoroutine(GetDate());
-        StartCoroutine(GetUsers("http://localhost/UnityBackendTutorial/GetUsers.php"));
-    }
+        WWWForm form = new WWWForm();
+        form.AddField("loginUser", username);
+        form.AddField("loginPass", password);
 
-    //IEnumerator GetDate()
-    //{
-    //    using (UnityWebRequest www = UnityWebRequest.Get("http://localhost/UnityBackendTutorial/GetDate.php"))
-    //    {
-    //        yield return www.Send();
 
-    //        if (www.isNetworkError || www.isHttpError)
-    //        {
-    //            Debug.Log(www.error);
-    //        }
-    //        else
-    //        {
-    //            Debug.Log(www.downloadHandler.text);
+        using UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/Register.php", form);
+        yield return www.SendWebRequest();
 
-    //            byte[] results = www.downloadHandler.data;
-    //        }
-    //    }
-
-    //}
-
-    IEnumerator GetUsers(string uri)
-    {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+        if (www.result != UnityWebRequest.Result.Success)
         {
-            // Request and wait for the desired page.
-            yield return webRequest.SendWebRequest();
+            Debug.LogError(www.error);
+        }
+        else
+        {
+            Debug.Log(www.downloadHandler.text);
+        }
+    }
+    public IEnumerator Login(string username, string password)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("username", username);
+        form.AddField("password", password);
 
-            string[] pages = uri.Split('/');
-            int page = pages.Length - 1;
+        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/Login.php", form))
+        {
+            yield return www.SendWebRequest();
 
-            switch (webRequest.result)
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
-                case UnityWebRequest.Result.ConnectionError:
-                case UnityWebRequest.Result.DataProcessingError:
-                    Debug.LogError(pages[page] + ": Error: " + webRequest.error);
-                    break;
-                case UnityWebRequest.Result.ProtocolError:
-                    Debug.LogError(pages[page] + ": HTTP Error: " + webRequest.error);
-                    break;
-                case UnityWebRequest.Result.Success:
-                    Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
-                    break;
+                feedbackText = "Connection error: " + www.error;
+            }
+            else
+            {
+                string jsonResponse = www.downloadHandler.text;
+                LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
+
+                if (response.status == "success")
+                {
+                    feedbackText = "Login successful!";
+                    ConnectToPhoton(response.user.username);
+                    
+                }
+                else
+                {
+                    feedbackText = "Login failed: " + response.message;
+                }
             }
         }
     }
+    private void ConnectToPhoton(string username)
+    {
+
+        
+        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.LoadLevel(1);
+        PhotonNetwork.NickName = username;
+    }
+
 }
+[System.Serializable]
+public class LoginResponse
+{
+    public string message;
+    public string status;
+    public Data user;
+}
+

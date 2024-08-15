@@ -391,27 +391,27 @@ public class MenuUI : MonoBehaviour
         PlayerPrefs.Save();
 
     }
-    public void SetPlayerNickname()
-    {
-        if(pw.IsMine)
-        {
-            if (nickNameInputText.text.Length > 4 && nickNameInputText.text.Length <= 14)
-            {
-                Debug.Log("Dogru");
-                PlayerData.Instance.pmData.nickName = nickNameInputText.text;
-            }
-            else
-            {
-                Debug.Log("Yanlis girdiniz la");
+    //public void SetPlayerNickname()
+    //{
+    //    if(pw.IsMine)
+    //    {
+    //        if (nickNameInputText.text.Length > 4 && nickNameInputText.text.Length <= 14)
+    //        {
+    //            Debug.Log("Dogru");
+    //            PlayerData.Instance.pmData.nickName = nickNameInputText.text;
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("Yanlis girdiniz la");
 
-            }
-        }
-        PlayerPrefs.SetString("nickName", PlayerData.Instance.pmData.nickName);
-        string name = PlayerData.Instance.pmData.nickName;
-        PmCustomize.SetPlayerNickname(PlayerData.Instance.pmData, name);
-        PlayerPrefs.Save();
+    //        }
+    //    }
+    //    PlayerPrefs.SetString("nickName", PlayerData.Instance.pmData.nickName);
+    //    string name = PlayerData.Instance.pmData.nickName;
+    //    PmCustomize.SetPlayerNickname(PlayerData.Instance.pmData, name);
+    //    PlayerPrefs.Save();
 
-    }
+    //}
     
 
     #endregion
