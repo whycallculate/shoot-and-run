@@ -44,8 +44,8 @@ public class PlayerManager : MonoBehaviour
         {
             SyncPlayerCustomizeData(PlayerData.Instance);
             pmCustom.SetPlayerBodyColor(myData, PlayerData.Instance.pmData.Body);
-            pmCustom.SetPlayerNickname(myData, myData.nickName);
-            Debug.Log(PlayerData.Instance.pmData.nickName);
+            //pmCustom.SetPlayerNickname(myData, myData.username);
+            Debug.Log(PlayerData.Instance.pmData.username);
         }
 
     }

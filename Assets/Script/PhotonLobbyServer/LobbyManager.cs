@@ -30,7 +30,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         pw = GetComponent<PhotonView>();
-        PhotonNetwork.ConnectUsingSettings();
+        
     }
 
     public override void OnConnectedToMaster()
@@ -107,7 +107,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        PlayerManager.Instance.SyncEverytingData();
+        //PlayerManager.Instance.SyncEverytingData();
         PlayerCheckUpdateList();
     }
     public override void OnLeftRoom()
