@@ -24,6 +24,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public List<RoomInfo> cachedRoom = new List<RoomInfo>();
     public PhotonView pw;
+    public Player Player;
    
 
 
@@ -48,8 +49,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             PlayerManager.Instance.SyncEverytingData();
 
         }
-        
-        
+
+        Debug.Log(PhotonNetwork.NickName);
         
     }
     
@@ -83,7 +84,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             }
         }
 
-        MenuUI.Instance.RoomUpdateUI();
+        //MenuUI.Instance.RoomUpdateUI();
     }
 
     public void CreateRoom(string roomName)
