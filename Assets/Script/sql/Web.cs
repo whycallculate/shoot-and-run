@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.Pun.Demo.Cockpit;
 
 public class Web : MonoBehaviour
 {
@@ -65,10 +66,25 @@ public class Web : MonoBehaviour
     private void ConnectToPhoton(string username)
     {
 
-        
+
+
         PhotonNetwork.ConnectUsingSettings();
         PhotonNetwork.LoadLevel(1);
         PhotonNetwork.NickName = username;
+        for (int i=0;i<PhotonNetwork.PlayerListOthers.Length;i++)
+        {
+            if (PhotonNetwork.PlayerListOthers[i].NickName == username) 
+            {
+                Debug.Log("You cant connect with this account");
+            }
+            else if (PhotonNetwork.PlayerListOthers[i].NickName != username)
+            {
+                
+            }
+
+        }
+
+
     }
 
 }

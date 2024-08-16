@@ -7,6 +7,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 
 public class MenuUI : MonoBehaviour
@@ -26,24 +27,13 @@ public class MenuUI : MonoBehaviour
     }
     #endregion
     [Header("MenuSide")]
-    [SerializeField] public GameObject joinSide;
-    [SerializeField] public GameObject createSide;
     [SerializeField] public GameObject menuSide;
     [SerializeField] public GameObject roomSide;
-
-    [Header("CreateRoom")]
-    [SerializeField] public TMP_InputField roomName;
-
-    [Header("JoinRoomUI")]
-    public Transform roomListParent;
-    [SerializeField] public GameObject roomItemPrefab;
-
 
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParent;
     [SerializeField] public GameObject playerItemList;
     public PhotonView pw;
-    
 
 
     [Header("ChatSide")]
@@ -81,89 +71,23 @@ public class MenuUI : MonoBehaviour
         
     }
     #region menuSideAndRoomSide
-    public void OpenJoinSide()
-    {
-        if (createSide.activeSelf == true)
-        {
-            createSide.SetActive(false);
-            joinSide.SetActive(true);
-        }
-        else if(createSide.activeSelf == false)
-        {
 
-            joinSide.SetActive(true);
-        } 
-    }
 
-    public void OpenCreateSide() 
-    {
-        if(joinSide.activeSelf == true)
-        {
-            joinSide.SetActive(false);
-            createSide.SetActive(true);
-        }
-        else if(joinSide.activeSelf == false)
-        {
 
-            createSide.SetActive(true);
-        }
-    }
     public void OpenProfilSide()
     {
 
 
-        if(profilSide.activeSelf == false)
+        if (profilSide.activeSelf == false)
         {
             profilSide.SetActive(true);
         }
-        else if(profilSide.activeSelf == true)
+        else if (profilSide.activeSelf == true)
         {
             profilSide.SetActive(false);
         }
-        if (joinSide.activeSelf == true)
-        {
-            joinSide.SetActive(false);
-            createSide.SetActive(false);
-        }
-        if (createSide.activeSelf == true)
-        {
-            joinSide.SetActive(false);
-            createSide.SetActive(false);
-        }
-
-    }
-
-    public void CreateRoomUISide()
-    {
-        if(roomName.text.Length == 0)
-        {
-            Debug.Log("RoomName bos ");
-        }
-        else if(roomName.text.Length > 0)
-        {
-            LobbyManager.Instance.CreateRoom(roomName.text);
-            createSide.SetActive(false);
-            menuSide.SetActive(false);
-        }
-    }
-
-    public void RoomUpdateUI()
-    {
-        foreach(Transform roomItem in roomListParent)
-        {
-            Destroy(roomItem.gameObject);
-        }
-        
-        foreach(var room in LobbyManager.Instance.cachedRoom)
-        {
-            GameObject roomItem = Instantiate(roomItemPrefab, roomListParent);
-
-            roomItem.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = room.Name;
-            roomItem.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = room.PlayerCount + "/" + room.MaxPlayers;
-            roomItem.transform.GetComponent<JoinButtonByName>().roomName = room.Name;
 
 
-        }
     }
 
     public void RoomSideInitiate()
@@ -183,7 +107,20 @@ public class MenuUI : MonoBehaviour
 
     public void PlayerAddUI(Player newPlayer)
     {
-        Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
+
+        for(int i = 0;i < PhotonNetwork.PlayerList.Length;i++)
+        {
+            if(playerItemList.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text == PhotonNetwork.PlayerList[i].NickName)
+            {
+                Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
+            }
+            else
+            {
+
+            }
+        }
+      
+        
         Debug.Log(newPlayer.NickName);
         Debug.Log("PlayerUpdateUI");
     }
@@ -276,21 +213,21 @@ public class MenuUI : MonoBehaviour
                     if (PhotonNetwork.CurrentRoom != null)
                     {
 
-                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                        //MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                        //MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
 
                         if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
                             MenuSideInitiate();
-                            MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
-                            MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = "Oda Araniyor : " + waitForSecond.ToString() + " Sn";
+                            MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnEnabled();
+                            MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = waitForSecond.ToString() + " Sn";
                             waitForSecond++;
                             yield return new WaitForSeconds(0.1f);
                         }
                         else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
-                            MatchFoundUI.transform.GetChild(0).gameObject.SetActive(true);
-                            MatchFoundUI.transform.GetChild(1).gameObject.SetActive(true);
+                            MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnEnabled();
+                            MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnEnabled();
                             MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
                             if (playerBoolCheck.Count == expectedPlayers)
                             {
@@ -308,23 +245,23 @@ public class MenuUI : MonoBehaviour
                     else if (PhotonNetwork.CurrentRoom == null)
                     {
                         MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
-                        MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                        MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                        MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+                        MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                     }
 
                 }
                 else if (MatchMaking.Instance.joinFailed)
                 {
-                    MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                    MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                    MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+                    MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                     MatchMaking.Instance.joinFailed = false;
                     break;
                 }
             }
             else if (cancelMatchMaking) 
             {
-                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+                MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                 PhotonNetwork.LeaveRoom();
                 cancelMatchMaking = false;
                 break;
@@ -353,8 +290,8 @@ public class MenuUI : MonoBehaviour
             {
                 
                 playerBoolCheck.Clear();
-                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
-                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+                MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                 MenuSideInitiate();
                 PhotonNetwork.LeaveRoom();
                 
@@ -363,11 +300,14 @@ public class MenuUI : MonoBehaviour
             else if(playerBoolCheck.All(x => x == false))
             {
                 playerBoolCheck.Clear();
-                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
-                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+                MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                 MenuSideInitiate();
                 PhotonNetwork.LeaveRoom();
             }
+
+
+            
 
         }
 
@@ -396,27 +336,6 @@ public class MenuUI : MonoBehaviour
         PlayerPrefs.Save();
 
     }
-    //public void SetPlayerNickname()
-    //{
-    //    if(pw.IsMine)
-    //    {
-    //        if (nickNameInputText.text.Length > 4 && nickNameInputText.text.Length <= 14)
-    //        {
-    //            Debug.Log("Dogru");
-    //            PlayerData.Instance.pmData.nickName = nickNameInputText.text;
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("Yanlis girdiniz la");
-
-    //        }
-    //    }
-    //    PlayerPrefs.SetString("nickName", PlayerData.Instance.pmData.nickName);
-    //    string name = PlayerData.Instance.pmData.nickName;
-    //    PmCustomize.SetPlayerNickname(PlayerData.Instance.pmData, name);
-    //    PlayerPrefs.Save();
-
-    //}
     
 
     #endregion
