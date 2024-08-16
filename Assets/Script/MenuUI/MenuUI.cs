@@ -258,6 +258,7 @@ public class MenuUI : MonoBehaviour
     public void CancelMatchMakingButton()
     {
         cancelMatchMaking = true;
+        Debug.Log(cancelMatchMaking);
     }
 
 
@@ -322,6 +323,9 @@ public class MenuUI : MonoBehaviour
             }
             else if (cancelMatchMaking) 
             {
+                MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
+                MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
+                PhotonNetwork.LeaveRoom();
                 cancelMatchMaking = false;
                 break;
             }
@@ -337,6 +341,7 @@ public class MenuUI : MonoBehaviour
 
         if(PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
+            //Oyuncularin Hepsinin bool true dondurdugune bakiliyor.
             if (playerBoolCheck.All(x => x == true))
             {
                 Debug.Log("Kac Defa calisti");

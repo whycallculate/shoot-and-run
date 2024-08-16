@@ -48,8 +48,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             PlayerManager.Instance.SyncEverytingData();
 
         }
-        
-        
+
+        Debug.Log(PhotonNetwork.NickName);
         
     }
     
