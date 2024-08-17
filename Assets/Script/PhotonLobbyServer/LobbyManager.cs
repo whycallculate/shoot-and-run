@@ -116,6 +116,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         MenuUI.Instance.MenuSideInitiate();
         
     }
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        StartCoroutine(MainWeb.Instance.web.Logout(PhotonNetwork.NickName));
+        
+    }
+    private void OnApplicationQuit()
+    {
+        StartCoroutine(MainWeb.Instance.web.Logout(PhotonNetwork.NickName));
+    }
 
 
     public void PlayerCheckUpdateList()
