@@ -9,35 +9,25 @@ using Photon.Pun.Demo.Cockpit;
 
 public class Web : MonoBehaviour
 {
-
+    public string username, userID;
     public string feedbackText;
-
-    IEnumerator RegisterUser(string username, string password)
+    private void Start()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("loginUser", username);
-        form.AddField("loginPass", password);
-
-
-        using UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/Register.php", form);
-        yield return www.SendWebRequest();
-
-        if (www.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
+        
     }
-    public IEnumerator Login(string username, string password)
+    public IEnumerator RegisterUser(string username, string password)
     {
+        PhotonNetwork.AuthValues = new AuthenticationValues();
         WWWForm form = new WWWForm();
         form.AddField("username", username);
         form.AddField("password", password);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/Login.php", form))
+        // PhotonUserId'yi buraya ekleyin
+        PhotonNetwork.AuthValues.UserId = username;
+        string photonUserId = PhotonNetwork.AuthValues.UserId;
+        form.AddField("photonUserId", photonUserId);
+
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Register.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -48,43 +38,154 @@ public class Web : MonoBehaviour
             else
             {
                 string jsonResponse = www.downloadHandler.text;
-                LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
+                Debug.Log("Received JSON: " + jsonResponse);
 
-                if (response.status == "success")
+                try
                 {
-                    feedbackText = "Login successful!";
-                    ConnectToPhoton(response.user.username);
-                    
+                    RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(jsonResponse);
+                    if (response.status == "success")
+                    {
+                        feedbackText = "Registration successful!";
+                    }
+                    else
+                    {
+                        feedbackText = "Registration failed: " + response.message;
+                    }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    feedbackText = "Login failed: " + response.message;
+                    feedbackText = "JSON parse error: " + ex.Message;
+                    Debug.LogError("JSON parse error: " + ex.Message);
                 }
             }
         }
     }
-    private void ConnectToPhoton(string username)
+
+    public IEnumerator Login(string username, string password)
     {
+        PhotonNetwork.AuthValues = new AuthenticationValues();
+        PhotonNetwork.AuthValues.UserId = username;
+        string photonUserId = PhotonNetwork.AuthValues.UserId;
 
+        WWWForm form = new WWWForm();
+        form.AddField("username", username);
+        form.AddField("password", password);
+        form.AddField("photonUserId", photonUserId);
 
-
-        PhotonNetwork.ConnectUsingSettings();
-        PhotonNetwork.LoadLevel(1);
-        PhotonNetwork.NickName = username;
-        for (int i=0;i<PhotonNetwork.PlayerListOthers.Length;i++)
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Login.php", form))
         {
-            if (PhotonNetwork.PlayerListOthers[i].NickName == username) 
-            {
-                Debug.Log("You cant connect with this account");
-            }
-            else if (PhotonNetwork.PlayerListOthers[i].NickName != username)
-            {
-                
-            }
+            yield return www.SendWebRequest();
 
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Login failed: " + www.error);
+            }
+            else
+            {
+                string jsonResponse = www.downloadHandler.text;
+                Debug.Log("Login response: " + jsonResponse);
+
+                LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
+
+
+                if (response.status == "success")
+                {
+
+                    PhotonNetwork.AuthValues.UserId = response.user.photon_userid;
+                    PhotonNetwork.NickName = response.user.username;
+
+                    ConnectToPhoton(response.user.username,response.user.photon_userid);
+
+                }
+                else if (response.status == "fail" && response.message == "User is already logged in")
+                {
+                    Debug.LogWarning("User is already logged in. Please log out from other devices.");
+                }
+                else
+                {
+                    Debug.LogWarning("Login failed: " + response.message);
+                }
+            }
         }
+    }
+    public IEnumerator UpdateOnlineStatus(bool isOnline)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("photonUserId", PhotonNetwork.AuthValues.UserId);
+        form.AddField("isOnline", isOnline ? 1 : 0);
+
+        using (UnityWebRequest www = UnityWebRequest.Post("http://whycallculate.online/UpdateOnlineStatus.php", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("UpdateOnlineStatus failed: " + www.error);
+            }
+        }
+    }
+    public IEnumerator Logout(string username)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("username", username);
+
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Logout.php", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Logout failed: " + www.error);
+            }
+            else
+            {
+                string jsonResponse = www.downloadHandler.text;
+                Debug.Log("Logout response: " + jsonResponse);
+
+                RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(jsonResponse);
+
+                if (response.status == "success")
+                {
+                    Debug.Log("Logout successful!");
+                }
+                else
+                {
+                    Debug.LogWarning("Logout failed: " + response.message);
+                }
+            }
+        }
+    }
+
+    public IEnumerator HeartbeatCoroutine(string name)
+    {
+        while (true)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("photonUserId", name);
+
+            using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Heartbeat.php", form))
+            {
+                yield return www.SendWebRequest();
+
+                if (www.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError("Heartbeat failed: " + www.error);
+                }
+            }
+
+            // 5 saniyede bir kalp atışı gönder
+            yield return new WaitForSeconds(5f);
+        }
+    }
 
 
+    private void ConnectToPhoton(string name, string ID)
+    {
+        username = name;
+        this.userID = ID;
+        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.NickName = name;
+        PhotonNetwork.LoadLevel(1);
     }
 
 }
@@ -94,5 +195,12 @@ public class LoginResponse
     public string message;
     public string status;
     public Data user;
+}
+
+[System.Serializable]
+public class RegisterResponse
+{
+    public string status;
+    public string message;
 }
 

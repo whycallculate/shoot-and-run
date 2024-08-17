@@ -42,10 +42,10 @@ public class PlayerData : MonoBehaviour
 public class Data
 {
 
+    public int id;
     public string username;
-    public string password;
-    public int level;
-    public int mmr;
+    public string photon_userid;
+
 
 
     public Color BodyColor;
