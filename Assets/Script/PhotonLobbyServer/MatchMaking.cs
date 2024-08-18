@@ -51,26 +51,18 @@ public class MatchMaking : MonoBehaviourPunCallbacks
     }
     
 
-    
-    public void JoinRandonMatchmaking(byte mapKey, byte playerLevel)
-    {
-        Hashtable expectedCustomRoomProp = new Hashtable { { MAP_KEY, mapKey }, { PLAYER_LEVEL, playerLevel } };
-        OpJoinRandomRoomParams opJoinRandomRoomParams = new OpJoinRandomRoomParams();
-        opJoinRandomRoomParams.ExpectedMaxPlayers = 2;
-        opJoinRandomRoomParams.ExpectedCustomRoomProperties = expectedCustomRoomProp;
-        loadBalancingClient.OpJoinRandomRoom(opJoinRandomRoomParams);
-
-    }
-
     #region IMatchmakingCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         
-        if (player != otherPlayer)
+        if (PhotonNetwork.LocalPlayer != otherPlayer)
         {
             PhotonNetwork.LeaveRoom();
+            MenuUI.Instance.MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
+            MenuUI.Instance.MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
         }
+
         joinFailed = true;
     }
 

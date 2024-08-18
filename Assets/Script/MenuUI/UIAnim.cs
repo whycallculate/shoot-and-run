@@ -13,7 +13,7 @@ public class UIAnim : MonoBehaviour
 
         //Acildigi zaman Bir anda karsina cikma anim
         gameObject.SetActive(true);
-        LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(1, 1, 1), 0.3f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(openGameObject);
+        LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(1, 1, 1), 0.1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(openGameObject);
     }
     void openGameObject()
     {
@@ -22,7 +22,7 @@ public class UIAnim : MonoBehaviour
     public void OnDisabled()
     {
         //Kapandigi zaman hizlic
-        LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(0, 0, 0), 0.3f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(closeGameObject);
+        LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(0, 0, 0), 0.1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(closeGameObject);
     }
     void closeGameObject()
     {
