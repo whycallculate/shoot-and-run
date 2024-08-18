@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8867367432650903594}
   - component: {fileID: 5559091839002190174}
   - component: {fileID: 8110540878864559523}
+  - component: {fileID: 3059761621327600722}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -45,19 +46,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 748927ccac2c27742840ee82c4dda058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  joinSide: {fileID: 0}
-  createSide: {fileID: 0}
   menuSide: {fileID: 0}
   roomSide: {fileID: 0}
-  roomName: {fileID: 0}
-  roomListParent: {fileID: 0}
-  roomItemPrefab: {fileID: 2794018691882710443, guid: f435c01ee2c1ab84eb224fb1ebc08502,
-    type: 3}
-  playerListParent: {fileID: 0}
+  playerListParentLeft: {fileID: 0}
+  playerListParentRight: {fileID: 0}
   playerItemList: {fileID: 1046149394783374987, guid: d25766fc8b5995344a263e9aaf2a4a8c,
     type: 3}
   pw: {fileID: 0}
   chatSide: {fileID: 0}
+  console: {fileID: 0}
   MatchFoundUI: {fileID: 0}
   acceptOrDecline: 0
   cancelMatchMaking: 0
@@ -94,3 +91,20 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &3059761621327600722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7142222599093889691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 583da73bae87d884f8af15168c34913f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  contentLeft: {fileID: 0}
+  contentRight: {fileID: 0}
+  playerItemPrefab: {fileID: 1046149394783374987, guid: d25766fc8b5995344a263e9aaf2a4a8c,
+    type: 3}
+  RoomUI: {fileID: 0}

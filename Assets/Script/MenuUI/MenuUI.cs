@@ -31,13 +31,17 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public GameObject roomSide;
 
     [Header("RoomSide")]
-    [SerializeField] public Transform playerListParent;
+    [SerializeField] public Transform playerListParentLeft;
+    [SerializeField] public Transform playerListParentRight;
     [SerializeField] public GameObject playerItemList;
     public PhotonView pw;
 
 
     [Header("ChatSide")]
     [SerializeField] public GameObject chatSide;
+
+    [Header("Console")]
+    [SerializeField] private GameObject console;
 
     [Header("MatchMaking")]
     [SerializeField] public GameObject MatchFoundUI;
@@ -65,18 +69,33 @@ public class MenuUI : MonoBehaviour
 
     private void Update()
     {
+        //Chat side acik mi kapali mi kismini updatte calistiriyoruz 
         ChatSideIsOpen();
-        if(PhotonNetwork.CurrentRoom != null )
+        OpenAndCloseConsole();
+        if (PhotonNetwork.CurrentRoom != null )
             Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
         
     }
     #region menuSideAndRoomSide
 
 
-
+    public void OpenAndCloseConsole()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (console.activeSelf)
+            {
+                console.SetActive(false);
+            }
+            else
+            {
+                 console.SetActive(true);
+            }
+        }
+    }
     public void OpenProfilSide()
     {
-
+        //Profili acilip kapandigi kisim
 
         if (profilSide.activeSelf == false)
         {
@@ -92,61 +111,22 @@ public class MenuUI : MonoBehaviour
 
     public void RoomSideInitiate()
     {
+        // oda yukleme ekrani
         menuSide.SetActive(false);
         roomSide.SetActive(true);
-
     }
     
     public void MenuSideInitiate()
     {
+        //Menu Yukleme ekrani
         menuSide.SetActive(true);
         roomSide.SetActive(false);
     }
     #endregion
-    #region playerlistSide
-
-    public void PlayerAddUI(Player newPlayer)
-    {
-
-        for(int i = 0;i < PhotonNetwork.PlayerList.Length;i++)
-        {
-            if(playerItemList.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text == PhotonNetwork.PlayerList[i].NickName)
-            {
-                Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer);
-            }
-            else
-            {
-
-            }
-        }
-      
-        
-        Debug.Log(newPlayer.NickName);
-        Debug.Log("PlayerUpdateUI");
-    }
-
-    public void PlayerUpdateUI(Player[] newPlayer)
-    {
-        for(int i = 0; i < newPlayer.Length; i++)
-        {
-            if (newPlayer[i].NickName == playerItemList.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
-            {
-                Destroy(playerItemList);
-            }
-            else
-            {
-                Instantiate(playerItemList, playerListParent).GetComponent<PlayerListItem>().PlayerListInitiate(newPlayer[i]);
-            }
-            
-        }
-        
-    }
-
-    #endregion
     #region chatSide
     public void ChatSideIsOpen()
     {
-        
+        //Room Aktif oldugu zaman chatin calisicagi kisim.
         if(roomSide.activeSelf == true)
         {
             chatSide.GetComponent<ChatUI>().ChatInputSendMesagge(true);
@@ -160,10 +140,14 @@ public class MenuUI : MonoBehaviour
     #region MatchMakingUI
     public void AcceptButton()
     {
+        //Oyunculararin Accept butonuna bastigi callback.
+
         pw.RPC("AcceptButtonPunRPCMethod", RpcTarget.All);
     }
     public void DeclineButton() 
     {
+        //Oyunculararin Accept butonuna bastigi callback.
+
         pw.RPC("DeclineButtonPunRPCMethod", RpcTarget.All);
     }
     
@@ -181,6 +165,7 @@ public class MenuUI : MonoBehaviour
     }
     public void FindMatchMakingButton()
     {
+        // Eger oyuncunun ismi belirli bir aralikta ise Arama yapilacak kontrol kismi.
         if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
         {
             StartCoroutine(SearchingMatch(1, 1, 2));
@@ -194,6 +179,7 @@ public class MenuUI : MonoBehaviour
     }
     public void CancelMatchMakingButton()
     {
+        //Aramayi Iptal etmek icin 
         cancelMatchMaking = true;
         Debug.Log(cancelMatchMaking);
     }
@@ -202,20 +188,22 @@ public class MenuUI : MonoBehaviour
     IEnumerator SearchingMatch(byte mapType, byte playerLevel, int expectedPlayers)
     {
         int waitForSecond = 1;
-
+        
+        //100 Saniye boyunca arama yaparak oda bulmaya calistigi kisim waitforSecond degistirerek Timeout suresini degistirebilirsin.
         while (waitForSecond < 100)
         {
-
+            //Eger iptal butonuna basilmadiysa
             if (!cancelMatchMaking)
             {
+                //eger birisi quitlemdiyse
                 if (!MatchMaking.Instance.joinFailed)
                 {
+                    //Eger suan da bir odadaysak Yapilacak islemler
                     if (PhotonNetwork.CurrentRoom != null)
                     {
 
-                        //MatchFoundUI.transform.GetChild(0).gameObject.SetActive(false);
-                        //MatchFoundUI.transform.GetChild(1).gameObject.SetActive(false);
 
+                        //Yeterli oyuncu gelene kadar Bekledigimiz kisim Oyuncu arama kismi
                         if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
                             MenuSideInitiate();
@@ -224,11 +212,13 @@ public class MenuUI : MonoBehaviour
                             waitForSecond++;
                             yield return new WaitForSeconds(0.1f);
                         }
+                        // Eger yeterli oyuncuya ulasildiysa Artik mac bulundu yapilip oyuncularin kabul kontrolleri yapiliyor.
                         else if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
                             MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnEnabled();
                             MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnEnabled();
                             MatchFoundUI.transform.GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mac Bulundu";
+                            //Eger herkes accept veya decline bastiysa Gerekli kontrollerin olacagi RPC methodu
                             if (playerBoolCheck.Count == expectedPlayers)
                             {
 
@@ -247,6 +237,7 @@ public class MenuUI : MonoBehaviour
                         MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
                         MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
                         MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
+                        playerBoolCheck.Clear();
                     }
 
                 }
@@ -266,26 +257,28 @@ public class MenuUI : MonoBehaviour
                 cancelMatchMaking = false;
                 break;
             }
-            
+
 
             yield return new WaitForSeconds(1);
         }
+
 
     }
     [PunRPC]
     public void MatchFound()
     {
-
+        //Gene oda eger full ise yapilacak islemler ufak bir bug kontrolu.
         if(PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             //Oyuncularin Hepsinin bool true dondurdugune bakiliyor.
             if (playerBoolCheck.All(x => x == true))
             {
                 Debug.Log("Kac Defa calisti");
-                //LobbyManager.Instance.PlayerCheckUpdateList();
+                
                 RoomSideInitiate();
                 
             }
+            //Decline basan varmi.
             else if (!playerBoolCheck.All(x => x == false))
             {
                 
@@ -297,7 +290,8 @@ public class MenuUI : MonoBehaviour
                 
 
             }
-            else if(playerBoolCheck.All(x => x == false))
+            //Decline basan varmi.
+            else if (playerBoolCheck.All(x => x == false))
             {
                 playerBoolCheck.Clear();
                 MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
