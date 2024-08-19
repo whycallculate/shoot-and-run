@@ -29,6 +29,7 @@ public class MenuUI : MonoBehaviour
     [Header("MenuSide")]
     [SerializeField] public GameObject menuSide;
     [SerializeField] public GameObject roomSide;
+    [SerializeField] private GameObject SceneAnimImage;
 
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParentLeft;
@@ -56,6 +57,7 @@ public class MenuUI : MonoBehaviour
     [SerializeField] Color[] defaultColors;
     public int pmParam;
     [SerializeField] private TMP_InputField nickNameInputText;
+
     
 
     
@@ -65,7 +67,10 @@ public class MenuUI : MonoBehaviour
         pmParam = 0;
         pw = GetComponent<PhotonView>();
     }
-
+    private void Start()
+    {
+        SceneAnimImage.GetComponent<UIAnim>().NewSceneChange(SceneAnimImage);
+    }
 
     private void Update()
     {

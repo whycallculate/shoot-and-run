@@ -33,6 +33,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         pw = GetComponent<PhotonView>();
         
     }
+    private void Update()
+    {
+        StartCoroutine(MainWeb.Instance.web.HeartbeatCoroutine(PhotonNetwork.LocalPlayer.NickName));
+    }
 
     public override void OnConnectedToMaster()
     {

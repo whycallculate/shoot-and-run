@@ -9,12 +9,15 @@ using UnityEngine.UI;
 
 public class Login : MonoBehaviour
 {
-
+    private void Update()
+    {
+        
+    }
     private void Start()
     {
-        headerObject.SetActive(true);
-        headerObject.GetComponent<UIAnim>().OnEnabledWithUpForHeader();
         
+        headerObject.GetComponent<UIAnim>().ScaleUpDownLogo(headerObject , 2f,2f);
+
     }
     [Header("Header")]
     [SerializeField] private GameObject headerObject;
@@ -45,6 +48,7 @@ public class Login : MonoBehaviour
     {
         if(registerBox.activeSelf == false)
         {
+            headerObject.GetComponent<UIAnim>().ScaleUpDownLogo(headerObject, 2f,0.3f);
             registerBox.GetComponent<UIAnim>().OnEnabledWithUp();
             loginBox.GetComponent<UIAnim>().OnDisabledWithDown();
         }
@@ -54,7 +58,7 @@ public class Login : MonoBehaviour
     {
         if (loginBox.activeSelf == false)
         {
-            
+            headerObject.GetComponent<UIAnim>().ScaleUpDownLogo(headerObject, 2f, 0.3f);
             registerBox.GetComponent<UIAnim>().OnDisabledWithDown();
             loginBox.GetComponent<UIAnim>().OnEnabledWithUp();
         }

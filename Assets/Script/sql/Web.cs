@@ -11,6 +11,7 @@ public class Web : MonoBehaviour
 {
     public string username, userID;
     public string feedbackText;
+    public GameObject sceneAnim;
     private void Start()
     {
         
@@ -185,7 +186,7 @@ public class Web : MonoBehaviour
         this.userID = ID;
         PhotonNetwork.ConnectUsingSettings();
         PhotonNetwork.NickName = name;
-        PhotonNetwork.LoadLevel(1);
+        sceneAnim.GetComponent<UIAnim>().ChangeScene(sceneAnim, 1);
     }
 
 }
