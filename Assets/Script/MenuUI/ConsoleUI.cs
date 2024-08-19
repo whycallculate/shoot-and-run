@@ -9,7 +9,6 @@ public class ConsoleUI : MonoBehaviour
     public GameObject logPrefab;  // Log mesajları için prefab
     public Transform logContainer; // ScrollView içindeki Content alanı
     public float logDuration = 5f; // Log mesajlarının ömrü
-    private string lastLogMessage = "";
 
 
     private Dictionary<GameObject, float> logs = new Dictionary<GameObject, float>();

@@ -6,12 +6,14 @@ using UnityEngine.Networking;
 using Photon.Pun;
 using Photon.Realtime;
 using Photon.Pun.Demo.Cockpit;
+using Unity.VisualScripting;
 
 public class Web : MonoBehaviour
 {
     public string username, userID;
     public string feedbackText;
     public GameObject sceneAnim;
+    public GameObject alertPanel;
     private void Start()
     {
         
@@ -80,6 +82,7 @@ public class Web : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError("Login failed: " + www.error);
+                AlertPanel.Instance.ShowLog(www.error);
             }
             else
             {
@@ -100,10 +103,12 @@ public class Web : MonoBehaviour
                 }
                 else if (response.status == "fail" && response.message == "User is already logged in")
                 {
-                    Debug.LogWarning("User is already logged in. Please log out from other devices.");
+                    AlertPanel.Instance.ShowLog("User is already logged in.Please log out from other devices.");
+                   
                 }
                 else
                 {
+                    AlertPanel.Instance.ShowLog(response.message);
                     Debug.LogWarning("Login failed: " + response.message);
                 }
             }
@@ -142,6 +147,7 @@ public class Web : MonoBehaviour
             {
                 string jsonResponse = www.downloadHandler.text;
                 Debug.Log("Logout response: " + jsonResponse);
+                
 
                 RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(jsonResponse);
 
@@ -159,23 +165,28 @@ public class Web : MonoBehaviour
 
     public IEnumerator HeartbeatCoroutine(string name)
     {
+        
         while (true)
         {
             WWWForm form = new WWWForm();
             form.AddField("photonUserId", name);
-
+            
             using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Heartbeat.php", form))
             {
                 yield return www.SendWebRequest();
-
+                
                 if (www.result != UnityWebRequest.Result.Success)
                 {
+                    yield return new WaitForSeconds(5f);
                     Debug.LogError("Heartbeat failed: " + www.error);
+                    break;
+                    
                 }
+                
             }
 
             // 5 saniyede bir kalp atışı gönder
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(9f);
         }
     }
 
