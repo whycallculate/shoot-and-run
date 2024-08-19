@@ -24,7 +24,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public PhotonView pw;
     public Player Player;
-    bool isOneCall = false;
 
 
 
@@ -35,7 +34,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     private void Update()
     {
-        StartCoroutine(MainWeb.Instance.web.HeartbeatCoroutine(PhotonNetwork.LocalPlayer.NickName));
+
     }
 
     public override void OnConnectedToMaster()
@@ -45,14 +44,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedLobby()
     {
-        if (pw.IsMine)
-        {
-            
-            Instantiate(MenuUI.Instance.playerObject);
-            
-            PlayerManager.Instance.SyncEverytingData();
 
-        }
 
         Debug.Log(PhotonNetwork.NickName);
         
@@ -61,6 +53,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         PlayerListItem.Instance.ClearPlayerList();
+        ChatUI.Instance.ClearMessage();
         //PlayerListItem.Instance.playerList.Add(PhotonNetwork.LocalPlayer);
 
     }
@@ -76,10 +69,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         StartCoroutine(MainWeb.Instance.web.Logout(PhotonNetwork.NickName));
-        
+        SoundManager.Instance.StopBackgroundMusic();
     }
     private void OnApplicationQuit()
     {
+        SoundManager.Instance.StopBackgroundMusic();
+
         StartCoroutine(MainWeb.Instance.web.Logout(PhotonNetwork.NickName));
     }
 

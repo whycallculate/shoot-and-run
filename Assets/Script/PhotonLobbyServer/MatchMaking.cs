@@ -59,9 +59,11 @@ public class MatchMaking : MonoBehaviourPunCallbacks
         if (PhotonNetwork.LocalPlayer != otherPlayer)
         {
             PhotonNetwork.LeaveRoom();
+
             MenuUI.Instance.MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
             MenuUI.Instance.MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
         }
+        MenuUI.Instance.SceneAnimImage.GetComponent<UIAnim>().ChangeImageMenu(MenuUI.Instance.SceneAnimImage);
 
         joinFailed = true;
     }

@@ -29,7 +29,7 @@ public class MenuUI : MonoBehaviour
     [Header("MenuSide")]
     [SerializeField] public GameObject menuSide;
     [SerializeField] public GameObject roomSide;
-    [SerializeField] private GameObject SceneAnimImage;
+    [SerializeField] public GameObject SceneAnimImage;
 
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParentLeft;
@@ -119,6 +119,7 @@ public class MenuUI : MonoBehaviour
         // oda yukleme ekrani
         menuSide.SetActive(false);
         roomSide.SetActive(true);
+        SoundManager.Instance.StopBackgroundMusic();
     }
     
     public void MenuSideInitiate()
@@ -126,6 +127,7 @@ public class MenuUI : MonoBehaviour
         //Menu Yukleme ekrani
         menuSide.SetActive(true);
         roomSide.SetActive(false);
+        
     }
     #endregion
     #region chatSide
@@ -229,6 +231,7 @@ public class MenuUI : MonoBehaviour
 
                                 pw.RPC("MatchFound", RpcTarget.All);
 
+                                SoundManager.PlaySoundRandom(SoundType.UI_NEXT, 1);
                                 break;
                             }
 
@@ -279,21 +282,21 @@ public class MenuUI : MonoBehaviour
             if (playerBoolCheck.All(x => x == true))
             {
                 Debug.Log("Kac Defa calisti");
+                SceneAnimImage.GetComponent<UIAnim>().ChangeImageRoom(SceneAnimImage);
                 
-                RoomSideInitiate();
                 
             }
             //Decline basan varmi.
             else if (!playerBoolCheck.All(x => x == false))
             {
-                
+               
                 playerBoolCheck.Clear();
                 MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
                 MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                 MenuSideInitiate();
                 PhotonNetwork.LeaveRoom();
-                
 
+                
             }
             //Decline basan varmi.
             else if (playerBoolCheck.All(x => x == false))

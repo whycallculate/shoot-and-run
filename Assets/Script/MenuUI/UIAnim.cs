@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
+
 public class UIAnim : MonoBehaviour
 {
 
@@ -22,18 +23,52 @@ public class UIAnim : MonoBehaviour
     {
         item.SetActive(true);
         LeanTween.scale(item, Vector3.one, 0);
+        SoundManager.PlaySoundOneShot(sound: SoundType.UI_NEXT, 0, 0.5f);
         LeanTween.scale(item, Vector3.zero, 1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(() =>
         {
+            SoundManager.Instance.PlayBackgroundMusic();
             item.SetActive(false);
 
         });
     }
-    public void ChangeScene(GameObject item, int i)
+    public void ChangeImageMenu(GameObject item)
     {
         item.SetActive(true);
         LeanTween.scale(item, Vector3.zero, 0);
+        SoundManager.PlaySoundOneShot(sound: SoundType.UI_NEXT, 1, 0.5f);
+
         LeanTween.scale(item, Vector3.one, 1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(() =>
         {
+            NewSceneChange(item);
+            MenuUI.Instance.MenuSideInitiate();
+            SoundManager.Instance.PlayBackgroundMusic();
+
+        }); ;
+    }
+    public void ChangeImageRoom(GameObject item)
+    {
+        item.SetActive(true);
+        SoundManager.Instance.StopBackgroundMusic();
+        LeanTween.scale(item, Vector3.zero, 0);
+        SoundManager.PlaySoundOneShot(sound: SoundType.UI_NEXT, 1, 0.5f);
+
+        LeanTween.scale(item, Vector3.one, 1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(() =>
+        {
+            NewSceneChange(item);
+            MenuUI.Instance.RoomSideInitiate();
+
+        }); ;
+    }
+    public void ChangeScene(GameObject item, int i)
+    {
+        SoundManager.Instance.StopBackgroundMusic();
+        item.SetActive(true);
+        LeanTween.scale(item, Vector3.zero, 0);
+
+        SoundManager.PlaySoundOneShot(sound: SoundType.UI_NEXT, 1, 0.5f);
+        LeanTween.scale(item, Vector3.one, 1f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(() =>
+        {
+
             PhotonNetwork.LoadLevel(i);
             
         });

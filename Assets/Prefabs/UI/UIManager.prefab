@@ -48,9 +48,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuSide: {fileID: 0}
   roomSide: {fileID: 0}
+  SceneAnimImage: {fileID: 0}
   playerListParentLeft: {fileID: 0}
   playerListParentRight: {fileID: 0}
-  playerItemList: {fileID: 1046149394783374987, guid: d25766fc8b5995344a263e9aaf2a4a8c,
+  playerItemList: {fileID: 4825647446233554989, guid: f4e108668969b8f4cb66ebdf3905c399,
     type: 3}
   pw: {fileID: 0}
   chatSide: {fileID: 0}
@@ -105,6 +106,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentLeft: {fileID: 0}
   contentRight: {fileID: 0}
-  playerItemPrefab: {fileID: 1046149394783374987, guid: d25766fc8b5995344a263e9aaf2a4a8c,
+  playerItemPrefab: {fileID: 4825647446233554989, guid: f4e108668969b8f4cb66ebdf3905c399,
     type: 3}
   RoomUI: {fileID: 0}

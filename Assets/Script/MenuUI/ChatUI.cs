@@ -7,6 +7,18 @@ using UnityEngine;
 
 public class ChatUI : MonoBehaviour
 {
+    private static ChatUI instance;
+    public static ChatUI Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                instance = FindObjectOfType<ChatUI>();
+            }
+            return instance;
+        }
+    }
     [Header("Chat")]
     [SerializeField] private TMP_InputField chatInput;
     [SerializeField] private GameObject messageItem;
@@ -27,6 +39,13 @@ public class ChatUI : MonoBehaviour
         }
         
         
+    }
+    public void ClearMessage()
+    {
+        foreach (Transform child in messageParent)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     [PunRPC]
