@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public enum SoundType
 {
@@ -31,7 +32,8 @@ public class SoundManager : MonoBehaviour
         }
     }
     #endregion
-
+    public static float sfxVolume = 0.5f;
+    public  float MusicVolume = 0.5f;
     [SerializeField] private SoundList[] soundList;
     [SerializeField] private AudioClip[] backgroundMucisList;
     [SerializeField] public AudioSource backgroundAudioSource;
@@ -41,26 +43,27 @@ public class SoundManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
 
 
-
     }
+
 
     public static void PlaySoundOneShot(SoundType sound ,int i , float volume = 1)
     {
         AudioClip[] clip = Instance.soundList[(int)sound].Sounds;
         AudioClip playClip = clip[i];
-        Instance.audioSource.PlayOneShot(playClip, volume);
+        Instance.audioSource.PlayOneShot(playClip, sfxVolume);
     }
     public static void PlaySoundRandom(SoundType sound, float volume = 1)
     {
         AudioClip[] clip = Instance.soundList[(int)sound].Sounds;
         AudioClip playClip = clip[UnityEngine.Random.Range(0, clip.Length)];
-        Instance.audioSource.PlayOneShot(playClip, volume);
+        Instance.audioSource.PlayOneShot(playClip, sfxVolume);
 
     }
 
     public void PlayBackgroundMusic()
     {
         backgroundAudioSource.clip = backgroundMucisList[UnityEngine.Random.Range(0, backgroundMucisList.Length)];
+        
         backgroundAudioSource.Play();
         backgroundAudioSource.PlayDelayed(2f);
     }
