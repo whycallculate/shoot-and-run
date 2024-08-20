@@ -81,6 +81,7 @@ public class UIAnim : MonoBehaviour
 
         //Acildigi zaman Bir anda karsina cikma anim
         gameObject.SetActive(true);
+        LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(0, 0, 0), 0.4f).setEase(LeanTweenType.easeInOutExpo);
         LeanTween.scale(gameObject.GetComponent<RectTransform>(), new Vector3(1, 1, 1), 0.4f).setEase(LeanTweenType.easeInOutExpo).setOnComplete(openGameObject);
     }
     void openGameObject()

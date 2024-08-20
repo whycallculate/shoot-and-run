@@ -37,7 +37,8 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public GameObject playerItemList;
     public PhotonView pw;
 
-
+    [Header("SettingsSide")]
+    [SerializeField] private GameObject settingsMenu;
     [Header("ChatSide")]
     [SerializeField] public GameObject chatSide;
 
@@ -120,6 +121,22 @@ public class MenuUI : MonoBehaviour
         menuSide.SetActive(false);
         roomSide.SetActive(true);
         SoundManager.Instance.StopBackgroundMusic();
+    }
+    public void OpenAndCloseSettingsMenu()
+    {
+        if(settingsMenu.activeSelf) 
+        {
+            settingsMenu.GetComponent<UIAnim>().OnDisabled();
+        }
+        else if (!settingsMenu.activeSelf)
+        {
+            settingsMenu.GetComponent<UIAnim>().OnEnabled();
+        }
+        if (profilSide.activeSelf)
+        {
+            settingsMenu.GetComponent<UIAnim>().OnDisabled();
+        }
+        
     }
     
     public void MenuSideInitiate()
