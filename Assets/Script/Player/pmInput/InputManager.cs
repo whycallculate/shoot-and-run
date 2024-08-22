@@ -2,38 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputManager : MonoBehaviour
+public static class InputManager
 {
-    #region singleton
-    private static InputManager instance;
-    public static InputManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<InputManager>();
-            }
-            return instance;
-        }
-    }
-    #endregion
 
-    public float VerticalPos;
-    public float HorizontalPos;
-    public KeyCode jumpKey = KeyCode.Space;
+    public static float VerticalPos;
+    public static float HorizontalPos;
+    public const KeyCode jumpKey = KeyCode.Space;
+    public const KeyCode sprintkey = KeyCode.LeftShift;
+    public const KeyCode crouchingKey = KeyCode.LeftControl;
 
-    private void Update()
-    {
-        MoveInput();
-    }
-    public void MoveInput()
+
+    public static void MoveInput()
     {
         VerticalPos = Input.GetAxisRaw("Vertical");
         HorizontalPos = Input.GetAxisRaw("Horizontal");
         Debug.Log("Input manager move input");
         Debug.Log(VerticalPos);
     }
+    
 
 
 }
