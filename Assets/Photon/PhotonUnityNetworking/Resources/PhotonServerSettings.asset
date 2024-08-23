@@ -44,6 +44,8 @@ MonoBehaviour:
   - DeclineButtonPunRPCMethod
   - MatchFound
   - AddPlayerToList
+  - RPCGameInitiate
+  - SyncAimPos
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
