@@ -4,6 +4,8 @@ using UnityEngine;
 using Cinemachine;
 using Photon.Pun;
 using UnityEngine.Animations.Rigging;
+using System.IO;
+using Unity.VisualScripting;
 
 
 public class AimState : MonoBehaviour 
@@ -35,7 +37,7 @@ public class AimState : MonoBehaviour
     public float fovSmoothSpeed = 10;
 
     [Header("Aim")]
-    public Transform aimPos;  // Artık private olacak
+    public GameObject aimPos;  
     [SerializeField] float aimSmoothSpeed = 20;
     [SerializeField] LayerMask aimMask;
     PhotonView pw;
@@ -53,29 +55,44 @@ public class AimState : MonoBehaviour
         pw = this.GetComponent<PhotonView>();
         rig = this.GetComponent<RigBuilder>();
     }
-
     void Start()
     {
+
+
         if (pw.IsMine)
         {
-            SetCameraStartMethod();
+            //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
+            Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
+            GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
 
+            PhotonView aimPosPhotonView = instantiatedAimPos.GetComponent<PhotonView>();
+
+            if (aimPosPhotonView.IsMine)
+            {
+
+                //Kendi targetimizi ayarladigimiz kisim.
+                SetValueRigging(instantiatedAimPos);
+                //Olusturdugumuz olan objenin photon view view id diger oyunculara gonderiyoruz.
+                pw.RPC("SetOtherPlayerAimPos", RpcTarget.OthersBuffered, aimPosPhotonView.ViewID);
+            }
+
+            // Diğer kamera başlangıç ayarları
+            SetCameraStartMethod();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
-        else if(!pw.IsMine)
+        else
         {
-            // Diğer oyuncuların kameralarını devre dışı bırak
             playerCamera = transform.GetChild(2).gameObject;
             playerCamera.SetActive(false);
-
-
         }
+
     }
+
 
     void Update()
     {
-        if (pw.IsMine)
+        if (pw.IsMine) 
         {
             PosUpdate();
         }
@@ -83,21 +100,48 @@ public class AimState : MonoBehaviour
 
     private void LateUpdate()
     {
+
+        //Animation rigging islemlerinin Diger oyunculara gonderme ve alma islemleri.
         if (pw.IsMine)
         {
-
+            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
             CamFollowPos();
             GetAim();
             ScreenCentre();
         }
+        else if(!pw.IsMine)
+        {
+            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+        }
 
     }
-    public void SetValue(Transform aimPos)
+    public void SetValueRigging(GameObject aimPos)
     {
-        UpdateAimConstraint(bodyAim, aimPos);
-        UpdateAimConstraint(headAim, aimPos);
-        UpdateAimConstraint(rHandAim, aimPos);
+        //Target objesini burada initilate ediyoruz.
+        this.aimPos = aimPos;
+        Debug.Log("Ne kadar caliiyor ");
+        UpdateAimConstraint(bodyAim, aimPos.transform);
+        UpdateAimConstraint(headAim, aimPos.transform);
+        UpdateAimConstraint(rHandAim, aimPos.transform);
+
+
+
     }
+    [PunRPC]
+    void SetOtherPlayerAimPos(int aimPosViewID)
+    {
+        //ufak bir ali cengiz oyunu ile Burada Photonviewleri karsilastiriyoruz. ve gonderdgimiz photonview objesinin gameobjectini diger oyuncular icin set ediyoruz.
+        PhotonView aimPosPhotonView = PhotonView.Find(aimPosViewID);
+        if (aimPosPhotonView != null && !aimPosPhotonView.IsMine)
+        {
+            SetValueRigging(aimPosPhotonView.gameObject);
+        }
+    }
+
     private void UpdateAimConstraint(MultiAimConstraint aim, Transform target)
     {
         var data = aim.data.sourceObjects;
@@ -123,6 +167,7 @@ public class AimState : MonoBehaviour
     }
     public void ScreenCentre()
     {
+        //Aim objesini ekranin ortasina koyuyoruz.
         Vector2 screenCentre = new Vector2(Screen.width / 2, Screen.height / 2);
         Ray ray = Camera.main.ScreenPointToRay(screenCentre);
     
@@ -130,7 +175,7 @@ public class AimState : MonoBehaviour
         {
             if (pw.IsMine)
             {
-                aimPos.position = Vector3.Lerp(aimPos.position, hit.point, aimSmoothSpeed * Time.deltaTime);
+                aimPos.transform.position = Vector3.Lerp(aimPos.transform.position, hit.point, aimSmoothSpeed * Time.deltaTime);
 
             }
 
@@ -141,12 +186,15 @@ public class AimState : MonoBehaviour
 
     public void PosUpdate()
     {
+
+        //Mouse hareket inputlari Cinemachine 
         xAxis.Update(Time.deltaTime);
         yAxis.Update(Time.deltaTime);
     }
 
     public void CamFollowPos()
     {
+        //Cameranin playerobjectini takip eden method
         camFollowPos.localEulerAngles = new Vector3(yAxis.Value, camFollowPos.localEulerAngles.y, camFollowPos.localEulerAngles.z);
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, xAxis.Value, camFollowPos.localEulerAngles.z);
     }
@@ -170,30 +218,6 @@ public class AimState : MonoBehaviour
             vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, hipFov, fovSmoothSpeed * Time.deltaTime);
         }
     }
-    //public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    //{
-    //    if (stream.IsWriting)
-    //    {
-    //        // Local player, data gönder
-    //        Debug.Log("Sending data..");
-    //        stream.SendNext(aimPos.position);
-
-    //    }
-    //    else
-    //    {
-
-    //        Debug.Log("Recive data");
-    //        // Remote player, data al
-    //        aimPos.position = (Vector3)stream.ReceiveNext();
-
-
-    //        // Aim Constraint'i güncelle
-    //        bodyAim.data.sourceObjects.SetTransform(0, aimPos);
-    //        headAim.data.sourceObjects.SetTransform(0, aimPos);
-    //        rHandAim.data.sourceObjects.SetTransform(0, aimPos);
-
-
-    //    }
-    //}
+    
 }
 

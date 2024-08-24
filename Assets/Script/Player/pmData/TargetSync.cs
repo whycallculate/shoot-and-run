@@ -16,7 +16,7 @@ public class TargetSync : MonoBehaviour, IPunObservable
         if (pw.IsMine)
         {
             // Local player updates aimPos position
-            transform.position = AimState.Instance.aimPos.position;
+            //transform.position = AimState.Instance.aimPos.transform.position;
         }
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

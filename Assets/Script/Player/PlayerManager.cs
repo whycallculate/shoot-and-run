@@ -31,9 +31,9 @@ public class PlayerManager : MonoBehaviour
         this.pw = GetComponent<PhotonView>();
         // Oyuncu ve AimPos oluşturma
         spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
-        GameObject aimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), spawnPosition, Quaternion.identity);
+        //GameObject aimPos = 
         GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
-        player.GetComponent<AimState>().SetValue(aimPos.transform);
+        //player.GetComponent<AimState>().SetValueRigging(aimPos.transform);
 
     }
 

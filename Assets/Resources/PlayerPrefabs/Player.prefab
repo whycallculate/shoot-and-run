@@ -510,10 +510,10 @@ MonoBehaviour:
   m_Data:
     m_ConstrainedObject: {fileID: 8288534514281849522}
     m_SourceObjects:
-      m_Length: 1
+      m_Length: 0
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -2487,10 +2487,10 @@ MonoBehaviour:
   m_Data:
     m_ConstrainedObject: {fileID: 3889660243772196489}
     m_SourceObjects:
-      m_Length: 1
+      m_Length: 0
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -3069,16 +3069,16 @@ MonoBehaviour:
   hipFov: 0
   currentFov: 0
   fovSmoothSpeed: 2
-  aimPos: {fileID: 0}
+  aimPos: {fileID: 3095760706043191251, guid: 3396906d97dbc73438b1950e8f583df5, type: 3}
   aimSmoothSpeed: 20
   aimMask:
     serializedVersion: 2
     m_Bits: 65
-  bodyAim: {fileID: 0}
-  headAim: {fileID: 0}
-  rHandAim: {fileID: 0}
-  lHandIK: {fileID: 0}
-  rig: {fileID: 0}
+  bodyAim: {fileID: 3515147587285362180}
+  headAim: {fileID: 5330824948993415858}
+  rHandAim: {fileID: 8108016956727138651}
+  lHandIK: {fileID: 6326747954112702055}
+  rig: {fileID: 4948282314268077874}
 --- !u!114 &8723125936718803338
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3520,10 +3520,10 @@ MonoBehaviour:
   m_Data:
     m_ConstrainedObject: {fileID: 6321887767198430332}
     m_SourceObjects:
-      m_Length: 1
+      m_Length: 0
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0
       m_Item1:
         transform: {fileID: 0}
         weight: 0
