@@ -52,8 +52,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        PlayerListItem.Instance.ClearPlayerList();
-        ChatUI.Instance.ClearMessage();
+        //PlayerListItem.Instance.ClearPlayerList();
+        //ChatUI.Instance.ClearMessage();
         //PlayerListItem.Instance.playerList.Add(PhotonNetwork.LocalPlayer);
 
     }

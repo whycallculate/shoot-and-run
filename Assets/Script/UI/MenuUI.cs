@@ -120,6 +120,8 @@ public class MenuUI : MonoBehaviour
         // oda yukleme ekrani
         menuSide.SetActive(false);
         roomSide.SetActive(true);
+        PlayerListItem.Instance.ClearPlayerList();
+        ChatUI.Instance.ClearMessage();
         SoundManager.Instance.StopBackgroundMusic();
     }
     public void OpenAndCloseSettingsMenu()
@@ -145,6 +147,21 @@ public class MenuUI : MonoBehaviour
         menuSide.SetActive(true);
         roomSide.SetActive(false);
         
+    }
+    public void GameSidInitiate()
+    {
+        
+        if(PhotonNetwork.IsMasterClient)
+        {
+            pw.RPC("RPCGameInitiate", RpcTarget.All);
+        }
+    }
+
+    [PunRPC]
+    public void RPCGameInitiate()
+    {
+        
+        PhotonNetwork.LoadLevel(2);
     }
     #endregion
     #region chatSide

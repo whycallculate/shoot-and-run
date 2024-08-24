@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Photon.Pun;
 using Photon.Realtime;
-using Photon.Pun.Demo.Cockpit;
 using Unity.VisualScripting;
 
 public class Web : MonoBehaviour

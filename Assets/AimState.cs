@@ -1,16 +1,34 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using Photon.Pun;
+using UnityEngine.Animations.Rigging;
+using System.IO;
 using Unity.VisualScripting;
 
-public class AimState : MonoBehaviour
+
+public class AimState : MonoBehaviour 
 {
+    private static AimState instance;
+    public static AimState Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<AimState>();
+            }
+            return instance;
+        }
+    }
+
     [Header("Cam Movement")]
     public Cinemachine.AxisState xAxis, yAxis;
-    [SerializeField] Transform camFollowPos;
+    [HideInInspector] Transform camFollowPos;
     [SerializeField] public Animator anim;
-    [SerializeField] public CinemachineVirtualCamera vCam;
+    [HideInInspector] public GameObject playerCamera;
+    CinemachineVirtualCamera vCam;
 
     [Header("ZoomInOutAim")]
     public float adsFov = 30;
@@ -19,79 +37,187 @@ public class AimState : MonoBehaviour
     public float fovSmoothSpeed = 10;
 
     [Header("Aim")]
-    [SerializeField] Transform aimPos;
-    [SerializeField] float aimSmoothSpeed=  20;
+    public GameObject aimPos;  
+    [SerializeField] float aimSmoothSpeed = 20;
     [SerializeField] LayerMask aimMask;
+    PhotonView pw;
 
-    // Start is called before the first frame update
+    [Header("Rigging")]
+    public MultiAimConstraint bodyAim;
+    public MultiAimConstraint headAim;
+    public MultiAimConstraint rHandAim;
+    public TwoBoneIKConstraint lHandIK;
+    public RigBuilder rig;
+
+
+    private void Awake()
+    {
+        pw = this.GetComponent<PhotonView>();
+        rig = this.GetComponent<RigBuilder>();
+    }
     void Start()
     {
-        hipFov = vCam.m_Lens.FieldOfView;
-        currentFov = hipFov;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+
+
+        if (pw.IsMine)
+        {
+            //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
+            Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
+            GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
+
+            PhotonView aimPosPhotonView = instantiatedAimPos.GetComponent<PhotonView>();
+
+            if (aimPosPhotonView.IsMine)
+            {
+
+                //Kendi targetimizi ayarladigimiz kisim.
+                SetValueRigging(instantiatedAimPos);
+                //Olusturdugumuz olan objenin photon view view id diger oyunculara gonderiyoruz.
+                pw.RPC("SetOtherPlayerAimPos", RpcTarget.OthersBuffered, aimPosPhotonView.ViewID);
+            }
+
+            // Diğer kamera başlangıç ayarları
+            SetCameraStartMethod();
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            playerCamera = transform.GetChild(2).gameObject;
+            playerCamera.SetActive(false);
+        }
 
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        PosUpdate();
-        
+        if (pw.IsMine) 
+        {
+            PosUpdate();
+        }
     }
+
     private void LateUpdate()
     {
-        CamFollowPos();
-        GetAim();
-        ScreenCentre();
+
+        //Animation rigging islemlerinin Diger oyunculara gonderme ve alma islemleri.
+        if (pw.IsMine)
+        {
+            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            CamFollowPos();
+            GetAim();
+            ScreenCentre();
+        }
+        else if(!pw.IsMine)
+        {
+            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
+        }
+
+    }
+    public void SetValueRigging(GameObject aimPos)
+    {
+        //Target objesini burada initilate ediyoruz.
+        this.aimPos = aimPos;
+        Debug.Log("Ne kadar caliiyor ");
+        UpdateAimConstraint(bodyAim, aimPos.transform);
+        UpdateAimConstraint(headAim, aimPos.transform);
+        UpdateAimConstraint(rHandAim, aimPos.transform);
+
+
+
+    }
+    [PunRPC]
+    void SetOtherPlayerAimPos(int aimPosViewID)
+    {
+        //ufak bir ali cengiz oyunu ile Burada Photonviewleri karsilastiriyoruz. ve gonderdgimiz photonview objesinin gameobjectini diger oyuncular icin set ediyoruz.
+        PhotonView aimPosPhotonView = PhotonView.Find(aimPosViewID);
+        if (aimPosPhotonView != null && !aimPosPhotonView.IsMine)
+        {
+            SetValueRigging(aimPosPhotonView.gameObject);
+        }
     }
 
+    private void UpdateAimConstraint(MultiAimConstraint aim, Transform target)
+    {
+        var data = aim.data.sourceObjects;
+        data.Clear();
+        data.Add(new WeightedTransform(target, 1));
+        aim.data.sourceObjects = data;
+        rig.Build(); // Rebuild the rig to apply changes
+    }
+    public void SetCameraStartMethod()
+    {
+        // Bu oyuncu local oyuncuysa, kamerayı etkinleştir
+        playerCamera = transform.GetChild(2).gameObject;
+        playerCamera.SetActive(true);
+
+        vCam = transform.GetChild(2).GetComponent<CinemachineVirtualCamera>();
+        hipFov = vCam.m_Lens.FieldOfView;
+        currentFov = hipFov;
+
+        camFollowPos = transform.GetChild(1);
+
+        vCam.Follow = camFollowPos;
+        vCam.LookAt = camFollowPos;
+    }
     public void ScreenCentre()
     {
-        Vector2 screenCentre = new Vector2(Screen.width/2,Screen.height/2);
+        //Aim objesini ekranin ortasina koyuyoruz.
+        Vector2 screenCentre = new Vector2(Screen.width / 2, Screen.height / 2);
         Ray ray = Camera.main.ScreenPointToRay(screenCentre);
-
-        if(Physics.Raycast(ray ,out RaycastHit hit, Mathf.Infinity,aimMask))
+    
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, aimMask))
         {
-            aimPos.position = Vector3.Lerp(aimPos.position,hit.point,aimSmoothSpeed*Time.deltaTime);
+            if (pw.IsMine)
+            {
+                aimPos.transform.position = Vector3.Lerp(aimPos.transform.position, hit.point, aimSmoothSpeed * Time.deltaTime);
+
+            }
+
         }
+
+
     }
 
     public void PosUpdate()
     {
-        //Cinemachineden aldigimiz Mouse degerleri.
+
+        //Mouse hareket inputlari Cinemachine 
         xAxis.Update(Time.deltaTime);
         yAxis.Update(Time.deltaTime);
     }
 
     public void CamFollowPos()
     {
-        //Kamera X Y koordinatlarini aldigimiz inputlara gore set etme islemi
-        camFollowPos.localEulerAngles = new Vector3(yAxis.Value,camFollowPos.localEulerAngles.y,camFollowPos.localEulerAngles.z);
-        transform.eulerAngles = new Vector3(transform.eulerAngles.x,xAxis.Value,camFollowPos.localEulerAngles.z);
+        //Cameranin playerobjectini takip eden method
+        camFollowPos.localEulerAngles = new Vector3(yAxis.Value, camFollowPos.localEulerAngles.y, camFollowPos.localEulerAngles.z);
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, xAxis.Value, camFollowPos.localEulerAngles.z);
     }
 
     public void GetAim()
     {
-        // Aim alip almadigimiz ve burada zoom in out ayni zaman da Animasyon islemleri
-        if (Input.GetKey(KeyCode.Mouse1))
+        if (pw.IsMine)
         {
-            
-            anim.SetBool("Aiming", true);
-            currentFov = adsFov;
-            vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
-
+            if (Input.GetKey(KeyCode.Mouse1))
+            {
+                anim.SetBool("Aiming", true);
+                currentFov = adsFov;
+                vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
+            }
+            else if (Input.GetKeyUp(KeyCode.Mouse1))
+            {
+                anim.SetBool("Aiming", false);
+                currentFov = hipFov;
+                vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
+            }
+            vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, hipFov, fovSmoothSpeed * Time.deltaTime);
         }
-        else if(Input.GetKeyUp(KeyCode.Mouse1)) 
-        {
-            
-
-            anim.SetBool("Aiming", false);
-            currentFov = hipFov;
-            vCam.m_Lens.FieldOfView = vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
-
-        }
-        //Oyun basinda currentfovu vererek ZoomInOut buglamamasi icin currentFovu Default haline cekiyoruz.
-        vCam.m_Lens.FieldOfView = vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
     }
+    
 }
+

@@ -1,6 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using UnityEngine.Animations.Rigging;
 public enum MovementState
 {
     WALK,
@@ -32,6 +34,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField] public Animator animator;
+    PhotonView pw;
+    PhotonAnimatorView animpw;
 
 
     [Header("Ground Check")]
@@ -48,31 +52,54 @@ public class PlayerMovement : MonoBehaviour
 
 
 
+
     private void Awake()
     {
         PlayerRb = GetComponent<Rigidbody>();
-        
+        pw = GetComponent<PhotonView>();
+        // Eğer bu oyuncu local oyuncu değilse, script'i devre dışı bırak
+        if (!pw.IsMine)
+        {
+            this.enabled = false;
+        }
 
     }
     private void Start()
     {
-        startYScale = transform.localScale.y;
+        if (pw.IsMine)
+        {
+            // Hareket kodlarınız burada
+            startYScale = transform.localScale.y;
+        }
+
+        
     }
 
     private void Update()
     {
-        InputManager.MoveInput();
-        GroundCheckRayCast();
-        SpeedControl();
-        JumpCheck();
-        CrouchingPlayer();
-        StateHandler();
+        if (pw.IsMine)
+        {
+            InputManager.MoveInput();
+            GroundCheckRayCast();
+            SpeedControl();
+            JumpCheck();
+            CrouchingPlayer();
+            StateHandler();
+        }
+
+
     }
 
     private void FixedUpdate()
     {
+        if (pw.IsMine)
         //Animasyon icin geekli input islemleri;
-        PlayerMove();
+        {
+            PlayerMove();
+
+
+        }
+        
 
     }
 
