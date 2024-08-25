@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.IO;
-using Unity.PlasticSCM.Editor.WebApi;
+using Cinemachine;
 public enum ShootState
 {
     IDLE,
@@ -11,7 +11,7 @@ public enum ShootState
     RELOADING,
     
 }
-public class Weapons : MonoBehaviour
+public class Weapons : MonoBehaviour, IPunObservable
 {
     [SerializeField] ShootState state;
     [SerializeField] ParticleSystem muzzle;
@@ -26,14 +26,18 @@ public class Weapons : MonoBehaviour
     [SerializeField] string bullet;
     [SerializeField] Transform firePoint;
     [SerializeField] Light weaponBarrel;
+    CinemachineImpulseSource recoilShake;
     WeaponBase weapon;
     PhotonView pw;
     bool notShooting = false;
-    bool isReloading = false;
 
     private void Awake()
     {
         pw =GetComponent<PhotonView>();
+        if (pw.IsMine)
+        {
+            recoilShake = GetComponent<CinemachineImpulseSource>();
+        }
         
         if(type == WeaponType.PISTOL)
         {
@@ -63,42 +67,45 @@ public class Weapons : MonoBehaviour
 
         if (pw.IsMine)
         {
+            Debug.Log(weapon.maxAmmo);
+            Debug.Log(weapon.currentAmmo);
             if(!notShooting)
             {
                 StartCoroutine(ShootOnGame());
-
             }
-            if (!isReloading)
+            if (Input.GetKeyDown(KeyCode.R))
             {
+                
                 StartCoroutine(ReloadOnGame());
             }
-            StateAnimUpdate();
+            StateAnimUpdate(state);
         }
+        
     }
 
-    public void StateAnimUpdate()
+    public void StateAnimUpdate(ShootState state)
     {
         if(state == ShootState.IDLE)
         {
             anim.SetBool("Reloading", false);
             anim.SetBool("Shooting", false);
             weaponBarrel.enabled = false ;
-
             muzzle.Stop();
 
         }
-        else if(state == ShootState.SHOOTING)
+        if(state == ShootState.SHOOTING)
         {
+
             weaponBarrel.enabled = true;
+            RecoilShake();
             muzzle.Play();
             anim.SetBool("Reloading", false);
             anim.SetBool("Shooting", true);
             
         }
-        else if(state == ShootState.RELOADING)
+        if(state == ShootState.RELOADING)
         {
             anim.SetBool("Reloading", true);
-            anim.SetBool("Shooting", false) ;
             weaponBarrel.enabled = false;
             muzzle.Stop();
 
@@ -106,45 +113,83 @@ public class Weapons : MonoBehaviour
     }
     IEnumerator ReloadOnGame()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (weapon.currentAmmo != weapon.maxAmmo)
         {
-            if(weapon.currentAmmo != weapon.maxAmmo)
-            {
-                isReloading = true;
-                state = ShootState.RELOADING;
-                yield return new WaitForSeconds(1f);
-                weapon.Reload();
-                isReloading = false;
+            
+            state = ShootState.RELOADING;
+            yield return new WaitForSeconds(1f);
+            weapon.Reload();
+            
 
-            }
-            
-            
         }
     }
     IEnumerator ShootOnGame()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (!weapon.isAutomatic)
         {
-            if(weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                state = ShootState.SHOOTING;
-                notShooting = true;
-                weapon.Shoot();
-                yield return new WaitForSeconds(weapon.fireRate);
-                notShooting = false;
+                if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                {
+                    state = ShootState.SHOOTING;
+                    notShooting = true;
+                    weapon.Shoot();
+                    yield return new WaitForSeconds(weapon.fireRate);
+                    notShooting = false;
 
+                }
+                else if (weapon.currentAmmo <= 0)
+                {
+                    state = ShootState.RELOADING;
+                    yield return new WaitForSeconds(1f);
+                    weapon.Reload();
+                }
             }
-            else if(weapon.currentAmmo <= 0)
+        }
+        else if (weapon.isAutomatic)
+        {
+            if (Input.GetKey(KeyCode.Mouse0))
             {
-                state = ShootState.RELOADING;
-                yield return new WaitForSeconds(1f);
-                weapon.Reload();
+                if(weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                {
+                    state = ShootState.SHOOTING;
+                    notShooting = true;
+                    weapon.Shoot();
+                    yield return new WaitForSeconds(weapon.fireRate);
+                    notShooting = false;
+                }
+                else if (weapon.currentAmmo <= 0)
+                {
+                    state = ShootState.RELOADING;
+                    yield return new WaitForSeconds(1f);
+                    weapon.Reload();
+                }
             }
-
-
         }
         
     }
+    public void RecoilShake()
+    {
+        recoilShake.GenerateImpulse();
+    }
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(state);
+        }
+        else
+        {
+            if(!pw.IsMine)
+            {
+                StateAnimUpdate((ShootState)stream.ReceiveNext());
+            }
+        }
+
+    }
+
+
+
 }
 
 class Rifle : WeaponBase
@@ -160,25 +205,36 @@ class Rifle : WeaponBase
         base.reloadTime = reloadTime;
         base.bullet = bullet;
         base.firePoint = firePoint;
-        base.currentAmmo = base.maxAmmo;
+        base.currentAmmo = maxAmmo;
 
     }
 
     public override void Reload()
     {
-        
+        base.currentAmmo = maxAmmo;
     }
 
     public override void Shoot()
     {
 
 
-        GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, firePoint.rotation);
+        int pelletCount = 1; 
+        float spreadAngle = 1f; 
 
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        rb.AddForce(firePoint.forward * fireRate, ForceMode.Impulse);
-
-        GameObject.Destroy(bullet, 5f);
+        for (int i = 0; i < pelletCount; i++)
+        {
+            // Rastgele bir açı hesapla
+            float randomX = Random.Range(-spreadAngle, spreadAngle);
+            float randomY = Random.Range(-spreadAngle, spreadAngle);
+            Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+            SoundManager.PlaySoundOneShot(SoundType.WEAPON, 0, 0.4f);
+            // Mermiyi oluştur ve rastgele açıyla fırlat
+            GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            rb.AddForce(randomRotation * Vector3.up * 375f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
+            currentAmmo--;
+            GameObject.Destroy(bullet, 0.5f);
+        }
     }
 }
 class Smg : WeaponBase
@@ -260,7 +316,7 @@ class Shotgun : WeaponBase
     public override void Shoot()
     {
         int pelletCount = 7; // Ateşlenecek mermi sayısı
-        float spreadAngle = 5f; // Mermilerin yayılma açısı
+        float spreadAngle = 2f; // Mermilerin yayılma açısı
 
         for (int i = 0; i < pelletCount; i++)
         {
@@ -268,7 +324,8 @@ class Shotgun : WeaponBase
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
-
+            SoundManager.PlaySoundOneShot(SoundType.WEAPON, 3, 0.4f);
+            currentAmmo--;
             // Mermiyi oluştur ve rastgele açıyla fırlat
             GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
             Rigidbody rb = bullet.GetComponent<Rigidbody>();

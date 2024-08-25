@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 1646748856935181446}
   - component: {fileID: -7611325968607024816}
   - component: {fileID: 7072098980478566067}
-  - component: {fileID: -6636690041168973437}
+  - component: {fileID: 8956953439736897720}
   m_Layer: 0
-  m_Name: ShotgunBullet
+  m_Name: RifleBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +80,7 @@ MonoBehaviour:
   observableSearch: 0
   ObservedComponents:
   - {fileID: -7611325968607024816}
-  - {fileID: -6636690041168973437}
+  - {fileID: 8956953439736897720}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -169,7 +169,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 0.95
+  m_Time: 0.03
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -179,7 +179,7 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.14223823
+        value: 0.047404855
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -187,8 +187,8 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.706934
-        value: 0.12931824
+        time: 0.7128849
+        value: 0.06034851
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -197,7 +197,7 @@ TrailRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 1
-        value: 0.09914109
+        value: 0.051732033
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -246,10 +246,10 @@ TrailRenderer:
     generateLightingData: 0
   m_MinVertexDistance: 0.6
   m_MaskInteraction: 0
-  m_Autodestruct: 1
+  m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
---- !u!114 &-6636690041168973437
+--- !u!114 &8956953439736897720
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

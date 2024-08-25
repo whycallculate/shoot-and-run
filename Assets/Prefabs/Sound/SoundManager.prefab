@@ -270,6 +270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a790f8d4c3df5e43b052c9f6fca7a29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MusicVolume: 0.5
   soundList:
   - name: UI_BUTTON
     sounds:
@@ -286,7 +287,11 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 346dd3b7fd544524caa5a0eeb0e53e5d, type: 3}
     - {fileID: 8300000, guid: 1c41d7b003c81d145b4638bff37dbce5, type: 3}
   - name: WEAPON
-    sounds: []
+    sounds:
+    - {fileID: 8300000, guid: 1e731820b0219a842ab45d4e53b95421, type: 3}
+    - {fileID: 8300000, guid: e76abb44981151f429dc7bcea89a0a09, type: 3}
+    - {fileID: 8300000, guid: 762a9cb6fa7fa75409627e440cdc85eb, type: 3}
+    - {fileID: 8300000, guid: 5361eed2f5a43ea49bce26307355b7af, type: 3}
   - name: PLAYER_FOOT_STEP
     sounds: []
   - name: PLAYER_DAMAGE
