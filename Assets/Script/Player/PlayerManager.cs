@@ -34,6 +34,7 @@ public class PlayerManager : MonoBehaviour
         //GameObject aimPos = 
         GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
         //player.GetComponent<AimState>().SetValueRigging(aimPos.transform);
+        SoundManager.Instance.StopBackgroundMusic();
 
     }
 
