@@ -6,6 +6,8 @@ using Photon.Pun;
 using UnityEngine.Animations.Rigging;
 using System.IO;
 using Unity.VisualScripting;
+using System.Data;
+using UnityEngine.Animations;
 
 
 public class AimState : MonoBehaviour 
@@ -26,7 +28,7 @@ public class AimState : MonoBehaviour
     [Header("Cam Movement")]
     public Cinemachine.AxisState xAxis, yAxis;
     [HideInInspector] Transform camFollowPos;
-    [SerializeField] public Animator anim;
+    [HideInInspector] public Animator anim;
     [HideInInspector] public GameObject playerCamera;
     CinemachineVirtualCamera vCam;
 
@@ -54,6 +56,8 @@ public class AimState : MonoBehaviour
     {
         pw = this.GetComponent<PhotonView>();
         rig = this.GetComponent<RigBuilder>();
+        anim = this.GetComponent<Animator>();
+
     }
     void Start()
     {
@@ -61,6 +65,7 @@ public class AimState : MonoBehaviour
 
         if (pw.IsMine)
         {
+            SetValueModelChange();
             //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
             Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
             GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
@@ -119,6 +124,34 @@ public class AimState : MonoBehaviour
         }
 
     }
+    public void SetValueModelChange()
+    {
+        // İlk olarak mevcut rig layer'ı kaldırıyoruz
+        rig.layers.RemoveAt(0);
+
+        // Yeni modelin bileşenlerini SkinChanger üzerinden alıyoruz
+        bodyAim = gameObject.GetComponent<SkinChanger>().getModelBodyAim;
+        headAim = gameObject.GetComponent<SkinChanger>().getModelHeadAim;
+        rHandAim = gameObject.GetComponent<SkinChanger>().getModelRHandAim;
+        lHandIK = gameObject.GetComponent<SkinChanger>().getModelLHandIK;
+
+
+        // Animatördeki avatarı değiştiriyoruz
+        anim.avatar = gameObject.GetComponent<SkinChanger>().getAvatar;
+
+        // Yeni rig'i rig layer'a ekliyoruz
+        rig.layers.Add(new RigLayer(gameObject.GetComponent<SkinChanger>().getModelRig));
+
+        // Animator'u yeniden başlatıyoruz
+        anim.Rebind();
+        anim.Update(0f);
+
+        // Yeni rig'i yeniden kuruyoruz
+        rig.Build();
+
+    }
+   
+
     public void SetValueRigging(GameObject aimPos)
     {
         //Target objesini burada initilate ediyoruz.
@@ -153,10 +186,10 @@ public class AimState : MonoBehaviour
     public void SetCameraStartMethod()
     {
         // Bu oyuncu local oyuncuysa, kamerayı etkinleştir
-        playerCamera = transform.GetChild(2).gameObject;
+        playerCamera = transform.GetChild(0).gameObject;
         playerCamera.SetActive(true);
 
-        vCam = transform.GetChild(2).GetComponent<CinemachineVirtualCamera>();
+        vCam = transform.GetChild(0).GetComponent<CinemachineVirtualCamera>();
         hipFov = vCam.m_Lens.FieldOfView;
         currentFov = hipFov;
 
