@@ -126,31 +126,54 @@ public class AimState : MonoBehaviour
     }
     public void SetValueModelChange()
     {
-        // İlk olarak mevcut rig layer'ı kaldırıyoruz
-        rig.layers.RemoveAt(0);
-
-        // Yeni modelin bileşenlerini SkinChanger üzerinden alıyoruz
-        bodyAim = gameObject.GetComponent<SkinChanger>().getModelBodyAim;
-        headAim = gameObject.GetComponent<SkinChanger>().getModelHeadAim;
-        rHandAim = gameObject.GetComponent<SkinChanger>().getModelRHandAim;
-        lHandIK = gameObject.GetComponent<SkinChanger>().getModelLHandIK;
-
-
-        // Animatördeki avatarı değiştiriyoruz
-        anim.avatar = gameObject.GetComponent<SkinChanger>().getAvatar;
-
-        // Yeni rig'i rig layer'a ekliyoruz
-        rig.layers.Add(new RigLayer(gameObject.GetComponent<SkinChanger>().getModelRig));
-
-        // Animator'u yeniden başlatıyoruz
-        anim.Rebind();
-        anim.Update(0f);
-
-        // Yeni rig'i yeniden kuruyoruz
-        rig.Build();
+        
+        //// İlk olarak mevcut rig layer'ı kaldırıyoruz
+        //rig.layers.RemoveAt(0);
+        //
+        //// Yeni modelin bileşenlerini SkinChanger üzerinden alıyoruz
+        //bodyAim = gameObject.GetComponent<SkinChanger>().getModelBodyAim;
+        //headAim = gameObject.GetComponent<SkinChanger>().getModelHeadAim;
+        //rHandAim = gameObject.GetComponent<SkinChanger>().getModelRHandAim;
+        ////lHandIK = gameObject.GetComponent<SkinChanger>().getModelLHandIK;
+        //
+        //Transform newBodyAimBone = gameObject.GetComponent<SkinChanger>().getModelBodyAim.transform;
+        //Transform newHeadAimBone = gameObject.GetComponent<SkinChanger>().getModelHeadAim.transform;
+        //Transform newRHandAimBone = gameObject.GetComponent<SkinChanger>().getModelRHandAim.transform;
+        ////Transform newLHandIKBone = gameObject.GetComponent<SkinChanger>().getModelLHandIK.transform;
+        //
+        //UpdateMultiAimConstraint(newBodyAimBone, bodyAim);
+        //UpdateMultiAimConstraint(newHeadAimBone, headAim);
+        //UpdateMultiAimConstraint(newRHandAimBone, rHandAim);
+        ////UpdateTwoBoneIKConstraint(newLHandIKBone, lHandIK);
+        //// Animatördeki avatarı değiştiriyoruz
+        //
+        //
+        //// Yeni rig'i rig layer'a ekliyoruz
+        //rig.layers.Add(new RigLayer(gameObject.GetComponent<SkinChanger>().getModelRig));
+        //anim.avatar = gameObject.GetComponent<SkinChanger>().getAvatar;
+        //rig.Build();
+        //anim.Rebind();
+        //anim.Update(0f);
+        ////Destroy(gameObject);
 
     }
-   
+    public void UpdateMultiAimConstraint(Transform newTargetBone, MultiAimConstraint multiAimConstraint)
+    {
+        if (multiAimConstraint != null)
+        {
+            var data = multiAimConstraint.data.sourceObjects;
+            data.Clear();  // Eski kaynakları temizliyoruz
+            data.Add(new WeightedTransform(newTargetBone, 1f));  // Yeni hedef kemiği ekliyoruz
+            multiAimConstraint.data.sourceObjects = data;
+        }
+    }
+    public void UpdateTwoBoneIKConstraint(Transform newTargetBone, TwoBoneIKConstraint twoBoneIKConstraint)
+    {
+        if (twoBoneIKConstraint != null)
+        {
+            twoBoneIKConstraint.data.target = newTargetBone;
+        }
+    }
 
     public void SetValueRigging(GameObject aimPos)
     {

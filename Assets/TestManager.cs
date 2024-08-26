@@ -29,6 +29,7 @@ public class TestManager : MonoBehaviourPunCallbacks
         if(Input.GetKeyDown(KeyCode.B)) 
         {
             SkinChanger.Instance.SkinChangeMethod();
+            
             AimState.Instance.SetValueModelChange();
         }
         if (Input.GetKeyDown(KeyCode.C))

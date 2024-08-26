@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class SkinChanger : MonoBehaviour
+public class SkinChanger : MonoBehaviour, IPunObservable
 {
     private static SkinChanger instance;
     public static SkinChanger Instance
@@ -20,14 +20,15 @@ public class SkinChanger : MonoBehaviour
     }
     PhotonView pw;
     [SerializeField] public GameObject[] playerModelObject;
-    public Avatar getAvatar;
-    public Rig getModelRig;
-    public MultiAimConstraint getModelBodyAim;
-    public MultiAimConstraint getModelHeadAim;
-    public MultiAimConstraint getModelRHandAim;
-    public TwoBoneIKConstraint getModelLHandIK;
-    public GameObject[] getWeaponList;
+    //public Avatar getAvatar;
+    //public Rig getModelRig;
+    //public MultiAimConstraint getModelBodyAim;
+    //public MultiAimConstraint getModelHeadAim;
+    //public MultiAimConstraint getModelRHandAim;
+    //public TwoBoneIKConstraint getModelLHandIK;
+    //public GameObject[] getWeaponList;
     int i = 0;
+    int getIndex;
 
 
     private void Awake()
@@ -35,50 +36,86 @@ public class SkinChanger : MonoBehaviour
         pw = GetComponent<PhotonView>();
         if (pw.IsMine)
         {
-            GetSkinDataMethod(i);
+            //GetSkinDataMethod(i);
+
 
         }
     }
 
     public void SkinChangeMethod()
     {
-        
-        if(i >= 0 && i < playerModelObject.Length -1)
+        if(pw.IsMine)
         {
-            playerModelObject[i+1].SetActive(true);
 
+            if (i >= 0 && i < playerModelObject.Length - 1)
+            {
+                playerModelObject[i + 1].SetActive(true);
 
-            playerModelObject[i+1].GetComponent<ModelGetData>().Body.bones = playerModelObject[i].GetComponent<ModelGetData>().Body.bones;
-            playerModelObject[i+1].GetComponent<ModelGetData>().Feet.bones = playerModelObject[i].GetComponent<ModelGetData>().Feet.bones;
-            playerModelObject[i+1].GetComponent<ModelGetData>().Head.bones = playerModelObject[i].GetComponent<ModelGetData>().Head.bones;
-            playerModelObject[i+1].GetComponent<ModelGetData>().Legs.bones = playerModelObject[i].GetComponent<ModelGetData>().Legs.bones;
-            playerModelObject[i + 1].GetComponent<ModelGetData>().Body.rootBone = playerModelObject[i + 1].GetComponent<ModelGetData>().modelRoot;
-            playerModelObject[i + 1].GetComponent<ModelGetData>().Feet.rootBone = playerModelObject[i + 1].GetComponent<ModelGetData>().modelRoot;
-            playerModelObject[i + 1].GetComponent<ModelGetData>().Head.rootBone = playerModelObject[i + 1].GetComponent<ModelGetData>().modelRoot;
-            playerModelObject[i + 1].GetComponent<ModelGetData>().Legs.rootBone = playerModelObject[i + 1].GetComponent<ModelGetData>().modelRoot;
-            playerModelObject[i].SetActive(false);
-
-            i++;
-            
-            GetSkinDataMethod(i);
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Legs.gameObject.SetActive(true);
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Body.bones = playerModelObject[i].GetComponent<ModelGetData>().Body.bones;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Feet.bones = playerModelObject[i].GetComponent<ModelGetData>().Feet.bones;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Head.bones = playerModelObject[i].GetComponent<ModelGetData>().Head.bones;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Legs.bones = playerModelObject[i].GetComponent<ModelGetData>().Legs.bones;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Body.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Feet.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Head.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+                playerModelObject[i + 1].GetComponent<ModelGetData>().Legs.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+                playerModelObject[i].GetComponent<ModelGetData>().Body.gameObject.SetActive(false);
+                playerModelObject[i].GetComponent<ModelGetData>().Feet.gameObject.SetActive(false);
+                playerModelObject[i].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
+                playerModelObject[i].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
+                i++;
+                //GetSkinDataMethod(i);
+            }
+            if (i == playerModelObject.Length - 1)
+            {
+                i = 0;
+                playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Body.gameObject.SetActive(false);
+                playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Feet.gameObject.SetActive(false);
+                playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
+                playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
+            }
         }
-        if(i > playerModelObject.Length - 1)
+        
+    }
+    public void OtherPlayerSetSkin(int getIndex)
+    {
+        if(!pw.IsMine)
         {
-            i = 0;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Legs.gameObject.SetActive(true);
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Body.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Feet.bones = playerModelObject[0].GetComponent<ModelGetData>().Feet.bones;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Head.bones = playerModelObject[0].GetComponent<ModelGetData>().Head.bones;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Legs.bones = playerModelObject[0].GetComponent<ModelGetData>().Legs.bones;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Body.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Feet.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Head.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+            playerModelObject[getIndex].GetComponent<ModelGetData>().Legs.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
+            playerModelObject[0].GetComponent<ModelGetData>().Body.gameObject.SetActive(false);
+            playerModelObject[0].GetComponent<ModelGetData>().Feet.gameObject.SetActive(false);
+            playerModelObject[0].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
+            playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
         }
     }
 
 
 
-    public void GetSkinDataMethod(int b)
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        playerModelObject[b].GetComponent<ModelGetData>();
-        getAvatar = playerModelObject[b].GetComponent<ModelGetData>().avatar;
-        getModelRig = playerModelObject[b].GetComponent<ModelGetData>().modelRig;
-        getModelBodyAim = playerModelObject[b].GetComponent<ModelGetData>().modelBodyAim;
-        getModelHeadAim = playerModelObject[b].GetComponent<ModelGetData>().modelHeadAim;
-        getModelRHandAim = playerModelObject[b].GetComponent<ModelGetData>().modelRHandAim;
-        getModelLHandIK = playerModelObject[b].GetComponent<ModelGetData>().modelLHandIK;
-        getWeaponList = playerModelObject[b].GetComponent<ModelGetData>().weaponList;
+        if (stream.IsWriting)
+        {
+            stream.SendNext(i);
+        }
+        else
+        {
+            OtherPlayerSetSkin((int)stream.ReceiveNext());
+        }
+
     }
 }
