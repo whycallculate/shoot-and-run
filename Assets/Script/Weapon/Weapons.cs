@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using System.IO;
 using Cinemachine;
+using UnityEngine.Animations.Rigging;
 public enum ShootState
 {
     IDLE,
@@ -11,8 +12,14 @@ public enum ShootState
     RELOADING,
     
 }
+//TEST ASAMASINDA BAZI MERMILER DESTROYLANMIYOR KONTROL EDILECEK..!!!
 public class Weapons : MonoBehaviour, IPunObservable
 {
+    [Header("IK Left Hand")]
+    [SerializeField] Transform leftHandTarget;
+    [SerializeField] TwoBoneIKConstraint leftHandRig;
+
+    [Header("Weapon Info")]
     [SerializeField] ShootState state;
     [SerializeField] ParticleSystem muzzle;
     [SerializeField] Animator anim;
@@ -59,7 +66,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint);
             weapon = shotgun;
         }
-
+        SetLeftHandIK();
     }
     private void Update()
     {
@@ -79,6 +86,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                 StartCoroutine(ReloadOnGame());
             }
             StateAnimUpdate(state);
+            //SetLeftHandIK();
         }
         
     }
@@ -171,6 +179,12 @@ public class Weapons : MonoBehaviour, IPunObservable
     public void RecoilShake()
     {
         recoilShake.GenerateImpulse();
+    }
+    public void SetLeftHandIK()
+    {
+        
+        leftHandRig.data.target = leftHandTarget;
+        AimState.Instance.rig.Build();
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {

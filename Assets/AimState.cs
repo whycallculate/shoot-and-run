@@ -6,6 +6,8 @@ using Photon.Pun;
 using UnityEngine.Animations.Rigging;
 using System.IO;
 using Unity.VisualScripting;
+using System.Data;
+using UnityEngine.Animations;
 
 
 public class AimState : MonoBehaviour 
@@ -26,7 +28,7 @@ public class AimState : MonoBehaviour
     [Header("Cam Movement")]
     public Cinemachine.AxisState xAxis, yAxis;
     [HideInInspector] Transform camFollowPos;
-    [SerializeField] public Animator anim;
+    [HideInInspector] public Animator anim;
     [HideInInspector] public GameObject playerCamera;
     CinemachineVirtualCamera vCam;
 
@@ -54,6 +56,8 @@ public class AimState : MonoBehaviour
     {
         pw = this.GetComponent<PhotonView>();
         rig = this.GetComponent<RigBuilder>();
+        anim = this.GetComponent<Animator>();
+
     }
     void Start()
     {
@@ -61,6 +65,7 @@ public class AimState : MonoBehaviour
 
         if (pw.IsMine)
         {
+            SetValueModelChange();
             //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
             Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
             GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
@@ -119,6 +124,57 @@ public class AimState : MonoBehaviour
         }
 
     }
+    public void SetValueModelChange()
+    {
+        
+        //// İlk olarak mevcut rig layer'ı kaldırıyoruz
+        //rig.layers.RemoveAt(0);
+        //
+        //// Yeni modelin bileşenlerini SkinChanger üzerinden alıyoruz
+        //bodyAim = gameObject.GetComponent<SkinChanger>().getModelBodyAim;
+        //headAim = gameObject.GetComponent<SkinChanger>().getModelHeadAim;
+        //rHandAim = gameObject.GetComponent<SkinChanger>().getModelRHandAim;
+        ////lHandIK = gameObject.GetComponent<SkinChanger>().getModelLHandIK;
+        //
+        //Transform newBodyAimBone = gameObject.GetComponent<SkinChanger>().getModelBodyAim.transform;
+        //Transform newHeadAimBone = gameObject.GetComponent<SkinChanger>().getModelHeadAim.transform;
+        //Transform newRHandAimBone = gameObject.GetComponent<SkinChanger>().getModelRHandAim.transform;
+        ////Transform newLHandIKBone = gameObject.GetComponent<SkinChanger>().getModelLHandIK.transform;
+        //
+        //UpdateMultiAimConstraint(newBodyAimBone, bodyAim);
+        //UpdateMultiAimConstraint(newHeadAimBone, headAim);
+        //UpdateMultiAimConstraint(newRHandAimBone, rHandAim);
+        ////UpdateTwoBoneIKConstraint(newLHandIKBone, lHandIK);
+        //// Animatördeki avatarı değiştiriyoruz
+        //
+        //
+        //// Yeni rig'i rig layer'a ekliyoruz
+        //rig.layers.Add(new RigLayer(gameObject.GetComponent<SkinChanger>().getModelRig));
+        //anim.avatar = gameObject.GetComponent<SkinChanger>().getAvatar;
+        //rig.Build();
+        //anim.Rebind();
+        //anim.Update(0f);
+        ////Destroy(gameObject);
+
+    }
+    public void UpdateMultiAimConstraint(Transform newTargetBone, MultiAimConstraint multiAimConstraint)
+    {
+        if (multiAimConstraint != null)
+        {
+            var data = multiAimConstraint.data.sourceObjects;
+            data.Clear();  // Eski kaynakları temizliyoruz
+            data.Add(new WeightedTransform(newTargetBone, 1f));  // Yeni hedef kemiği ekliyoruz
+            multiAimConstraint.data.sourceObjects = data;
+        }
+    }
+    public void UpdateTwoBoneIKConstraint(Transform newTargetBone, TwoBoneIKConstraint twoBoneIKConstraint)
+    {
+        if (twoBoneIKConstraint != null)
+        {
+            twoBoneIKConstraint.data.target = newTargetBone;
+        }
+    }
+
     public void SetValueRigging(GameObject aimPos)
     {
         //Target objesini burada initilate ediyoruz.
@@ -153,10 +209,10 @@ public class AimState : MonoBehaviour
     public void SetCameraStartMethod()
     {
         // Bu oyuncu local oyuncuysa, kamerayı etkinleştir
-        playerCamera = transform.GetChild(2).gameObject;
+        playerCamera = transform.GetChild(0).gameObject;
         playerCamera.SetActive(true);
 
-        vCam = transform.GetChild(2).GetComponent<CinemachineVirtualCamera>();
+        vCam = transform.GetChild(0).GetComponent<CinemachineVirtualCamera>();
         hipFov = vCam.m_Lens.FieldOfView;
         currentFov = hipFov;
 

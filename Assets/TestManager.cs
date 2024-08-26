@@ -24,4 +24,23 @@ public class TestManager : MonoBehaviourPunCallbacks
     {
         PlayerManager.SetActive(true);
     }
+    public void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.B)) 
+        {
+            SkinChanger.Instance.SkinChangeMethod();
+            
+            AimState.Instance.SetValueModelChange();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            AimState.Instance.rig.Clear();
+
+            AimState.Instance.rig.Build();
+            AimState.Instance.anim.Rebind();
+            AimState.Instance.anim.Update(0f);
+
+        }
+
+    }
 }
