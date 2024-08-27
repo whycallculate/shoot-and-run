@@ -29,11 +29,8 @@ public class PlayerManager : MonoBehaviour
     private void Awake()
     {
         this.pw = GetComponent<PhotonView>();
-        // Oyuncu ve AimPos oluşturma
         spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
-        //GameObject aimPos = 
         GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
-        //player.GetComponent<AimState>().SetValueRigging(aimPos.transform);
         SoundManager.Instance.StopBackgroundMusic();
 
     }

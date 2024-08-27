@@ -192,9 +192,7 @@ MonoBehaviour:
   Feet: {fileID: 7052338436969160951}
   Head: {fileID: 3208670403629271625}
   Legs: {fileID: 1916799491643533008}
-  weaponList:
-  - {fileID: 3992007191512267755}
-  - {fileID: 2954194810157185735}
+  costumIndex: 0
 --- !u!1 &166609057347617514
 GameObject:
   m_ObjectHideFlags: 0
@@ -1184,7 +1182,7 @@ MonoBehaviour:
   Feet: {fileID: 4977064142012681567}
   Head: {fileID: 6438920496515279813}
   Legs: {fileID: 3043826750510682570}
-  weaponList: []
+  costumIndex: 9
 --- !u!1 &1869730912379732761
 GameObject:
   m_ObjectHideFlags: 0
@@ -1270,7 +1268,7 @@ MonoBehaviour:
   Feet: {fileID: 7215423617280744981}
   Head: {fileID: 2964582832727498520}
   Legs: {fileID: 5729954910145323458}
-  weaponList: []
+  costumIndex: 10
 --- !u!1 &1909938948417146668
 GameObject:
   m_ObjectHideFlags: 0
@@ -15254,7 +15252,7 @@ MonoBehaviour:
   Feet: {fileID: 2970341728638987662}
   Head: {fileID: 6381106472274275734}
   Legs: {fileID: 3735928883539341557}
-  weaponList: []
+  costumIndex: 6
 --- !u!1 &5527632484093332045
 GameObject:
   m_ObjectHideFlags: 0
@@ -16722,7 +16720,7 @@ MonoBehaviour:
   Feet: {fileID: 2469744136782996594}
   Head: {fileID: 5943107131418101122}
   Legs: {fileID: 3595503067295407434}
-  weaponList: []
+  costumIndex: 8
 --- !u!1 &6254341595280227218
 GameObject:
   m_ObjectHideFlags: 0
@@ -17038,7 +17036,7 @@ MonoBehaviour:
   Feet: {fileID: 8635735469333414204}
   Head: {fileID: 3644941128402737139}
   Legs: {fileID: 7023353527336993195}
-  weaponList: []
+  costumIndex: 3
 --- !u!1 &6572744301006732249
 GameObject:
   m_ObjectHideFlags: 0
@@ -17523,7 +17521,7 @@ MonoBehaviour:
   Feet: {fileID: 8154806139915496880}
   Head: {fileID: 1463948909881968250}
   Legs: {fileID: 8461681692341491654}
-  weaponList: []
+  costumIndex: 7
 --- !u!1 &6991229684892358504
 GameObject:
   m_ObjectHideFlags: 0
@@ -17577,7 +17575,7 @@ MonoBehaviour:
   Feet: {fileID: 8016678993808040791}
   Head: {fileID: 4658070004177959567}
   Legs: {fileID: 3444277231067489814}
-  weaponList: []
+  costumIndex: 5
 --- !u!1 &7055976792558517852
 GameObject:
   m_ObjectHideFlags: 0
@@ -18210,6 +18208,7 @@ MonoBehaviour:
   aimMask:
     serializedVersion: 2
     m_Bits: 65
+  pw: {fileID: 0}
   bodyAim: {fileID: 3871175834420606326}
   headAim: {fileID: 2884625225081204898}
   rHandAim: {fileID: 6871418917562823220}
@@ -18301,6 +18300,7 @@ MonoBehaviour:
   - {fileID: 1828708366117748464}
   - {fileID: 4083691573616730232}
   - {fileID: 1104647120754150800}
+  - {fileID: 7755999424621525487}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -18404,7 +18404,6 @@ MonoBehaviour:
   - {fileID: 6991229684892358504}
   - {fileID: 5380943487896956435}
   - {fileID: 6967114144098038387}
-  - {fileID: 6253667050593892876}
   - {fileID: 6253667050593892876}
   - {fileID: 1794803767449272764}
   - {fileID: 1882740591964716793}
@@ -23953,7 +23952,7 @@ MonoBehaviour:
   Feet: {fileID: 6986020724343688415}
   Head: {fileID: 103652399839556790}
   Legs: {fileID: 5901100205761942073}
-  weaponList: []
+  costumIndex: 4
 --- !u!1 &7969121792166901574
 GameObject:
   m_ObjectHideFlags: 0
@@ -30063,7 +30062,7 @@ MonoBehaviour:
   Feet: {fileID: 6887266267737193881}
   Head: {fileID: 7799277350763895035}
   Legs: {fileID: 3270527096675946407}
-  weaponList: []
+  costumIndex: 1
 --- !u!1 &8924186387010779888
 GameObject:
   m_ObjectHideFlags: 0
@@ -30117,7 +30116,7 @@ MonoBehaviour:
   Feet: {fileID: 5450775591778419697}
   Head: {fileID: 5725195830799457408}
   Legs: {fileID: 3611979044599176075}
-  weaponList: []
+  costumIndex: 2
 --- !u!1 &8935807216062139684
 GameObject:
   m_ObjectHideFlags: 0

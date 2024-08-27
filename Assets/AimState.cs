@@ -42,7 +42,7 @@ public class AimState : MonoBehaviour
     public GameObject aimPos;  
     [SerializeField] float aimSmoothSpeed = 20;
     [SerializeField] LayerMask aimMask;
-    PhotonView pw;
+    public PhotonView pw;
 
     [Header("Rigging")]
     public MultiAimConstraint bodyAim;
@@ -65,7 +65,6 @@ public class AimState : MonoBehaviour
 
         if (pw.IsMine)
         {
-            SetValueModelChange();
             //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
             Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
             GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
@@ -88,7 +87,7 @@ public class AimState : MonoBehaviour
         }
         else
         {
-            playerCamera = transform.GetChild(2).gameObject;
+            playerCamera = transform.GetChild(0).gameObject;
             playerCamera.SetActive(false);
         }
 
@@ -115,6 +114,7 @@ public class AimState : MonoBehaviour
             CamFollowPos();
             GetAim();
             ScreenCentre();
+
         }
         else if(!pw.IsMine)
         {
@@ -124,39 +124,7 @@ public class AimState : MonoBehaviour
         }
 
     }
-    public void SetValueModelChange()
-    {
-        
-        //// İlk olarak mevcut rig layer'ı kaldırıyoruz
-        //rig.layers.RemoveAt(0);
-        //
-        //// Yeni modelin bileşenlerini SkinChanger üzerinden alıyoruz
-        //bodyAim = gameObject.GetComponent<SkinChanger>().getModelBodyAim;
-        //headAim = gameObject.GetComponent<SkinChanger>().getModelHeadAim;
-        //rHandAim = gameObject.GetComponent<SkinChanger>().getModelRHandAim;
-        ////lHandIK = gameObject.GetComponent<SkinChanger>().getModelLHandIK;
-        //
-        //Transform newBodyAimBone = gameObject.GetComponent<SkinChanger>().getModelBodyAim.transform;
-        //Transform newHeadAimBone = gameObject.GetComponent<SkinChanger>().getModelHeadAim.transform;
-        //Transform newRHandAimBone = gameObject.GetComponent<SkinChanger>().getModelRHandAim.transform;
-        ////Transform newLHandIKBone = gameObject.GetComponent<SkinChanger>().getModelLHandIK.transform;
-        //
-        //UpdateMultiAimConstraint(newBodyAimBone, bodyAim);
-        //UpdateMultiAimConstraint(newHeadAimBone, headAim);
-        //UpdateMultiAimConstraint(newRHandAimBone, rHandAim);
-        ////UpdateTwoBoneIKConstraint(newLHandIKBone, lHandIK);
-        //// Animatördeki avatarı değiştiriyoruz
-        //
-        //
-        //// Yeni rig'i rig layer'a ekliyoruz
-        //rig.layers.Add(new RigLayer(gameObject.GetComponent<SkinChanger>().getModelRig));
-        //anim.avatar = gameObject.GetComponent<SkinChanger>().getAvatar;
-        //rig.Build();
-        //anim.Rebind();
-        //anim.Update(0f);
-        ////Destroy(gameObject);
-
-    }
+    
     public void UpdateMultiAimConstraint(Transform newTargetBone, MultiAimConstraint multiAimConstraint)
     {
         if (multiAimConstraint != null)
@@ -179,7 +147,6 @@ public class AimState : MonoBehaviour
     {
         //Target objesini burada initilate ediyoruz.
         this.aimPos = aimPos;
-        Debug.Log("Ne kadar caliiyor ");
         UpdateAimConstraint(bodyAim, aimPos.transform);
         UpdateAimConstraint(headAim, aimPos.transform);
         UpdateAimConstraint(rHandAim, aimPos.transform);

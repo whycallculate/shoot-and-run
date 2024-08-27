@@ -74,8 +74,6 @@ public class Weapons : MonoBehaviour, IPunObservable
 
         if (pw.IsMine)
         {
-            Debug.Log(weapon.maxAmmo);
-            Debug.Log(weapon.currentAmmo);
             if(!notShooting)
             {
                 StartCoroutine(ShootOnGame());
@@ -86,7 +84,6 @@ public class Weapons : MonoBehaviour, IPunObservable
                 StartCoroutine(ReloadOnGame());
             }
             StateAnimUpdate(state);
-            //SetLeftHandIK();
         }
         
     }
@@ -178,7 +175,12 @@ public class Weapons : MonoBehaviour, IPunObservable
     }
     public void RecoilShake()
     {
-        recoilShake.GenerateImpulse();
+        if (pw.IsMine)
+        {
+            recoilShake.GenerateImpulse();
+
+        }
+
     }
     public void SetLeftHandIK()
     {
@@ -345,7 +347,7 @@ class Shotgun : WeaponBase
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             rb.AddForce(randomRotation * Vector3.up * 175f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
 
-            GameObject.Destroy(bullet, 0.2f);
+            GameObject.Destroy(bullet,0.2f);
         }
     }
 }

@@ -18,8 +18,6 @@ public static class InputManager
     {
         VerticalPos = Input.GetAxisRaw("Vertical");
         HorizontalPos = Input.GetAxisRaw("Horizontal");
-        Debug.Log("Input manager move input");
-        Debug.Log(VerticalPos);
     }
     
 
