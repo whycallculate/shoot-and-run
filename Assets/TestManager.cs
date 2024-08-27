@@ -7,7 +7,6 @@ public class TestManager : MonoBehaviourPunCallbacks
 {
 
     [SerializeField] GameObject PlayerManager;
-    // Start is called before the first frame update
     void Start()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -26,19 +25,14 @@ public class TestManager : MonoBehaviourPunCallbacks
     }
     public void Update()
     {
-        if(Input.GetKeyDown(KeyCode.B)) 
-        {
-            SkinChanger.Instance.SkinChangeMethod();
-            
-            AimState.Instance.SetValueModelChange();
-        }
+
         if (Input.GetKeyDown(KeyCode.C))
         {
             AimState.Instance.rig.Clear();
-
             AimState.Instance.rig.Build();
             AimState.Instance.anim.Rebind();
             AimState.Instance.anim.Update(0f);
+
 
         }
 

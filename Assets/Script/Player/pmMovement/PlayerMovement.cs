@@ -176,7 +176,6 @@ public class PlayerMovement : MonoBehaviour
     {
         //Karakterimizin ayaklari yere degiyor mu diye isin islemini kullaniyoruz.
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.4f + 0.2f, whatIsGround);
-        Debug.Log(Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.4f + 0.2f, whatIsGround));
 
         if (grounded)
         {
@@ -207,12 +206,10 @@ public class PlayerMovement : MonoBehaviour
         PlayerRb.velocity = new Vector3(PlayerRb.velocity.x, 0f, PlayerRb.velocity.z);
         PlayerRb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         
-        Debug.Log("Jump Methodu");
     }
     private IEnumerator ResetJump()
     {
         //Animasyon icin ufak Time checkleri attiriyoruz ki animasyon daha iyi gozuksun ve burasi cooldown kismi
-        Debug.Log("JumpReset Methodu");
         yield return new WaitForSeconds(0.5f);
         animator.SetBool("Jump", false);
 
@@ -224,7 +221,6 @@ public class PlayerMovement : MonoBehaviour
     private void JumpCheck()
     {
         //Burada Ziplamaya hazir miyiz yere degiyor muyuz ve cooldown suresi dolmus mu kontrolleri
-        Debug.Log("JumpCheck Methodu");
         if (Input.GetKeyDown(KeyCode.Space) && readyToJump && grounded)
         {
             
@@ -232,7 +228,6 @@ public class PlayerMovement : MonoBehaviour
             Jump();
             StartCoroutine(ResetJump());
             
-            Debug.Log("JumpCheck if Methodu");
         }
     }
 
