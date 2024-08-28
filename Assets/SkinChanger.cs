@@ -39,21 +39,12 @@ public class SkinChanger : MonoBehaviour, IPunObservable
     private void Update()
     {
 
-        if(pw.IsMine)
-        {
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                SkinChangeMethod();
 
-                Debug.Log(playerModelObject.Length);
-                Debug.Log(getIndex);
-            }
-        }
-        else
-        {
-            Debug.Log(setIndex + getIndex + i);
+        //if
+        //{
+        //    Debug.Log(setIndex + getIndex + i);
 
-        }
+        //}
 
     }
 
@@ -93,7 +84,8 @@ public class SkinChanger : MonoBehaviour, IPunObservable
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Feet.gameObject.SetActive(false);
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
-            }
+                SkinChangeMethod();
+            }                                                
             AimState.Instance.rig.Clear();
             AimState.Instance.rig.Build();
             AimState.Instance.anim.Rebind();
@@ -126,7 +118,7 @@ public class SkinChanger : MonoBehaviour, IPunObservable
                 playerModelObject[0].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
                 playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
             }
-            if(getIndex > 1 && getIndex < playerModelObject.Length -1)
+            else if(getIndex > 1 && getIndex < playerModelObject.Length -1)
             {
                 playerModelObject[getIndex].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
                 playerModelObject[getIndex].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
@@ -145,13 +137,14 @@ public class SkinChanger : MonoBehaviour, IPunObservable
                 playerModelObject[getIndex - 1].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
                 playerModelObject[getIndex - 1].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
             }
-            if(getIndex == playerModelObject.Length - 1)
+            else if(getIndex == playerModelObject.Length - 1)
             {
                 this.getIndex = 0;
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Body.gameObject.SetActive(false);
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Feet.gameObject.SetActive(false);
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
                 playerModelObject[playerModelObject.Length - 1].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
+                OtherPlayerSetSkin(this.getIndex);
             }
 
             AimState.Instance.rig.Clear();
