@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.Animations.Rigging;
+using Cinemachine;
 public enum MovementState
 {
     WALK,
@@ -36,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public Animator animator;
     PhotonView pw;
     PhotonAnimatorView animpw;
+    CinemachineImpulseSource movementShake;
 
 
     [Header("Ground Check")]
@@ -57,6 +59,7 @@ public class PlayerMovement : MonoBehaviour
     {
         PlayerRb = GetComponent<Rigidbody>();
         pw = GetComponent<PhotonView>();
+        movementShake = GetComponent<CinemachineImpulseSource>();
         // Eğer bu oyuncu local oyuncu değilse, script'i devre dışı bırak
         if (!pw.IsMine)
         {
@@ -84,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
             SpeedControl();
             JumpCheck();
             CrouchingPlayer();
-            StateHandler();
+            
         }
 
 
@@ -96,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
         //Animasyon icin geekli input islemleri;
         {
             PlayerMove();
-
+            StateHandler();
 
         }
         
@@ -110,10 +113,12 @@ public class PlayerMovement : MonoBehaviour
         {
             state = MovementState.SPRINTING;
             PlayerMoveSpeed = playerSprintSpeed;
+            movementShake.GenerateImpulse();
             animator.SetBool("Crouching", false);
             animator.SetBool("Running", true);
             animator.SetBool("Walking", false);
             animator.SetBool("Jump", false);
+            
         }
         //yurume
         else if (grounded)

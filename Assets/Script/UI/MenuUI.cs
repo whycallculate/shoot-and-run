@@ -105,11 +105,11 @@ public class MenuUI : MonoBehaviour
 
         if (profilSide.activeSelf == false)
         {
-            profilSide.SetActive(true);
+            profilSide.GetComponent<UIAnim>().OnEnabledWithUp();
         }
         else if (profilSide.activeSelf == true)
         {
-            profilSide.SetActive(false);
+            profilSide.GetComponent<UIAnim>().OnDisabledWithDown();
         }
 
 
@@ -351,28 +351,7 @@ public class MenuUI : MonoBehaviour
     }
     #endregion
     #region PlayerCustomizeAndPlayerStuff
-    public void ChangeColorOnBody(int param)
-    {
 
-        PlayerData.Instance.pmData.Body += param;
-        Debug.Log(PlayerData.Instance.pmData.Body);
-        if (PlayerData.Instance.pmData.Body > defaultColors.Length)
-        {
-
-            MenuUI.Instance.pmParam = 0;
-            PlayerData.Instance.pmData.Body = 0;
-        }
-        if (PlayerData.Instance.pmData.Body < 0)
-        {
-            PlayerData.Instance.pmData.Body = defaultColors.Length - 1;
-        }
-        PlayerPrefs.SetInt("Body", PlayerData.Instance.pmData.Body);
-        int i = PlayerData.Instance.pmData.Body;
-        PmCustomize.SetPlayerBodyColor(PlayerData.Instance.pmData, i);
-        PlayerPrefs.Save();
-
-    }
-    
 
     #endregion
 }

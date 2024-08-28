@@ -13,6 +13,8 @@ public class Web : MonoBehaviour
     public string feedbackText;
     public GameObject sceneAnim;
     public GameObject alertPanel;
+    int costumeIndex;
+    int characterLevel;
     private void Start()
     {
         
@@ -69,10 +71,12 @@ public class Web : MonoBehaviour
         PhotonNetwork.AuthValues.UserId = username;
         string photonUserId = PhotonNetwork.AuthValues.UserId;
 
+
         WWWForm form = new WWWForm();
         form.AddField("username", username);
         form.AddField("password", password);
         form.AddField("photonUserId", photonUserId);
+
 
         using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Login.php", form))
         {
@@ -97,7 +101,7 @@ public class Web : MonoBehaviour
                     PhotonNetwork.AuthValues.UserId = response.user.photon_userid;
                     PhotonNetwork.NickName = response.user.username;
 
-                    ConnectToPhoton(response.user.username,response.user.photon_userid);
+                    ConnectToPhoton(response.user.username,response.user.photon_userid,response);
 
                 }
                 else if (response.status == "fail" && response.message == "User is already logged in")
@@ -190,13 +194,16 @@ public class Web : MonoBehaviour
     }
 
 
-    private void ConnectToPhoton(string name, string ID)
+    private void ConnectToPhoton(string name, string ID,LoginResponse userData)
     {
         username = name;
         this.userID = ID;
         PhotonNetwork.ConnectUsingSettings();
         PhotonNetwork.NickName = name;
         sceneAnim.GetComponent<UIAnim>().ChangeScene(sceneAnim, 1);
+        PlayerData.Instance.playerData = userData;
+        Debug.Log(userData.user.character_level);
+        Debug.Log(userData.user.costume_index);
     }
 
 }
