@@ -5,6 +5,7 @@ using Photon.Pun;
 using System.IO;
 using Cinemachine;
 using UnityEngine.Animations.Rigging;
+using System.Threading;
 public enum ShootState
 {
     IDLE,
@@ -58,7 +59,7 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
         else if(type == WeaponType.RIFLE)
         {
-            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint);
+            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw);
             weapon = rifle;
         }
         else if(type == WeaponType.SHOTGUN)
@@ -100,6 +101,16 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
         if(state == ShootState.SHOOTING)
         {
+            if(weapon.weaponType == WeaponType.SHOTGUN)
+            {
+                pw.RPC("GetSFXVolumeRPC", RpcTarget.All,3);
+            }
+            else if(weapon.weaponType == WeaponType.RIFLE)
+            {
+                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 0);
+
+            }
+
 
             weaponBarrel.enabled = true;
             RecoilShake();
@@ -188,6 +199,11 @@ public class Weapons : MonoBehaviour, IPunObservable
         leftHandRig.data.target = leftHandTarget;
         AimState.Instance.rig.Build();
     }
+    [PunRPC]
+    public void GetSFXVolumeRPC(int sound)
+    {
+        SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, sound, 0.4f);
+    }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -210,7 +226,8 @@ public class Weapons : MonoBehaviour, IPunObservable
 
 class Rifle : WeaponBase
 {
-    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint)
+    PhotonView pw;
+    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine)
     {
         base.weaponName = weaponName;
         base.weaponType = WeaponType.RIFLE;
@@ -222,6 +239,7 @@ class Rifle : WeaponBase
         base.bullet = bullet;
         base.firePoint = firePoint;
         base.currentAmmo = maxAmmo;
+        pw = pwMine;
 
     }
 
@@ -235,7 +253,8 @@ class Rifle : WeaponBase
 
 
         int pelletCount = 1; 
-        float spreadAngle = 1f; 
+        float spreadAngle = 1f;
+        currentAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
         {
@@ -243,15 +262,20 @@ class Rifle : WeaponBase
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
-            SoundManager.PlaySoundOneShot(SoundType.WEAPON, 0, 0.4f);
             // Mermiyi oluştur ve rastgele açıyla fırlat
             GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             rb.AddForce(randomRotation * Vector3.up * 375f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
-            currentAmmo--;
-            GameObject.Destroy(bullet, 0.5f);
+            pw.RPC("DestroyOnBullet", RpcTarget.All, bullet);
         }
     }
+    [PunRPC]
+    public void DestroyOnBullet(GameObject bullet)
+    {
+        Thread.Sleep(200);
+        GameObject.Destroy(bullet);
+    }
+
 }
 class Smg : WeaponBase
 {
@@ -280,7 +304,12 @@ class Smg : WeaponBase
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         rb.AddForce(firePoint.forward * fireRate, ForceMode.Impulse);
 
-        GameObject.Destroy(bullet, 5f);
+    }
+    public IEnumerator DestroySelfBullet(GameObject bullet)
+    {
+        yield return new WaitForSeconds(0.4f);
+        PhotonNetwork.Destroy(bullet);
+
     }
 }
 class Pistol : WeaponBase
@@ -306,6 +335,12 @@ class Pistol : WeaponBase
     public override void Shoot()
     {
         Debug.Log("Shoot Shotgun");
+    }
+    public IEnumerator DestroySelfBullet(GameObject bullet)
+    {
+        yield return new WaitForSeconds(0.4f);
+        PhotonNetwork.Destroy(bullet);
+
     }
 }
 class Shotgun : WeaponBase
@@ -333,6 +368,7 @@ class Shotgun : WeaponBase
     {
         int pelletCount = 7; // Ateşlenecek mermi sayısı
         float spreadAngle = 2f; // Mermilerin yayılma açısı
+        currentAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
         {
@@ -340,14 +376,18 @@ class Shotgun : WeaponBase
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
-            SoundManager.PlaySoundOneShot(SoundType.WEAPON, 3, 0.4f);
-            currentAmmo--;
+            
             // Mermiyi oluştur ve rastgele açıyla fırlat
             GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             rb.AddForce(randomRotation * Vector3.up * 175f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
-
-            GameObject.Destroy(bullet,0.2f);
+            DestroySelfBullet(bullet);
         }
+    }
+    public IEnumerator DestroySelfBullet(GameObject bullet)
+    {
+        yield return new WaitForSeconds(0.4f);
+        PhotonNetwork.Destroy(bullet);
+
     }
 }
