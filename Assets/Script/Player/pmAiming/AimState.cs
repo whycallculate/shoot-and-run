@@ -99,16 +99,7 @@ public class AimState : MonoBehaviour
         if (pw.IsMine) 
         {
             PosUpdate();
-            if (pw.IsMine)
-            {
-                if (Input.GetKeyDown(KeyCode.B))
-                {
-                    gameObject.GetComponent<SkinChanger>().SkinChangeMethod();
 
-                    //Debug.Log(playerModelObject.Length);
-                    //Debug.Log(getIndex);
-                }
-            }
         }
 
 

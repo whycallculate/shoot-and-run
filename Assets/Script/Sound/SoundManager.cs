@@ -37,6 +37,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private SoundList[] soundList;
     [SerializeField] private AudioClip[] backgroundMucisList;
     [SerializeField] public AudioSource backgroundAudioSource;
+    [SerializeField] public static AudioSource playerSfx;
     private AudioSource audioSource;
     private void Start()
     {
@@ -51,6 +52,12 @@ public class SoundManager : MonoBehaviour
         AudioClip[] clip = Instance.soundList[(int)sound].Sounds;
         AudioClip playClip = clip[i];
         Instance.audioSource.PlayOneShot(playClip, sfxVolume);
+    }
+    public static void PlayerPlaySoundOneShot(SoundType sound ,int i , float volume = 1)
+    {
+        AudioClip[] clip = Instance.soundList[(int)sound].Sounds;
+        AudioClip playClip = clip[i];
+        playerSfx.PlayOneShot(playClip, sfxVolume);
     }
     public static void PlaySoundRandom(SoundType sound, float volume = 1)
     {

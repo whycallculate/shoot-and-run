@@ -5,6 +5,7 @@ using UnityEngine;
 public class UpdateSkinChanger : MonoBehaviour
 {
     [SerializeField] public GameObject[] playerModelObject;
+
     int i = 0;
     public void NextChangeSkinUI()
     {

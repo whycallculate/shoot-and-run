@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -7611325968607024816}
   - component: {fileID: 7072098980478566067}
   - component: {fileID: 8956953439736897720}
+  - component: {fileID: -1536186264267693249}
   m_Layer: 0
   m_Name: RifleBullet
   m_TagString: Untagged
@@ -265,3 +266,16 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &-1536186264267693249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1505303901468372714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99ab77c9f7e8234f8106a6395c73652, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletTpye: 1

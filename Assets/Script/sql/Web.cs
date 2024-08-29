@@ -27,11 +27,12 @@ public class Web : MonoBehaviour
         form.AddField("password", password);
 
         // PhotonUserId'yi buraya ekleyin
+
         PhotonNetwork.AuthValues.UserId = username;
         string photonUserId = PhotonNetwork.AuthValues.UserId;
         form.AddField("photonUserId", photonUserId);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Register.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/game/Register.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -76,9 +77,12 @@ public class Web : MonoBehaviour
         form.AddField("username", username);
         form.AddField("password", password);
         form.AddField("photonUserId", photonUserId);
+        
+        
 
 
-        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Login.php", form))
+        
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/game/Login.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -107,7 +111,7 @@ public class Web : MonoBehaviour
                 else if (response.status == "fail" && response.message == "User is already logged in")
                 {
                     AlertPanel.Instance.ShowLog("User is already logged in.Please log out from other devices.");
-                   
+                 
                 }
                 else
                 {
@@ -117,13 +121,15 @@ public class Web : MonoBehaviour
             }
         }
     }
+    
+
     public IEnumerator UpdateOnlineStatus(bool isOnline)
     {
         WWWForm form = new WWWForm();
         form.AddField("photonUserId", PhotonNetwork.AuthValues.UserId);
         form.AddField("isOnline", isOnline ? 1 : 0);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://whycallculate.online/UpdateOnlineStatus.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post("http://whycallculate.online/game/UpdateOnlineStatus.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -138,7 +144,7 @@ public class Web : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("username", username);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Logout.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/game/Logout.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -174,7 +180,7 @@ public class Web : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("photonUserId", name);
             
-            using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/Heartbeat.php", form))
+            using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/game/Heartbeat.php", form))
             {
                 yield return www.SendWebRequest();
                 

@@ -11,14 +11,7 @@ public enum WeaponType
     PISTOL
 
 }
-public enum BulletTpye
-{
-    EMPTY,
-    RIFLE_AMMO,
-    SMG_AMMO,
-    SHOTGUN_AMMO,
-    PISTOL_AMMO
-}
+
 public abstract class WeaponBase
 {
 
