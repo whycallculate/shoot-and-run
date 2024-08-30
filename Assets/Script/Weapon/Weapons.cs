@@ -239,6 +239,7 @@ class Rifle : WeaponBase
         base.bullet = bullet;
         base.firePoint = firePoint;
         base.currentAmmo = maxAmmo;
+        base.weaponDamage = 20;
         pw = pwMine;
 
     }
@@ -250,9 +251,7 @@ class Rifle : WeaponBase
 
     public override void Shoot()
     {
-
-
-        int pelletCount = 1; 
+        int pelletCount = 1;
         float spreadAngle = 1f;
         currentAmmo--;
 
@@ -262,11 +261,32 @@ class Rifle : WeaponBase
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
-            // Mermiyi oluştur ve rastgele açıyla fırlat
-            GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            rb.AddForce(randomRotation * Vector3.up * 375f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
-            pw.RPC("DestroyOnBullet", RpcTarget.All, bullet);
+
+            // Ateş noktası ile aynı rotasyonda bir ray oluştur
+            Ray ray = new Ray(firePoint.position, randomRotation * Vector3.up);
+            RaycastHit hit;
+
+            // Raycast ile çarpışmayı kontrol et
+            if (Physics.Raycast(ray, out hit, 100f)) // 100f menzilini istediğin gibi ayarlayabilirsin
+            {
+                //Debug.Log(Physics.Raycast(ray, out hit, 100f));
+                //Debug.Log("Çarpma Noktası: " + hit.point); // Çarpma noktası
+                Debug.Log("Çarpılan Nesne: " + hit.collider.name); // Çarpılan nesnenin ismi
+
+                // Eğer çarpılan nesne bir oyuncuysa, hasar uygula
+                if (hit.collider.CompareTag("Playerr"))
+                {
+                    // Burada hasar hesaplamasını ve uygulamasını yap
+                    // Hedef oyuncunun health scriptine hasar gönderebilirsin
+                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+
+                }
+
+                // Mermi çarptıktan sonra görsel bir efekt oynatmak isteyebilirsin
+                GameObject tracers =PhotonNetwork.Instantiate(Path.Combine("bullet",bullet), firePoint.position, Quaternion.LookRotation(hit.normal));
+                tracers.GetComponent<Rigidbody>().AddForce(randomRotation * Vector3.up * 175f, ForceMode.Impulse);
+                
+            }
         }
     }
     [PunRPC]
@@ -358,7 +378,7 @@ class Shotgun : WeaponBase
         base.firePoint = firePoint;
         currentAmmo = maxAmmo;
     }
-
+     
     public override void Reload()
     {
         currentAmmo = maxAmmo;
