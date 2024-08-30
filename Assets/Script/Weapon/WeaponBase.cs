@@ -25,6 +25,7 @@ public abstract class WeaponBase
     public float reloadTime;
     public string bullet;
     public Transform firePoint;
+    public int weaponDamage;
 
 
     public abstract void Shoot();

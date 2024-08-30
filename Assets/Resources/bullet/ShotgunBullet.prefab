@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -7611325968607024816}
   - component: {fileID: 7072098980478566067}
   - component: {fileID: -6636690041168973437}
-  - component: {fileID: 8280064452444893635}
+  - component: {fileID: 2486761205799117278}
   m_Layer: 0
   m_Name: ShotgunBullet
   m_TagString: Untagged
@@ -108,10 +108,10 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
+  m_IsKinematic: 1
+  m_Interpolate: 2
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &-7611325968607024816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
+  m_SynchronizeAngularVelocity: 1
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
 --- !u!96 &7072098980478566067
@@ -266,7 +266,7 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
---- !u!114 &8280064452444893635
+--- !u!114 &2486761205799117278
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -278,4 +278,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c99ab77c9f7e8234f8106a6395c73652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletTpye: 3
+  bulletTpye: 0
