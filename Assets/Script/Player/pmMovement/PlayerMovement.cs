@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.Animations.Rigging;
 using Cinemachine;
+using Unity.VisualScripting;
 public enum MovementState
 {
     WALK,
@@ -178,7 +179,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //Karakterimizin ayaklari yere degiyor mu diye isin islemini kullaniyoruz.
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.4f + 0.2f, whatIsGround);
-
+        
         if (grounded)
         {
             PlayerRb.drag = groundDrag;

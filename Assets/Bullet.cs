@@ -14,14 +14,21 @@ public enum BulletTpye
 }
 public class Bullet : MonoBehaviour
 {
-
+    Rigidbody rb;
     private void OnEnable()
     {
+        rb = GetComponent<Rigidbody>();
         StartCoroutine(DestroyGameObject());
+    }
+    public void Update()
+    {
+
+        
     }
     IEnumerator DestroyGameObject()
     {
-        yield return new WaitForSeconds(0.2f);
+
+        yield return new WaitForSeconds(0.3f);
         Destroy(gameObject);
     }
 
