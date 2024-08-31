@@ -21,6 +21,8 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] TwoBoneIKConstraint leftHandRig;
 
     [Header("Weapon Info")]
+
+    [SerializeField] GameObject[] particleEffect;
     [SerializeField] ShootState state;
     [SerializeField] ParticleSystem muzzle;
     [SerializeField] Animator anim;
@@ -33,6 +35,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] float reloadTime;
     [SerializeField] string bullet;
     [SerializeField] Transform firePoint;
+    [SerializeField] Transform firePointnew;
     [SerializeField] Light weaponBarrel;
     CinemachineImpulseSource recoilShake;
     WeaponBase weapon;
@@ -49,22 +52,22 @@ public class Weapons : MonoBehaviour, IPunObservable
         
         if(type == WeaponType.PISTOL)
         {
-            Pistol pistol = new Pistol(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint);
+            Pistol pistol = new Pistol(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
             weapon =pistol;
         }
         else if(type == WeaponType.SMG) 
         {
-            Smg smg = new Smg(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint);
+            Smg smg = new Smg(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
             weapon = smg;
         }
         else if(type == WeaponType.RIFLE)
         {
-            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw);
+            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw, firePointnew,particleEffect);
             weapon = rifle;
         }
         else if(type == WeaponType.SHOTGUN)
         {
-            Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint);
+            Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
             weapon = shotgun;
         }
         SetLeftHandIK();
@@ -72,7 +75,11 @@ public class Weapons : MonoBehaviour, IPunObservable
     private void Update()
     {
         state = ShootState.IDLE;
+        if (pw.IsMine)
+        {
+            firePointnew.LookAt(AimState.Instance.aimPos.transform);
 
+        }
         if (pw.IsMine)
         {
             if(!notShooting)
@@ -169,6 +176,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                 if(weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                 {
                     state = ShootState.SHOOTING;
+                    AimState.Instance.yAxis.Value -= weapon.recoil;
                     notShooting = true;
                     weapon.Shoot();
                     yield return new WaitForSeconds(weapon.fireRate);
@@ -227,8 +235,9 @@ public class Weapons : MonoBehaviour, IPunObservable
 class Rifle : WeaponBase
 {
     PhotonView pw;
-    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine)
+    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine,Transform firePointnew, GameObject[] particleEffect)
     {
+        base.particleEffect = particleEffect;
         base.weaponName = weaponName;
         base.weaponType = WeaponType.RIFLE;
         base.maxAmmo = ammo;
@@ -240,6 +249,7 @@ class Rifle : WeaponBase
         base.firePoint = firePoint;
         base.currentAmmo = maxAmmo;
         base.weaponDamage = 20;
+        base.firePointnew = firePointnew;
         pw = pwMine;
 
     }
@@ -260,12 +270,12 @@ class Rifle : WeaponBase
             // Rastgele bir açı hesapla
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
-            Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+            Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
 
             // Ateş noktası ile aynı rotasyonda bir ray oluştur
-            Ray ray = new Ray(firePoint.position, randomRotation * Vector3.up);
+            Ray ray = new Ray(firePointnew.position, randomRotation * Vector3.forward);
             RaycastHit hit;
-
+            Debug.DrawLine(firePointnew.position, randomRotation * Vector3.forward);
             // Raycast ile çarpışmayı kontrol et
             if (Physics.Raycast(ray, out hit, 100f)) // 100f menzilini istediğin gibi ayarlayabilirsin
             {
@@ -279,13 +289,18 @@ class Rifle : WeaponBase
                     // Burada hasar hesaplamasını ve uygulamasını yap
                     // Hedef oyuncunun health scriptine hasar gönderebilirsin
                     hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                    GameObject particle = GameObject.Instantiate(particleEffect[0], hit.point, Quaternion.LookRotation(hit.normal));
+
+                    GameObject.Destroy(particle, 0.2f);
 
                 }
 
                 // Mermi çarptıktan sonra görsel bir efekt oynatmak isteyebilirsin
-                GameObject tracers =PhotonNetwork.Instantiate(Path.Combine("bullet",bullet), firePoint.position, Quaternion.LookRotation(hit.normal));
-                tracers.GetComponent<Rigidbody>().AddForce(randomRotation * Vector3.up * 175f, ForceMode.Impulse);
                 
+                GameObject tracers =PhotonNetwork.Instantiate(Path.Combine("bullet",bullet), firePoint.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 175f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
+
             }
         }
     }
@@ -299,7 +314,7 @@ class Rifle : WeaponBase
 }
 class Smg : WeaponBase
 {
-    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint)
+    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
     {
         base.weaponName = weaponName;
         base.weaponType = WeaponType.SMG;
@@ -310,6 +325,7 @@ class Smg : WeaponBase
         base.reloadTime = reloadTime;
         base.bullet = bullet;
         base.firePoint = firePoint;
+        base.firePointnew = firePointnew;
     }
 
     public override void Reload()
@@ -334,7 +350,7 @@ class Smg : WeaponBase
 }
 class Pistol : WeaponBase
 {
-    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint)
+    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
     {
         base.weaponName = weaponName;
         base.weaponType = WeaponType.PISTOL;
@@ -345,6 +361,7 @@ class Pistol : WeaponBase
         base.reloadTime = reloadTime;
         base.bullet = bullet;
         base.firePoint = firePoint;
+        base.firePointnew = firePointnew;
     }
 
     public override void Reload()
@@ -365,7 +382,7 @@ class Pistol : WeaponBase
 }
 class Shotgun : WeaponBase
 {
-    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint)
+    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
     {
         base.weaponName = weaponName;
         base.weaponType = WeaponType.SHOTGUN;
@@ -376,6 +393,7 @@ class Shotgun : WeaponBase
         base.reloadTime = reloadTime;
         base.bullet = bullet;
         base.firePoint = firePoint;
+        base.firePointnew = firePointnew;
         currentAmmo = maxAmmo;
     }
      

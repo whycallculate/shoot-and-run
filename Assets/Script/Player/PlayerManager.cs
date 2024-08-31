@@ -82,6 +82,7 @@ public class PlayerManager : MonoBehaviour
     public void TakeDamage(float damage)
     {
         pw.RPC("TakeDamageRPC", RpcTarget.All,damage);
+        TakeDamageMethod(damage);
     }
     [PunRPC]
     public void TakeDamageRPC(float damage )
@@ -90,9 +91,27 @@ public class PlayerManager : MonoBehaviour
         {
             return;
         }
+        StartCoroutine(HittingCoroutine());
         currentHP -= damage;
         Debug.Log(currentHP +PhotonNetwork.NickName);
+
+    }
+    public void TakeDamageMethod(float damage)
+    {
+        if (!pw.IsMine)
+        {
+            StartCoroutine(HittingCoroutine());
+            currentHP -= damage;
+            Debug.Log(currentHP + PhotonNetwork.NickName);
+        }
+
+    }
+
+    public IEnumerator HittingCoroutine()
+    {
         playerAim.anim.SetBool("Hitting", true);
+        yield return new WaitForSeconds(0.2f);
+        playerAim.anim.SetBool("Hitting", false);
 
     }
 }
