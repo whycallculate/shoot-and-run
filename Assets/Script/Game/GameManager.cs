@@ -34,8 +34,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
-        GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "newPlayer2"), spawnPosition, Quaternion.identity);
+        spawnPosition = new Vector3(Random.Range(-21, -100f), 0, transform.position.z);
+        GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
         SoundManager.Instance.StopBackgroundMusic();
     }
 

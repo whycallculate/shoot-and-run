@@ -5,6 +5,9 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.IO;
 using UnityEditor.Rendering;
+using UnityEditor;
+using UnityEngine.Animations.Rigging;
+using Cinemachine;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -36,18 +39,26 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] Data playerData;
     [SerializeField] AimState playerAim;
     [SerializeField] PlayerMovement playerMovement;
+    [SerializeField] GameObject player;
+    [SerializeField] Camera mainCamera;
     PhotonView pw;
     private void Awake()
     {
         pw = GetComponent<PhotonView>();
         if (pw.IsMine)
         {
-            SoundManager.playerSfx = gameObject.GetComponent<AudioSource>();
+
+            SoundManager.playerSfx = transform.GetChild(1).GetComponent<AudioSource>();
+
 
         }
         else if (!pw.IsMine)
         {
-            gameObject.GetComponent<AudioSource>().enabled = false;
+            mainCamera.enabled = false;
+            mainCamera.GetComponent<AudioListener>().enabled = false;
+            mainCamera.GetComponent<CinemachineBrain>().enabled = false;
+            gameObject.transform.GetChild(1).GetComponent<AudioSource>().enabled = false;
+
         }
 
 
@@ -57,6 +68,31 @@ public class PlayerManager : MonoBehaviour
         if (pw.IsMine)
         {
             SwitchWeapon();
+        }
+    }
+
+
+    public IEnumerator IsDeath()
+    {
+        if(currentHP <= 0)
+        {
+
+            //playerAim.lHandIK.weight = 0;
+            //playerAim.bodyAim.weight = 0;
+            //playerAim.headAim.weight = 0;
+            //playerAim.rHandAim.weight = 0;
+            //playerAim.rHandIK.weight = 0;
+            //playerAim.rig.Build();
+            //weaponList[0].gameObject.SetActive(false);
+            playerMovement.animator.SetBool("Death", true);
+            //player.SetActive(false);
+            //playerAim.enabled = false;
+
+
+            yield return new WaitForSeconds(10f);
+            PhotonNetwork.Destroy(gameObject);
+            //PhotonNetwork.Destroy(playerAim.aimPos);
+
         }
     }
     public void SwitchWeapon()
@@ -83,6 +119,8 @@ public class PlayerManager : MonoBehaviour
     {
         pw.RPC("TakeDamageRPC", RpcTarget.All,damage);
         TakeDamageMethod(damage);
+        StartCoroutine(IsDeath());
+
     }
     [PunRPC]
     public void TakeDamageRPC(float damage )
@@ -91,10 +129,12 @@ public class PlayerManager : MonoBehaviour
         {
             return;
         }
+
         StartCoroutine(HittingCoroutine());
         currentHP -= damage;
-        Debug.Log(currentHP +PhotonNetwork.NickName);
+        StartCoroutine(IsDeath());
 
+        Debug.Log(currentHP +PhotonNetwork.NickName);
     }
     public void TakeDamageMethod(float damage)
     {
@@ -103,6 +143,7 @@ public class PlayerManager : MonoBehaviour
             StartCoroutine(HittingCoroutine());
             currentHP -= damage;
             Debug.Log(currentHP + PhotonNetwork.NickName);
+
         }
 
     }

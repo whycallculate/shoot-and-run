@@ -8,6 +8,7 @@ using System.IO;
 using Unity.VisualScripting;
 using System.Data;
 using UnityEngine.Animations;
+using System;
 
 
 public class AimState : MonoBehaviour 
@@ -30,6 +31,7 @@ public class AimState : MonoBehaviour
     [HideInInspector] Transform camFollowPos;
     [HideInInspector] public Animator anim;
     [HideInInspector] public GameObject playerCamera;
+
     CinemachineVirtualCamera vCam;
 
     [Header("ZoomInOutAim")]
@@ -39,23 +41,25 @@ public class AimState : MonoBehaviour
     public float fovSmoothSpeed = 10;
 
     [Header("Aim")]
-    public GameObject aimPos;  
-    [SerializeField] float aimSmoothSpeed = 20;
-    [SerializeField] LayerMask aimMask;
     public PhotonView pw;
+    public bool isAiming;
 
     [Header("Rigging")]
-    public MultiAimConstraint bodyAim;
-    public MultiAimConstraint headAim;
-    public MultiAimConstraint rHandAim;
-    public TwoBoneIKConstraint lHandIK;
-    public RigBuilder rig;
+    [SerializeField] public Rig aimLayer;
+    [SerializeField] public GameObject aimPos;
+    public float aimDuration = 0.3f;
+    [SerializeField] MultiAimConstraint bodyAim;
+    [SerializeField] MultiAimConstraint bodyAim2;
+    [SerializeField] MultiAimConstraint headAim;
+    [SerializeField] MultiAimConstraint weaponAim;
+    [SerializeField] RigBuilder rig;
+
+
 
 
     private void Awake()
     {
         pw = this.GetComponent<PhotonView>();
-        rig = this.GetComponent<RigBuilder>();
         anim = this.GetComponent<Animator>();
 
     }
@@ -65,28 +69,14 @@ public class AimState : MonoBehaviour
 
         if (pw.IsMine)
         {
-            //Animation rigging target objesini burada uretiyoruz ve ayni zamanda photonview alarak Diger oyunculara bu objenin PhotomViewID gonderiyoruz ayni zaman da kendiminiki de yolluyoruz.
-            Vector3 tempVector = new Vector3(1.0f, 1.0f, 1.0f);
-            GameObject instantiatedAimPos = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "AimPos"), tempVector, Quaternion.identity);
-
-            PhotonView aimPosPhotonView = instantiatedAimPos.GetComponent<PhotonView>();
-
-            if (aimPosPhotonView.IsMine)
-            {
-
-                //Kendi targetimizi ayarladigimiz kisim.
-                SetValueRigging(instantiatedAimPos);
-                //Olusturdugumuz olan objenin photon view view id diger oyunculara gonderiyoruz.
-                pw.RPC("SetOtherPlayerAimPos", RpcTarget.OthersBuffered, aimPosPhotonView.ViewID);
-            }
-
-            // Diğer kamera başlangıç ayarları
+            SetValueRigging(aimPos);
             SetCameraStartMethod();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
         else
         {
+            SetValueRigging(aimPos);
             playerCamera = transform.GetChild(0).gameObject;
             playerCamera.SetActive(false);
         }
@@ -94,41 +84,17 @@ public class AimState : MonoBehaviour
     }
 
 
-    void Update()
+
+    private void Update()
     {
-        if (pw.IsMine) 
-        {
-            PosUpdate();
-
-        }
-
-
-
-    }
-
-    private void LateUpdate()
-    {
-
-        //Animation rigging islemlerinin Diger oyunculara gonderme ve alma islemleri.
         if (pw.IsMine)
         {
-            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
-            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
-            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
             CamFollowPos();
             GetAim();
-            ScreenCentre();
-
+            PosUpdate();
         }
-        else if(!pw.IsMine)
-        {
-            bodyAim.data.sourceObjects.SetTransform(0, aimPos.transform);
-            headAim.data.sourceObjects.SetTransform(0, aimPos.transform);
-            rHandAim.data.sourceObjects.SetTransform(0, aimPos.transform);
-        }
-
     }
-    
+
     public void UpdateMultiAimConstraint(Transform newTargetBone, MultiAimConstraint multiAimConstraint)
     {
         if (multiAimConstraint != null)
@@ -150,23 +116,10 @@ public class AimState : MonoBehaviour
     public void SetValueRigging(GameObject aimPos)
     {
         //Target objesini burada initilate ediyoruz.
-        this.aimPos = aimPos;
         UpdateAimConstraint(bodyAim, aimPos.transform);
         UpdateAimConstraint(headAim, aimPos.transform);
-        UpdateAimConstraint(rHandAim, aimPos.transform);
-
-
-
-    }
-    [PunRPC]
-    void SetOtherPlayerAimPos(int aimPosViewID)
-    {
-        //ufak bir ali cengiz oyunu ile Burada Photonviewleri karsilastiriyoruz. ve gonderdgimiz photonview objesinin gameobjectini diger oyuncular icin set ediyoruz.
-        PhotonView aimPosPhotonView = PhotonView.Find(aimPosViewID);
-        if (aimPosPhotonView != null && !aimPosPhotonView.IsMine)
-        {
-            SetValueRigging(aimPosPhotonView.gameObject);
-        }
+        UpdateAimConstraint(bodyAim2, aimPos.transform);
+        UpdateAimConstraint(weaponAim, aimPos.transform);
     }
 
     private void UpdateAimConstraint(MultiAimConstraint aim, Transform target)
@@ -192,24 +145,6 @@ public class AimState : MonoBehaviour
         vCam.Follow = camFollowPos;
         vCam.LookAt = camFollowPos;
     }
-    public void ScreenCentre()
-    {
-        //Aim objesini ekranin ortasina koyuyoruz.
-        Vector2 screenCentre = new Vector2(Screen.width / 2, Screen.height / 2);
-        Ray ray = Camera.main.ScreenPointToRay(screenCentre);
-    
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, aimMask))
-        {
-            if (pw.IsMine)
-            {
-                aimPos.transform.position = Vector3.Lerp(aimPos.transform.position, hit.point, aimSmoothSpeed * Time.deltaTime);
-
-            }
-
-        }
-
-
-    }
 
     public void PosUpdate()
     {
@@ -232,12 +167,18 @@ public class AimState : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Mouse1))
             {
+                isAiming = true;
                 anim.SetBool("Aiming", true);
+                pw.RPC("WeaponPoseMethod", RpcTarget.Others, true);
+                aimLayer.weight += Time.deltaTime / aimDuration;
                 currentFov = adsFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
             }
-            else if (Input.GetKeyUp(KeyCode.Mouse1))
+            else
             {
+                isAiming = false;
+                aimLayer.weight -= Time.deltaTime / aimDuration;
+                pw.RPC("WeaponPoseMethod", RpcTarget.Others, false);
                 anim.SetBool("Aiming", false);
                 currentFov = hipFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
@@ -245,6 +186,32 @@ public class AimState : MonoBehaviour
             vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, hipFov, fovSmoothSpeed * Time.deltaTime);
         }
     }
+    [PunRPC]
+    public void WeaponPoseMethod(bool openOrClose )
+    {
+        if(!pw.IsMine)
+        {
+            while (openOrClose)
+            {
+                aimLayer.weight += Time.deltaTime / aimDuration;
+                if (aimLayer.weight >= 1)
+                {
+                    break;
+                }
+            }
+            while (!openOrClose)
+            {
+                aimLayer.weight -= Time.deltaTime / aimDuration;
+                if (aimLayer.weight <= 0.1)
+                {
+                    break;
+                }
+            }
+
+
+        }
+    }
+
     
 }
 

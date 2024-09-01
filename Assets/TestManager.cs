@@ -28,10 +28,10 @@ public class TestManager : MonoBehaviourPunCallbacks
 
         if (Input.GetKeyDown(KeyCode.C))
         {
-            AimState.Instance.rig.Clear();
-            AimState.Instance.rig.Build();
-            AimState.Instance.anim.Rebind();
-            AimState.Instance.anim.Update(0f);
+           //AimState.Instance.rig.Clear();
+           //AimState.Instance.rig.Build();
+           //AimState.Instance.anim.Rebind();
+           //AimState.Instance.anim.Update(0f);
 
 
         }

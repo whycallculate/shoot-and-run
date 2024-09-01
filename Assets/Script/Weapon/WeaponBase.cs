@@ -26,6 +26,7 @@ public abstract class WeaponBase
     public string bullet;
     public Transform firePoint;
     public Transform firePointnew;
+    public Transform raycastDestination;
     public int weaponDamage;
 
 

@@ -6,6 +6,7 @@ using System.IO;
 using Cinemachine;
 using UnityEngine.Animations.Rigging;
 using System.Threading;
+using UnityEngineInternal;
 public enum ShootState
 {
     IDLE,
@@ -36,6 +37,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] string bullet;
     [SerializeField] Transform firePoint;
     [SerializeField] Transform firePointnew;
+    [SerializeField] Transform raycastDestination;
     [SerializeField] Light weaponBarrel;
     CinemachineImpulseSource recoilShake;
     WeaponBase weapon;
@@ -62,7 +64,7 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
         else if(type == WeaponType.RIFLE)
         {
-            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw, firePointnew,particleEffect);
+            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw, firePointnew,particleEffect, raycastDestination);
             weapon = rifle;
         }
         else if(type == WeaponType.SHOTGUN)
@@ -70,7 +72,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
             weapon = shotgun;
         }
-        SetLeftHandIK();
+        //SetLeftHandIK();
     }
     private void Update()
     {
@@ -84,7 +86,13 @@ public class Weapons : MonoBehaviour, IPunObservable
         {
             if(!notShooting)
             {
-                StartCoroutine(ShootOnGame());
+                if (AimState.Instance.isAiming)
+                {
+                    StartCoroutine(ShootOnGame());
+                }
+                else
+                    return;
+                
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -117,8 +125,6 @@ public class Weapons : MonoBehaviour, IPunObservable
                 pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 0);
 
             }
-
-
             weaponBarrel.enabled = true;
             RecoilShake();
             muzzle.Play();
@@ -154,6 +160,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             {
                 if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                 {
+
                     state = ShootState.SHOOTING;
                     notShooting = true;
                     weapon.Shoot();
@@ -175,6 +182,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             {
                 if(weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                 {
+
                     state = ShootState.SHOOTING;
                     AimState.Instance.yAxis.Value -= weapon.recoil;
                     notShooting = true;
@@ -205,7 +213,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     {
         
         leftHandRig.data.target = leftHandTarget;
-        AimState.Instance.rig.Build();
+        //AimState.Instance.rig.Build();
     }
     [PunRPC]
     public void GetSFXVolumeRPC(int sound)
@@ -235,7 +243,7 @@ public class Weapons : MonoBehaviour, IPunObservable
 class Rifle : WeaponBase
 {
     PhotonView pw;
-    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine,Transform firePointnew, GameObject[] particleEffect)
+    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine,Transform firePointnew, GameObject[] particleEffect,Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -250,6 +258,7 @@ class Rifle : WeaponBase
         base.currentAmmo = maxAmmo;
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
+        base.raycastDestination = raycastDestination;
         pw = pwMine;
 
     }
@@ -273,12 +282,16 @@ class Rifle : WeaponBase
             Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
 
             // Ateş noktası ile aynı rotasyonda bir ray oluştur
-            Ray ray = new Ray(firePointnew.position, randomRotation * Vector3.forward);
+            Ray ray = new Ray();
             RaycastHit hit;
-            Debug.DrawLine(firePointnew.position, randomRotation * Vector3.forward);
+
+            ray.origin = firePointnew.position;
+            ray.direction = raycastDestination.position - firePointnew.position;
             // Raycast ile çarpışmayı kontrol et
-            if (Physics.Raycast(ray, out hit, 100f)) // 100f menzilini istediğin gibi ayarlayabilirsin
+            if (Physics.Raycast(ray, out hit)) // 100f menzilini istediğin gibi ayarlayabilirsin
             {
+                Debug.DrawLine(ray.origin,hit.point,Color.red,4f);
+
                 //Debug.Log(Physics.Raycast(ray, out hit, 100f));
                 //Debug.Log("Çarpma Noktası: " + hit.point); // Çarpma noktası
                 Debug.Log("Çarpılan Nesne: " + hit.collider.name); // Çarpılan nesnenin ismi
@@ -291,7 +304,7 @@ class Rifle : WeaponBase
                     hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
                     GameObject particle = GameObject.Instantiate(particleEffect[0], hit.point, Quaternion.LookRotation(hit.normal));
 
-                    GameObject.Destroy(particle, 0.2f);
+                    GameObject.Destroy(particle, 0.1f);
 
                 }
 
