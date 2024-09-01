@@ -14,7 +14,8 @@ public enum WeaponType
 
 public abstract class WeaponBase
 {
-    public GameObject[] particleEffect;
+    public ParticleSystem[] particleEffect;
+    public TrailRenderer trailRenderer;
     public string weaponName ;
     public WeaponType weaponType ;
     public int currentAmmo;
@@ -24,7 +25,6 @@ public abstract class WeaponBase
     public bool isAutomatic ;
     public float reloadTime;
     public string bullet;
-    public Transform firePoint;
     public Transform firePointnew;
     public Transform raycastDestination;
     public int weaponDamage;

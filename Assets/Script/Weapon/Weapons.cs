@@ -19,14 +19,14 @@ public class Weapons : MonoBehaviour, IPunObservable
 {
     [Header("IK Left Hand")]
     [SerializeField] Transform leftHandTarget;
+    [SerializeField] Transform rightHandTarget;
     [SerializeField] TwoBoneIKConstraint leftHandRig;
+    [SerializeField] TwoBoneIKConstraint rightHandRig;
 
     [Header("Weapon Info")]
-
-    [SerializeField] GameObject[] particleEffect;
+    [SerializeField] ParticleSystem[] particleEffect;
     [SerializeField] ShootState state;
-    [SerializeField] ParticleSystem muzzle;
-    [SerializeField] Animator anim;
+    [SerializeField] public Animator anim;
     [SerializeField] WeaponType type;
     [SerializeField] string weaponName;
     [SerializeField] int ammo;
@@ -35,16 +35,15 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] bool isAutomatic;
     [SerializeField] float reloadTime;
     [SerializeField] string bullet;
-    [SerializeField] Transform firePoint;
     [SerializeField] Transform firePointnew;
-    [SerializeField] Transform raycastDestination;
+    [SerializeField] public Transform raycastDestination;
     [SerializeField] Light weaponBarrel;
     CinemachineImpulseSource recoilShake;
     WeaponBase weapon;
     PhotonView pw;
     bool notShooting = false;
 
-    private void Awake()
+    private void Start()
     {
         pw =GetComponent<PhotonView>();
         if (pw.IsMine)
@@ -54,25 +53,25 @@ public class Weapons : MonoBehaviour, IPunObservable
         
         if(type == WeaponType.PISTOL)
         {
-            Pistol pistol = new Pistol(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
+            Pistol pistol = new Pistol(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon =pistol;
         }
         else if(type == WeaponType.SMG) 
         {
-            Smg smg = new Smg(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
+            Smg smg = new Smg(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = smg;
         }
         else if(type == WeaponType.RIFLE)
         {
-            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint,pw, firePointnew,particleEffect, raycastDestination);
+            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet,firePointnew, particleEffect, raycastDestination);
             weapon = rifle;
         }
         else if(type == WeaponType.SHOTGUN)
         {
-            Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePoint, firePointnew);
+            Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = shotgun;
         }
-        //SetLeftHandIK();
+        
     }
     private void Update()
     {
@@ -111,7 +110,6 @@ public class Weapons : MonoBehaviour, IPunObservable
             anim.SetBool("Reloading", false);
             anim.SetBool("Shooting", false);
             weaponBarrel.enabled = false ;
-            muzzle.Stop();
 
         }
         if(state == ShootState.SHOOTING)
@@ -127,7 +125,6 @@ public class Weapons : MonoBehaviour, IPunObservable
             }
             weaponBarrel.enabled = true;
             RecoilShake();
-            muzzle.Play();
             anim.SetBool("Reloading", false);
             anim.SetBool("Shooting", true);
             
@@ -136,7 +133,6 @@ public class Weapons : MonoBehaviour, IPunObservable
         {
             anim.SetBool("Reloading", true);
             weaponBarrel.enabled = false;
-            muzzle.Stop();
 
         }
     }
@@ -209,12 +205,7 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
 
     }
-    public void SetLeftHandIK()
-    {
-        
-        leftHandRig.data.target = leftHandTarget;
-        //AimState.Instance.rig.Build();
-    }
+
     [PunRPC]
     public void GetSFXVolumeRPC(int sound)
     {
@@ -242,8 +233,7 @@ public class Weapons : MonoBehaviour, IPunObservable
 
 class Rifle : WeaponBase
 {
-    PhotonView pw;
-    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePoint,PhotonView pwMine,Transform firePointnew, GameObject[] particleEffect,Transform raycastDestination)
+    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePointnew, ParticleSystem[] particleEffect,Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -254,12 +244,10 @@ class Rifle : WeaponBase
         base.isAutomatic = isAutomatic;
         base.reloadTime = reloadTime;
         base.bullet = bullet;
-        base.firePoint = firePoint;
         base.currentAmmo = maxAmmo;
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
-        pw = pwMine;
 
     }
 
@@ -276,59 +264,67 @@ class Rifle : WeaponBase
 
         for (int i = 0; i < pelletCount; i++)
         {
-            // Rastgele bir açı hesapla
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
 
-            // Ateş noktası ile aynı rotasyonda bir ray oluştur
             Ray ray = new Ray();
             RaycastHit hit;
 
             ray.origin = firePointnew.position;
             ray.direction = raycastDestination.position - firePointnew.position;
-            // Raycast ile çarpışmayı kontrol et
-            if (Physics.Raycast(ray, out hit)) // 100f menzilini istediğin gibi ayarlayabilirsin
+            if (Physics.Raycast(ray, out hit))
             {
+
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
+
+                particleEffect[0].Emit(1);
+                particleEffect[1].Emit(1);
                 Debug.DrawLine(ray.origin,hit.point,Color.red,4f);
 
-                //Debug.Log(Physics.Raycast(ray, out hit, 100f));
-                //Debug.Log("Çarpma Noktası: " + hit.point); // Çarpma noktası
-                Debug.Log("Çarpılan Nesne: " + hit.collider.name); // Çarpılan nesnenin ismi
+                particleEffect[2].transform.position = hit.point;
+                particleEffect[2].transform.forward = hit.normal;
+                particleEffect[2].Emit(1);
 
-                // Eğer çarpılan nesne bir oyuncuysa, hasar uygula
+                particleEffect[3].transform.position = hit.point;
+                particleEffect[3].transform.forward = hit.normal;
+                particleEffect[3].Emit(1);
+
+                particleEffect[4].transform.position = hit.point;
+                particleEffect[4].transform.forward = hit.normal;
+                particleEffect[4].Emit(1);
+
+                particleEffect[5].transform.position = hit.point;
+                particleEffect[5].transform.forward = hit.normal;
+                particleEffect[5].Emit(1);
+
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    // Burada hasar hesaplamasını ve uygulamasını yap
-                    // Hedef oyuncunun health scriptine hasar gönderebilirsin
                     hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    GameObject particle = GameObject.Instantiate(particleEffect[0], hit.point, Quaternion.LookRotation(hit.normal));
-
-                    GameObject.Destroy(particle, 0.1f);
+                    particleEffect[6].Emit(1);
+                    particleEffect[7].Emit(1);
+                    particleEffect[8].Emit(1);
+                }
+                
+                {
 
                 }
 
-                // Mermi çarptıktan sonra görsel bir efekt oynatmak isteyebilirsin
-                
-                GameObject tracers =PhotonNetwork.Instantiate(Path.Combine("bullet",bullet), firePoint.position, Quaternion.LookRotation(hit.normal));
-                Rigidbody rb = tracers.GetComponent<Rigidbody>();
-                rb.AddForce(randomRotation * Vector3.forward * 175f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
+
 
             }
         }
     }
-    [PunRPC]
-    public void DestroyOnBullet(GameObject bullet)
-    {
-        Thread.Sleep(200);
-        GameObject.Destroy(bullet);
-    }
+
 
 }
 class Smg : WeaponBase
 {
-    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
+    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
+        base.particleEffect = particleEffect;
         base.weaponName = weaponName;
         base.weaponType = WeaponType.SMG;
         base.maxAmmo = ammo;
@@ -337,8 +333,10 @@ class Smg : WeaponBase
         base.isAutomatic = isAutomatic;
         base.reloadTime = reloadTime;
         base.bullet = bullet;
-        base.firePoint = firePoint;
+        base.currentAmmo = maxAmmo;
+        base.weaponDamage = 20;
         base.firePointnew = firePointnew;
+        base.raycastDestination = raycastDestination;
     }
 
     public override void Reload()
@@ -348,10 +346,64 @@ class Smg : WeaponBase
 
     public override void Shoot()
     {
-        GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, firePoint.rotation);
+        int pelletCount = 1;
+        float spreadAngle = 1f;
+        currentAmmo--;
 
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        rb.AddForce(firePoint.forward * fireRate, ForceMode.Impulse);
+        for (int i = 0; i < pelletCount; i++)
+        {
+            float randomX = Random.Range(-spreadAngle, spreadAngle);
+            float randomY = Random.Range(-spreadAngle, spreadAngle);
+            Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+
+            Ray ray = new Ray();
+            RaycastHit hit;
+
+            ray.origin = firePointnew.position;
+            ray.direction = raycastDestination.position - firePointnew.position;
+            if (Physics.Raycast(ray, out hit))
+            {
+
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
+
+                particleEffect[0].Emit(1);
+                particleEffect[1].Emit(1);
+                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
+
+                particleEffect[2].transform.position = hit.point;
+                particleEffect[2].transform.forward = hit.normal;
+                particleEffect[2].Emit(1);
+
+                particleEffect[3].transform.position = hit.point;
+                particleEffect[3].transform.forward = hit.normal;
+                particleEffect[3].Emit(1);
+
+                particleEffect[4].transform.position = hit.point;
+                particleEffect[4].transform.forward = hit.normal;
+                particleEffect[4].Emit(1);
+
+                particleEffect[5].transform.position = hit.point;
+                particleEffect[5].transform.forward = hit.normal;
+                particleEffect[5].Emit(1);
+
+                if (hit.collider.CompareTag("Playerr"))
+                {
+                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                    particleEffect[6].Emit(1);
+                    particleEffect[7].Emit(1);
+                    particleEffect[8].Emit(1);
+                }
+
+                {
+
+                }
+
+
+
+            }
+        }
 
     }
     public IEnumerator DestroySelfBullet(GameObject bullet)
@@ -363,8 +415,9 @@ class Smg : WeaponBase
 }
 class Pistol : WeaponBase
 {
-    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
+    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
+        base.particleEffect = particleEffect;
         base.weaponName = weaponName;
         base.weaponType = WeaponType.PISTOL;
         base.maxAmmo = ammo;
@@ -373,8 +426,10 @@ class Pistol : WeaponBase
         base.isAutomatic = isAutomatic;
         base.reloadTime = reloadTime;
         base.bullet = bullet;
-        base.firePoint = firePoint;
+        base.currentAmmo = maxAmmo;
+        base.weaponDamage = 20;
         base.firePointnew = firePointnew;
+        base.raycastDestination = raycastDestination;
     }
 
     public override void Reload()
@@ -384,7 +439,64 @@ class Pistol : WeaponBase
 
     public override void Shoot()
     {
-        Debug.Log("Shoot Shotgun");
+        int pelletCount = 1;
+        float spreadAngle = 1f;
+        currentAmmo--;
+
+        for (int i = 0; i < pelletCount; i++)
+        {
+            float randomX = Random.Range(-spreadAngle, spreadAngle);
+            float randomY = Random.Range(-spreadAngle, spreadAngle);
+            Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+
+            Ray ray = new Ray();
+            RaycastHit hit;
+
+            ray.origin = firePointnew.position;
+            ray.direction = raycastDestination.position - firePointnew.position;
+            if (Physics.Raycast(ray, out hit))
+            {
+
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
+
+                particleEffect[0].Emit(1);
+                particleEffect[1].Emit(1);
+                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
+
+                particleEffect[2].transform.position = hit.point;
+                particleEffect[2].transform.forward = hit.normal;
+                particleEffect[2].Emit(1);
+
+                particleEffect[3].transform.position = hit.point;
+                particleEffect[3].transform.forward = hit.normal;
+                particleEffect[3].Emit(1);
+
+                particleEffect[4].transform.position = hit.point;
+                particleEffect[4].transform.forward = hit.normal;
+                particleEffect[4].Emit(1);
+
+                particleEffect[5].transform.position = hit.point;
+                particleEffect[5].transform.forward = hit.normal;
+                particleEffect[5].Emit(1);
+
+                if (hit.collider.CompareTag("Playerr"))
+                {
+                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                    particleEffect[6].Emit(1);
+                    particleEffect[7].Emit(1);
+                    particleEffect[8].Emit(1);
+                }
+
+                {
+
+                }
+
+
+
+            }
+        }
     }
     public IEnumerator DestroySelfBullet(GameObject bullet)
     {
@@ -395,8 +507,9 @@ class Pistol : WeaponBase
 }
 class Shotgun : WeaponBase
 {
-    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePoint, Transform firePointnew)
+    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet,  Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
+        base.particleEffect = particleEffect;
         base.weaponName = weaponName;
         base.weaponType = WeaponType.SHOTGUN;
         base.maxAmmo = ammo;
@@ -405,9 +518,10 @@ class Shotgun : WeaponBase
         base.isAutomatic = isAutomatic;
         base.reloadTime = reloadTime;
         base.bullet = bullet;
-        base.firePoint = firePoint;
+        base.currentAmmo = maxAmmo;
+        base.weaponDamage = 20;
         base.firePointnew = firePointnew;
-        currentAmmo = maxAmmo;
+        base.raycastDestination = raycastDestination;
     }
      
     public override void Reload()
@@ -417,22 +531,63 @@ class Shotgun : WeaponBase
 
     public override void Shoot()
     {
-        int pelletCount = 7; // Ateşlenecek mermi sayısı
-        float spreadAngle = 2f; // Mermilerin yayılma açısı
+        int pelletCount = 1;
+        float spreadAngle = 1f;
         currentAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
         {
-            // Rastgele bir açı hesapla
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
-            Quaternion randomRotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
-            
-            // Mermiyi oluştur ve rastgele açıyla fırlat
-            GameObject bullet = PhotonNetwork.Instantiate(Path.Combine("bullet", base.bullet), firePoint.position, randomRotation);
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            rb.AddForce(randomRotation * Vector3.up * 175f, ForceMode.Impulse); // Mermiyi ileri doğru fırlat
-            DestroySelfBullet(bullet);
+            Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+
+            Ray ray = new Ray();
+            RaycastHit hit;
+
+            ray.origin = firePointnew.position;
+            ray.direction = raycastDestination.position - firePointnew.position;
+            if (Physics.Raycast(ray, out hit))
+            {
+
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
+
+                particleEffect[0].Emit(1);
+                particleEffect[1].Emit(1);
+                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
+
+                particleEffect[2].transform.position = hit.point;
+                particleEffect[2].transform.forward = hit.normal;
+                particleEffect[2].Emit(1);
+
+                particleEffect[3].transform.position = hit.point;
+                particleEffect[3].transform.forward = hit.normal;
+                particleEffect[3].Emit(1);
+
+                particleEffect[4].transform.position = hit.point;
+                particleEffect[4].transform.forward = hit.normal;
+                particleEffect[4].Emit(1);
+
+                particleEffect[5].transform.position = hit.point;
+                particleEffect[5].transform.forward = hit.normal;
+                particleEffect[5].Emit(1);
+
+                if (hit.collider.CompareTag("Playerr"))
+                {
+                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                    particleEffect[6].Emit(1);
+                    particleEffect[7].Emit(1);
+                    particleEffect[8].Emit(1);
+                }
+
+                {
+
+                }
+
+
+
+            }
         }
     }
     public IEnumerator DestroySelfBullet(GameObject bullet)

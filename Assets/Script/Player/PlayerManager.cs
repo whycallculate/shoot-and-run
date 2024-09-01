@@ -67,7 +67,6 @@ public class PlayerManager : MonoBehaviour
     {
         if (pw.IsMine)
         {
-            SwitchWeapon();
         }
     }
 
@@ -95,25 +94,7 @@ public class PlayerManager : MonoBehaviour
 
         }
     }
-    public void SwitchWeapon()
-    {
-        nextWeapon = currentWeapon++;
 
-        if (nextWeapon < weaponList.Length - 1)
-        {
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                weaponList[currentWeapon].gameObject.SetActive(false);
-                weaponList[nextWeapon].gameObject.SetActive(true);
-            }
-        }
-        else
-        {
-            nextWeapon = 0;
-        }
-
-
-    }
 
     public void TakeDamage(float damage)
     {
