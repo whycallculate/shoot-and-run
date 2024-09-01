@@ -170,14 +170,14 @@ public class AimState : MonoBehaviour
                 isAiming = true;
                 anim.SetBool("Aiming", true);
                 pw.RPC("WeaponPoseMethod", RpcTarget.Others, true);
-                aimLayer.weight += Time.deltaTime / aimDuration;
+                aimLayer.weight = 1f;
                 currentFov = adsFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
             }
             else
             {
-                isAiming = false;
-                aimLayer.weight -= Time.deltaTime / aimDuration;
+                isAiming = true ;
+                aimLayer.weight = 1f;
                 pw.RPC("WeaponPoseMethod", RpcTarget.Others, false);
                 anim.SetBool("Aiming", false);
                 currentFov = hipFov;
