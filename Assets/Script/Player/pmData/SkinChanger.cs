@@ -72,10 +72,10 @@ public class SkinChanger : MonoBehaviour, IPunObservable
             playerModelObject[0].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
             playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
 
-            AimState.Instance.rig.Clear();
-            AimState.Instance.rig.Build();
-            AimState.Instance.anim.Rebind();
-            AimState.Instance.anim.Update(0f);
+            //AimState.Instance.rig.Clear();
+            //AimState.Instance.rig.Build();
+            //AimState.Instance.anim.Rebind();
+            //AimState.Instance.anim.Update(0f);
         }
 
     }
@@ -101,10 +101,10 @@ public class SkinChanger : MonoBehaviour, IPunObservable
             playerModelObject[0].GetComponent<ModelGetData>().Head.gameObject.SetActive(false);
             playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
 
-            AimState.Instance.rig.Clear();
-            AimState.Instance.rig.Build();
-            AimState.Instance.anim.Rebind();
-            AimState.Instance.anim.Update(0f);
+            //AimState.Instance.rig.Clear();
+            //AimState.Instance.rig.Build();
+            //AimState.Instance.anim.Rebind();
+            //AimState.Instance.anim.Update(0f);
         }
     }
 
