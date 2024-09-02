@@ -8,7 +8,8 @@ public enum WeaponType
     RIFLE,
     SMG,
     SHOTGUN,
-    PISTOL
+    PISTOL,
+    SNIPER
 
 }
 

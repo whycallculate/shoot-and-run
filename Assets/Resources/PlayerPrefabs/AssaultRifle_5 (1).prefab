@@ -14664,7 +14664,6 @@ MonoBehaviour:
   - {fileID: 3521125904552416424}
   - {fileID: 840153427437206738}
   state: 0
-  muzzle: {fileID: 0}
   anim: {fileID: 0}
   type: 1
   weaponName: AssaultRifle_5 (1)
@@ -14674,7 +14673,6 @@ MonoBehaviour:
   isAutomatic: 1
   reloadTime: 3
   bullet: RifleBullet
-  firePoint: {fileID: 7773225412209218243}
   firePointnew: {fileID: 7373518491695211652}
   raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 4280346054267680471}
