@@ -17,12 +17,6 @@ public enum ShootState
 //TEST ASAMASINDA BAZI MERMILER DESTROYLANMIYOR KONTROL EDILECEK..!!!
 public class Weapons : MonoBehaviour, IPunObservable
 {
-    [Header("IK Left Hand")]
-    [SerializeField] Transform leftHandTarget;
-    [SerializeField] Transform rightHandTarget;
-    [SerializeField] TwoBoneIKConstraint leftHandRig;
-    [SerializeField] TwoBoneIKConstraint rightHandRig;
-
     [Header("Weapon Info")]
     [SerializeField] ParticleSystem[] particleEffect;
     [SerializeField] ShootState state;
@@ -38,6 +32,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] Transform firePointnew;
     [SerializeField] public Transform raycastDestination;
     [SerializeField] Light weaponBarrel;
+    [SerializeField] public AnimationClip weaponAnimation;
     CinemachineImpulseSource recoilShake;
     WeaponBase weapon;
     PhotonView pw;
@@ -71,6 +66,11 @@ public class Weapons : MonoBehaviour, IPunObservable
             Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = shotgun;
         }
+        else if(type == WeaponType.SNIPER)
+        {
+            Sniper sniper = new Sniper(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
+            weapon = sniper;
+        }
         
     }
     private void Update()
@@ -85,13 +85,8 @@ public class Weapons : MonoBehaviour, IPunObservable
         {
             if(!notShooting)
             {
-                if (AimState.Instance.isAiming)
-                {
-                    StartCoroutine(ShootOnGame());
-                }
-                else
-                    return;
-                
+                StartCoroutine(ShootOnGame());
+
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -121,6 +116,21 @@ public class Weapons : MonoBehaviour, IPunObservable
             else if(weapon.weaponType == WeaponType.RIFLE)
             {
                 pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 0);
+
+            }
+            else if(weapon.weaponType == WeaponType.SMG)
+            {
+                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 4);
+
+            }
+            else if(weapon.weaponType == WeaponType.PISTOL)
+            {
+                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 1);
+
+            }
+            else if(weapon.weaponType == WeaponType.SNIPER)
+            {
+                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 2);
 
             }
             weaponBarrel.enabled = true;
@@ -233,7 +243,7 @@ public class Weapons : MonoBehaviour, IPunObservable
 
 class Rifle : WeaponBase
 {
-    public Rifle(string weaponName,int ammo,float firerate,float recoil,bool isAutomatic,float reloadTime, string bullet,Transform firePointnew, ParticleSystem[] particleEffect,Transform raycastDestination)
+    public Rifle(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -282,7 +292,7 @@ class Rifle : WeaponBase
 
                 particleEffect[0].Emit(1);
                 particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin,hit.point,Color.red,4f);
+                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
 
                 particleEffect[2].transform.position = hit.point;
                 particleEffect[2].transform.forward = hit.normal;
@@ -307,7 +317,7 @@ class Rifle : WeaponBase
                     particleEffect[7].Emit(1);
                     particleEffect[8].Emit(1);
                 }
-                
+
                 {
 
                 }
@@ -318,6 +328,94 @@ class Rifle : WeaponBase
         }
     }
 
+
+}
+class Sniper : WeaponBase
+{
+    public Sniper(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    {
+        base.particleEffect = particleEffect;
+        base.weaponName = weaponName;
+        base.weaponType = WeaponType.SNIPER;
+        base.maxAmmo = ammo;
+        base.fireRate = firerate;
+        base.recoil = recoil;
+        base.isAutomatic = isAutomatic;
+        base.reloadTime = reloadTime;
+        base.bullet = bullet;
+        base.currentAmmo = maxAmmo;
+        base.weaponDamage = 20;
+        base.firePointnew = firePointnew;
+        base.raycastDestination = raycastDestination;
+
+    }
+
+    public override void Reload()
+    {
+        base.currentAmmo = maxAmmo;
+    }
+
+    public override void Shoot()
+    {
+        int pelletCount = 1;
+        float spreadAngle = 1f;
+        currentAmmo--;
+
+        for (int i = 0; i < pelletCount; i++)
+        {
+            float randomX = Random.Range(-spreadAngle, spreadAngle);
+            float randomY = Random.Range(-spreadAngle, spreadAngle);
+            Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
+
+            Ray ray = new Ray();
+            RaycastHit hit;
+
+            ray.origin = firePointnew.position;
+            ray.direction = raycastDestination.position - firePointnew.position;
+            if (Physics.Raycast(ray, out hit))
+            {
+
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                Rigidbody rb = tracers.GetComponent<Rigidbody>();
+                rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
+
+                particleEffect[0].Emit(1);
+                particleEffect[1].Emit(1);
+                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
+
+                particleEffect[2].transform.position = hit.point;
+                particleEffect[2].transform.forward = hit.normal;
+                particleEffect[2].Emit(1);
+
+                particleEffect[3].transform.position = hit.point;
+                particleEffect[3].transform.forward = hit.normal;
+                particleEffect[3].Emit(1);
+
+                particleEffect[4].transform.position = hit.point;
+                particleEffect[4].transform.forward = hit.normal;
+                particleEffect[4].Emit(1);
+
+                particleEffect[5].transform.position = hit.point;
+                particleEffect[5].transform.forward = hit.normal;
+                particleEffect[5].Emit(1);
+
+                if (hit.collider.CompareTag("Playerr"))
+                {
+                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                    particleEffect[6].Emit(1);
+                    particleEffect[7].Emit(1);
+                    particleEffect[8].Emit(1);
+                }
+
+                {
+
+                }
+
+
+
+            }
+        }
+    }
 
 }
 class Smg : WeaponBase
@@ -413,6 +511,7 @@ class Smg : WeaponBase
 
     }
 }
+
 class Pistol : WeaponBase
 {
     public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
@@ -507,7 +606,7 @@ class Pistol : WeaponBase
 }
 class Shotgun : WeaponBase
 {
-    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet,  Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -523,7 +622,7 @@ class Shotgun : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
     }
-     
+
     public override void Reload()
     {
         currentAmmo = maxAmmo;

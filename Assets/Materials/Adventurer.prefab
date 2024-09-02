@@ -305,7 +305,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 764122210526902622}
-  sceneViewId: 2
+  sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &764122210526902622
@@ -510,7 +510,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 6980568449923136899}
-  sceneViewId: 4
+  sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &6980568449923136899
@@ -11910,10 +11910,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01f08222636409458e2f283456f9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHandTarget: {fileID: 2120982165310498800}
-  leftHandRig: {fileID: 0}
+  particleEffect: []
   state: 0
-  muzzle: {fileID: 826242079970871239}
   anim: {fileID: 0}
   type: 0
   weaponName: Shotgun
@@ -11923,8 +11921,10 @@ MonoBehaviour:
   isAutomatic: 0
   reloadTime: 1
   bullet: ShotgunBullet
-  firePoint: {fileID: 3194447931774283860}
+  firePointnew: {fileID: 0}
+  raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 5831470104577222015}
+  weaponAnim: {fileID: 0}
 --- !u!114 &2966278023933879246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11945,7 +11945,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 879854539845218584}
-  sceneViewId: 3
+  sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &3733259236919357935
@@ -17836,10 +17836,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01f08222636409458e2f283456f9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHandTarget: {fileID: 1190439147427976257}
-  leftHandRig: {fileID: 0}
+  particleEffect: []
   state: 0
-  muzzle: {fileID: 2554974432814313080}
   anim: {fileID: 0}
   type: 0
   weaponName: Rifle_01
@@ -17849,8 +17847,10 @@ MonoBehaviour:
   isAutomatic: 1
   reloadTime: 3
   bullet: RifleBullet
-  firePoint: {fileID: 6346802605834329477}
+  firePointnew: {fileID: 0}
+  raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 3210454264488434444}
+  weaponAnim: {fileID: 0}
 --- !u!114 &2147243503405774013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17871,7 +17871,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 388868480091935450}
-  sceneViewId: 5
+  sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &6000511239307116190

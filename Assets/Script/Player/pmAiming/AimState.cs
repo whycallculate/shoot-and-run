@@ -112,7 +112,10 @@ public class AimState : MonoBehaviour
             twoBoneIKConstraint.data.target = newTargetBone;
         }
     }
-
+    private void OnAnimatorMove()
+    {
+        
+    }
     public void SetValueRigging(GameObject aimPos)
     {
         //Target objesini burada initilate ediyoruz.
@@ -169,7 +172,7 @@ public class AimState : MonoBehaviour
             {
                 isAiming = true;
                 anim.SetBool("Aiming", true);
-                pw.RPC("WeaponPoseMethod", RpcTarget.Others, true);
+                //pw.RPC("WeaponPoseMethod", RpcTarget.Others, true);
                 aimLayer.weight = 1f;
                 currentFov = adsFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
@@ -177,8 +180,8 @@ public class AimState : MonoBehaviour
             else
             {
                 isAiming = true ;
-                aimLayer.weight = 1f;
-                pw.RPC("WeaponPoseMethod", RpcTarget.Others, false);
+                //aimLayer.weight = 1f;
+                //pw.RPC("WeaponPoseMethod", RpcTarget.Others, false);
                 anim.SetBool("Aiming", false);
                 currentFov = hipFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
