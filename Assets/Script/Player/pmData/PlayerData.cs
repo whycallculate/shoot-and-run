@@ -37,7 +37,7 @@ public class PlayerData : MonoBehaviour
         form.AddField("userId", userId);
         form.AddField("costumeIndex", costumeIndex);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/UpdateCostume.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post("https://whycallculate.online/game/UpdateCostume.php", form))
         {
             yield return www.SendWebRequest();
 
