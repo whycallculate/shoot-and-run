@@ -7,6 +7,7 @@ using Cinemachine;
 using UnityEngine.Animations.Rigging;
 using System.Threading;
 using UnityEngineInternal;
+using Unity.VisualScripting;
 public enum ShootState
 {
     IDLE,
@@ -17,12 +18,20 @@ public enum ShootState
 //TEST ASAMASINDA BAZI MERMILER DESTROYLANMIYOR KONTROL EDILECEK..!!!
 public class Weapons : MonoBehaviour, IPunObservable
 {
+
+    [Header("Camera")]
+    CinemachineVirtualCamera virtualCamera;
+    Cinemachine.CinemachineImpulseSource impulseSource;
+    float time;
+    public float duration;
+
+
     [Header("Weapon Info")]
     [SerializeField] ParticleSystem[] particleEffect;
     [SerializeField] ShootState state;
     [SerializeField] public Animator anim;
     [SerializeField] WeaponType type;
-    [SerializeField] string weaponName;
+    [SerializeField] public string weaponName;
     [SerializeField] int ammo;
     [SerializeField] float firerate;
     [SerializeField] float recoil;
@@ -34,8 +43,9 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] Light weaponBarrel;
     [SerializeField] public AnimationClip weaponAnimation;
     CinemachineImpulseSource recoilShake;
+    public Animator rigController;
     WeaponBase weapon;
-    PhotonView pw;
+    public PhotonView pw;
     bool notShooting = false;
 
     private void Start()
@@ -43,7 +53,9 @@ public class Weapons : MonoBehaviour, IPunObservable
         pw =GetComponent<PhotonView>();
         if (pw.IsMine)
         {
+            impulseSource = GetComponent<CinemachineImpulseSource>();
             recoilShake = GetComponent<CinemachineImpulseSource>();
+            virtualCamera = AimState.Instance.virtualCamera;
         }
         
         if(type == WeaponType.PISTOL)
@@ -79,7 +91,11 @@ public class Weapons : MonoBehaviour, IPunObservable
         if (pw.IsMine)
         {
             firePointnew.LookAt(AimState.Instance.aimPos.transform);
-
+            if(time > 0)
+            {
+                AimState.Instance.yAxis.Value -= (weapon.recoil * Time.deltaTime) / duration ;
+                time -= Time.deltaTime;
+            }
         }
         if (pw.IsMine)
         {
@@ -146,6 +162,13 @@ public class Weapons : MonoBehaviour, IPunObservable
 
         }
     }
+    public void GenerateRecoil()
+    {
+        time = duration;
+        impulseSource.GenerateImpulse(Camera.main.transform.forward);
+        rigController.Play("weaponRecoil" + weapon.weaponType.ToString(), 1, 0.0f);
+
+    }
     IEnumerator ReloadOnGame()
     {
         if (weapon.currentAmmo != weapon.maxAmmo)
@@ -160,50 +183,62 @@ public class Weapons : MonoBehaviour, IPunObservable
     }
     IEnumerator ShootOnGame()
     {
-        if (!weapon.isAutomatic)
+        if (pw.IsMine)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0))
+            if (AimState.Instance.isAiming)
             {
-                if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                rigController.SetBool("holsterWeapon", true);
+                if (!weapon.isAutomatic)
                 {
+                    if (Input.GetKeyDown(KeyCode.Mouse0))
+                    {
+                        if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                        {
+                            GenerateRecoil();
+                            state = ShootState.SHOOTING;
+                            notShooting = true;
+                            weapon.Shoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
+                            notShooting = false;
 
-                    state = ShootState.SHOOTING;
-                    notShooting = true;
-                    weapon.Shoot();
-                    yield return new WaitForSeconds(weapon.fireRate);
-                    notShooting = false;
-
+                        }
+                        else if (weapon.currentAmmo <= 0)
+                        {
+                            state = ShootState.RELOADING;
+                            yield return new WaitForSeconds(1f);
+                            weapon.Reload();
+                        }
+                    }
                 }
-                else if (weapon.currentAmmo <= 0)
+                else if (weapon.isAutomatic)
                 {
-                    state = ShootState.RELOADING;
-                    yield return new WaitForSeconds(1f);
-                    weapon.Reload();
+                    if (Input.GetKey(KeyCode.Mouse0))
+                    {
+                        if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                        {
+                            GenerateRecoil();
+                            state = ShootState.SHOOTING;
+                            notShooting = true;
+                            weapon.Shoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
+                            notShooting = false;
+                        }
+                        else if (weapon.currentAmmo <= 0)
+                        {
+                            state = ShootState.RELOADING;
+                            yield return new WaitForSeconds(1f);
+                            weapon.Reload();
+                        }
+                    }
                 }
             }
-        }
-        else if (weapon.isAutomatic)
-        {
-            if (Input.GetKey(KeyCode.Mouse0))
+            else
             {
-                if(weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
-                {
-
-                    state = ShootState.SHOOTING;
-                    AimState.Instance.yAxis.Value -= weapon.recoil;
-                    notShooting = true;
-                    weapon.Shoot();
-                    yield return new WaitForSeconds(weapon.fireRate);
-                    notShooting = false;
-                }
-                else if (weapon.currentAmmo <= 0)
-                {
-                    state = ShootState.RELOADING;
-                    yield return new WaitForSeconds(1f);
-                    weapon.Reload();
-                }
+                rigController.SetBool("holsterWeapon", false);
             }
         }
+
+        
         
     }
     public void RecoilShake()
@@ -312,10 +347,14 @@ class Rifle : WeaponBase
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    particleEffect[6].Emit(1);
-                    particleEffect[7].Emit(1);
-                    particleEffect[8].Emit(1);
+                    if (!hit.collider.GetComponent<PhotonView>().IsMine)
+                    {
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        particleEffect[6].Emit(1);
+                        particleEffect[7].Emit(1);
+                        particleEffect[8].Emit(1);
+                    }
+
                 }
 
                 {
@@ -401,10 +440,13 @@ class Sniper : WeaponBase
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    particleEffect[6].Emit(1);
-                    particleEffect[7].Emit(1);
-                    particleEffect[8].Emit(1);
+                    if (!hit.collider.GetComponent<PhotonView>().IsMine)
+                    {
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        particleEffect[6].Emit(1);
+                        particleEffect[7].Emit(1);
+                        particleEffect[8].Emit(1);
+                    }
                 }
 
                 {
@@ -488,10 +530,13 @@ class Smg : WeaponBase
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    particleEffect[6].Emit(1);
-                    particleEffect[7].Emit(1);
-                    particleEffect[8].Emit(1);
+                    if (!hit.collider.GetComponent<PhotonView>().IsMine)
+                    {
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        particleEffect[6].Emit(1);
+                        particleEffect[7].Emit(1);
+                        particleEffect[8].Emit(1);
+                    }
                 }
 
                 {
@@ -582,15 +627,15 @@ class Pistol : WeaponBase
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    particleEffect[6].Emit(1);
-                    particleEffect[7].Emit(1);
-                    particleEffect[8].Emit(1);
+                    if (!hit.collider.GetComponent<PhotonView>().IsMine)
+                    {
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        particleEffect[6].Emit(1);
+                        particleEffect[7].Emit(1);
+                        particleEffect[8].Emit(1);
+                    }
                 }
 
-                {
-
-                }
 
 
 
@@ -674,15 +719,16 @@ class Shotgun : WeaponBase
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
-                    hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                    particleEffect[6].Emit(1);
-                    particleEffect[7].Emit(1);
-                    particleEffect[8].Emit(1);
+                    if (!hit.collider.GetComponent<PhotonView>().IsMine)
+                    {
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        particleEffect[6].Emit(1);
+                        particleEffect[7].Emit(1);
+                        particleEffect[8].Emit(1);
+                    }
                 }
 
-                {
-
-                }
+             
 
 
 

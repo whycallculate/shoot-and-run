@@ -31,6 +31,7 @@ public class AimState : MonoBehaviour
     [HideInInspector] Transform camFollowPos;
     [HideInInspector] public Animator anim;
     [HideInInspector] public GameObject playerCamera;
+    [HideInInspector] public CinemachineVirtualCamera virtualCamera;
 
     CinemachineVirtualCamera vCam;
 
@@ -45,7 +46,6 @@ public class AimState : MonoBehaviour
     public bool isAiming;
 
     [Header("Rigging")]
-    [SerializeField] public Rig aimLayer;
     [SerializeField] public GameObject aimPos;
     public float aimDuration = 0.3f;
     [SerializeField] MultiAimConstraint bodyAim;
@@ -69,6 +69,8 @@ public class AimState : MonoBehaviour
 
         if (pw.IsMine)
         {
+
+            virtualCamera = transform.GetChild(0).GetComponent<CinemachineVirtualCamera>();
             SetValueRigging(aimPos);
             SetCameraStartMethod();
             Cursor.lockState = CursorLockMode.Locked;
@@ -92,6 +94,7 @@ public class AimState : MonoBehaviour
             CamFollowPos();
             GetAim();
             PosUpdate();
+            GetWeaponOnHand();
         }
     }
 
@@ -131,7 +134,7 @@ public class AimState : MonoBehaviour
         data.Clear();
         data.Add(new WeightedTransform(target, 1));
         aim.data.sourceObjects = data;
-        rig.Build(); // Rebuild the rig to apply changes
+        //rig.Build(); // Rebuild the rig to apply changes
     }
     public void SetCameraStartMethod()
     {
@@ -170,51 +173,33 @@ public class AimState : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Mouse1))
             {
-                isAiming = true;
-                anim.SetBool("Aiming", true);
-                //pw.RPC("WeaponPoseMethod", RpcTarget.Others, true);
-                aimLayer.weight = 1f;
+                
                 currentFov = adsFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
             }
             else
             {
-                isAiming = true ;
-                //aimLayer.weight = 1f;
                 //pw.RPC("WeaponPoseMethod", RpcTarget.Others, false);
-                anim.SetBool("Aiming", false);
                 currentFov = hipFov;
                 vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, currentFov, fovSmoothSpeed * Time.deltaTime);
             }
             vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, hipFov, fovSmoothSpeed * Time.deltaTime);
         }
     }
-    [PunRPC]
-    public void WeaponPoseMethod(bool openOrClose )
+    
+    public void GetWeaponOnHand()
     {
-        if(!pw.IsMine)
+        if (Input.GetKeyDown(InputManager.getWeaponOnHand) && !isAiming)
         {
-            while (openOrClose)
-            {
-                aimLayer.weight += Time.deltaTime / aimDuration;
-                if (aimLayer.weight >= 1)
-                {
-                    break;
-                }
-            }
-            while (!openOrClose)
-            {
-                aimLayer.weight -= Time.deltaTime / aimDuration;
-                if (aimLayer.weight <= 0.1)
-                {
-                    break;
-                }
-            }
-
+            isAiming = true;
 
         }
-    }
+        else if(Input.GetKeyDown(InputManager.getWeaponOnHand) && isAiming)
+        {
+            isAiming = false;
+        }
 
+    }
     
 }
 

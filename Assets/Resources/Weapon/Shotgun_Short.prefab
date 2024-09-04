@@ -19259,6 +19259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01f08222636409458e2f283456f9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 0.05
   particleEffect:
   - {fileID: 3021474962998588758}
   - {fileID: 599279325160718403}
@@ -19275,7 +19276,7 @@ MonoBehaviour:
   weaponName: Shotgun_Short
   ammo: 4
   firerate: 0.2
-  recoil: 0.35
+  recoil: 4
   isAutomatic: 0
   reloadTime: 5
   bullet: ShotgunBullet
@@ -19283,6 +19284,8 @@ MonoBehaviour:
   raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 3972177167874600236}
   weaponAnimation: {fileID: 7400000, guid: f2ed66b38680f5442a71581aab5cddaa, type: 2}
+  rigController: {fileID: 0}
+  pw: {fileID: 0}
 --- !u!114 &2931544742641762782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19298,8 +19301,8 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
+  Synchronization: 1
+  OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
   - {fileID: 2737258146680761692}
@@ -19321,7 +19324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ImpulseDefinition:
     m_ImpulseChannel: 1
-    m_ImpulseShape: 1
+    m_ImpulseShape: 0
     m_CustomImpulseShape:
       serializedVersion: 2
       m_Curve:
@@ -19347,9 +19350,9 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     m_ImpulseDuration: 0.17
-    m_ImpulseType: 0
+    m_ImpulseType: 3
     m_DissipationRate: 0.25
-    m_RawSignal: {fileID: 0}
+    m_RawSignal: {fileID: 11400000, guid: 800f6c1d0bb159b4781605888c4253b5, type: 2}
     m_AmplitudeGain: 1
     m_FrequencyGain: 1
     m_RepeatMode: 0

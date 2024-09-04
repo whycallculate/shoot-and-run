@@ -76,21 +76,12 @@ public class PlayerManager : MonoBehaviour
         if(currentHP <= 0)
         {
 
-            //playerAim.lHandIK.weight = 0;
-            //playerAim.bodyAim.weight = 0;
-            //playerAim.headAim.weight = 0;
-            //playerAim.rHandAim.weight = 0;
-            //playerAim.rHandIK.weight = 0;
-            //playerAim.rig.Build();
-            //weaponList[0].gameObject.SetActive(false);
             playerMovement.animator.SetBool("Death", true);
-            //player.SetActive(false);
-            //playerAim.enabled = false;
+
 
 
             yield return new WaitForSeconds(10f);
             PhotonNetwork.Destroy(gameObject);
-            //PhotonNetwork.Destroy(playerAim.aimPos);
 
         }
     }
