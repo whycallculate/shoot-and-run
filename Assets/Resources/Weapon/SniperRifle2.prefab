@@ -19609,7 +19609,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5727783259254414436
 Transform:
   m_ObjectHideFlags: 0
@@ -19652,10 +19652,10 @@ MonoBehaviour:
   - {fileID: 273170656476464447}
   state: 0
   anim: {fileID: 0}
-  type: 5
+  type: 0
   weaponName: SniperRifle2
   ammo: 8
-  firerate: 0.6
+  firerate: 1.9
   recoil: 2
   isAutomatic: 0
   reloadTime: 5
@@ -19665,6 +19665,7 @@ MonoBehaviour:
   weaponBarrel: {fileID: 6622234309909394054}
   weaponAnimation: {fileID: 7400000, guid: 6629d4b982c29754f85a7c910adf3d4b, type: 2}
   rigController: {fileID: 0}
+  newAimState: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &1548945873351516711
 MonoBehaviour:
@@ -19681,7 +19682,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 1
+  Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -25554,7 +25555,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -35182,7 +35183,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -40012,7 +40013,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2

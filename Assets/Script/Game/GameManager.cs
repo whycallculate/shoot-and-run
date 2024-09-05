@@ -26,16 +26,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         //spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
         //GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
-
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponAssault"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSubMachine"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSniperRifle2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSniperRifle1"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponShotgunShort"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponShotgun"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponPistol2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponPistol1"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        //PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponAssaultRifle2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
         //SoundManager.Instance.StopBackgroundMusic();
     }
     public override void OnConnectedToMaster()
@@ -50,16 +40,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
         GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
-
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponAssault"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSubMachine"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSniperRifle2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponSniperRifle1"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponShotgunShort"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponShotgun"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponPistol2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponPistol1"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
-        PhotonNetwork.Instantiate(Path.Combine("WeaponCreate", "WeaponAssaultRifle2"), new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z), Quaternion.identity);
         SoundManager.Instance.StopBackgroundMusic();
     }
 

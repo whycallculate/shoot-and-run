@@ -94,7 +94,6 @@ public class AimState : MonoBehaviour
             CamFollowPos();
             GetAim();
             PosUpdate();
-            GetWeaponOnHand();
         }
     }
 
@@ -187,19 +186,7 @@ public class AimState : MonoBehaviour
         }
     }
     
-    public void GetWeaponOnHand()
-    {
-        if (Input.GetKeyDown(InputManager.getWeaponOnHand) && !isAiming)
-        {
-            isAiming = true;
 
-        }
-        else if(Input.GetKeyDown(InputManager.getWeaponOnHand) && isAiming)
-        {
-            isAiming = false;
-        }
-
-    }
     
 }
 

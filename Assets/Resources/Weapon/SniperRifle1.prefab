@@ -865,7 +865,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -15484,7 +15484,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -29925,7 +29925,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -43806,7 +43806,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3003040525464877319
 Transform:
   m_ObjectHideFlags: 0
@@ -43849,10 +43849,10 @@ MonoBehaviour:
   - {fileID: 2958320989769703581}
   state: 0
   anim: {fileID: 0}
-  type: 5
+  type: 0
   weaponName: SniperRifle1
   ammo: 5
-  firerate: 0.6
+  firerate: 2.18
   recoil: 2
   isAutomatic: 0
   reloadTime: 3
@@ -43862,6 +43862,7 @@ MonoBehaviour:
   weaponBarrel: {fileID: 5821216122781881487}
   weaponAnimation: {fileID: 7400000, guid: 940e8ce7e6c9d5e4f8a810662284c965, type: 2}
   rigController: {fileID: 0}
+  newAimState: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &2935909822305026556
 MonoBehaviour:
@@ -43878,7 +43879,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 1
+  Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
