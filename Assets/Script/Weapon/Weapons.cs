@@ -44,82 +44,122 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] public AnimationClip weaponAnimation;
     CinemachineImpulseSource recoilShake;
     public Animator rigController;
+    public AimState newAimState;
+    public ActiveWeapon activeWeapon;
     WeaponBase weapon;
     public PhotonView pw;
     bool notShooting = false;
 
     private void Start()
     {
-        pw =GetComponent<PhotonView>();
+        pw = GetComponent<PhotonView>();
         if (pw.IsMine)
         {
             impulseSource = GetComponent<CinemachineImpulseSource>();
             recoilShake = GetComponent<CinemachineImpulseSource>();
-            virtualCamera = AimState.Instance.virtualCamera;
+            virtualCamera = newAimState.virtualCamera;
         }
-        
-        if(type == WeaponType.PISTOL)
+
+        if (type == WeaponType.PISTOL)
         {
             Pistol pistol = new Pistol(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
-            weapon =pistol;
+            weapon = pistol;
         }
-        else if(type == WeaponType.SMG) 
+        else if (type == WeaponType.SMG)
         {
             Smg smg = new Smg(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = smg;
         }
-        else if(type == WeaponType.RIFLE)
+        else if (type == WeaponType.RIFLE)
         {
-            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet,firePointnew, particleEffect, raycastDestination);
+            Rifle rifle = new Rifle(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = rifle;
         }
-        else if(type == WeaponType.SHOTGUN)
+        else if (type == WeaponType.SHOTGUN)
         {
             Shotgun shotgun = new Shotgun(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = shotgun;
         }
-        else if(type == WeaponType.SNIPER)
+        else if (type == WeaponType.SNIPER)
         {
             Sniper sniper = new Sniper(weaponName, ammo, firerate, recoil, isAutomatic, reloadTime, bullet, firePointnew, particleEffect, raycastDestination);
             weapon = sniper;
         }
-        
+
     }
     private void Update()
     {
         state = ShootState.IDLE;
         if (pw.IsMine)
         {
-            firePointnew.LookAt(AimState.Instance.aimPos.transform);
-            if(time > 0)
+            firePointnew.LookAt(newAimState.aimPos.transform);
+            if (time > 0)
             {
-                AimState.Instance.yAxis.Value -= (weapon.recoil * Time.deltaTime) / duration ;
+                newAimState.yAxis.Value -= (weapon.recoil * Time.deltaTime) / duration;
                 time -= Time.deltaTime;
             }
         }
         if (pw.IsMine)
         {
-            if(!notShooting)
+            if (!notShooting)
             {
-                StartCoroutine(ShootOnGame());
+                if (activeWeapon.mainIsActive)
+                {
+                    rigController.SetBool("holsterSecondary", true);
+
+                    rigController.SetBool("holsterWeapon", false);
+                    HoldingWeapon();
+                    StartCoroutine(ShootMain());
+                }
+                else if (!activeWeapon.mainIsActive)
+                {
+                    rigController.SetBool("holsterSecondary", true);
+                    rigController.SetBool("holsterWeapon", true);
+                }
+                if (activeWeapon.secondaryIsActive)
+                {
+                    rigController.SetBool("holsterSecondary", false);
+                    rigController.SetBool("holsterWeapon", true);
+                    HoldingWeapon();
+                    StartCoroutine(ShootSecondary());
+                }
+                else if (!activeWeapon.secondaryIsActive)
+                {
+                    rigController.SetBool("holsterSecondary", true);
+                    rigController.SetBool("holsterWeapon", true);
+                }
 
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
-                
+
                 StartCoroutine(ReloadOnGame());
             }
             StateAnimUpdate(state);
         }
-        
+
+    }
+
+
+    public void HoldingWeapon()
+    {
+        if (weapon.weaponType == WeaponType.PISTOL)
+        {
+            anim.SetBool("PistolHand", true);
+            anim.SetBool("RifleHand", false);
+        }
+        else
+        {
+            anim.SetBool("RifleHand", true);
+            anim.SetBool("PistolHand", false);
+        }
     }
 
     public void StateAnimUpdate(ShootState state)
     {
         if(state == ShootState.IDLE)
         {
-            anim.SetBool("Reloading", false);
-            anim.SetBool("Shooting", false);
+
             weaponBarrel.enabled = false ;
 
         }
@@ -151,15 +191,12 @@ public class Weapons : MonoBehaviour, IPunObservable
             }
             weaponBarrel.enabled = true;
             RecoilShake();
-            anim.SetBool("Reloading", false);
-            anim.SetBool("Shooting", true);
+
             
         }
         if(state == ShootState.RELOADING)
         {
-            anim.SetBool("Reloading", true);
             weaponBarrel.enabled = false;
-
         }
     }
     public void GenerateRecoil()
@@ -181,12 +218,113 @@ public class Weapons : MonoBehaviour, IPunObservable
 
         }
     }
+    IEnumerator ShootMain()
+    {
+        if (pw.IsMine)
+        {
+            if (!weapon.isAutomatic)
+            {
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                    {
+                        GenerateRecoil();
+                        state = ShootState.SHOOTING;
+                        notShooting = true;
+                        weapon.Shoot();
+                        yield return new WaitForSeconds(weapon.fireRate);
+                        notShooting = false;
+
+                    }
+                    else if (weapon.currentAmmo <= 0)
+                    {
+                        state = ShootState.RELOADING;
+                        yield return new WaitForSeconds(1f);
+                        weapon.Reload();
+                    }
+                }
+            }
+            else if (weapon.isAutomatic)
+            {
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
+                    if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                    {
+                        GenerateRecoil();
+                        state = ShootState.SHOOTING;
+                        notShooting = true;
+                        weapon.Shoot();
+                        yield return new WaitForSeconds(weapon.fireRate);
+                        notShooting = false;
+                    }
+                    else if (weapon.currentAmmo <= 0)
+                    {
+                        state = ShootState.RELOADING;
+                        yield return new WaitForSeconds(1f);
+                        weapon.Reload();
+                    }
+                }
+            }
+        }
+    }
+    
+    IEnumerator ShootSecondary()
+    {
+        if (pw.IsMine)
+        {
+            if (!weapon.isAutomatic)
+            {
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                    {
+                        GenerateRecoil();
+                        state = ShootState.SHOOTING;
+                        notShooting = true;
+                        weapon.Shoot();
+                        yield return new WaitForSeconds(weapon.fireRate);
+                        notShooting = false;
+
+                    }
+                    else if (weapon.currentAmmo <= 0)
+                    {
+                        state = ShootState.RELOADING;
+                        yield return new WaitForSeconds(1f);
+                        weapon.Reload();
+                    }
+                }
+            }
+            else if (weapon.isAutomatic)
+            {
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
+                    if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
+                    {
+                        GenerateRecoil();
+                        state = ShootState.SHOOTING;
+                        notShooting = true;
+                        weapon.Shoot();
+                        yield return new WaitForSeconds(weapon.fireRate);
+                        notShooting = false;
+                    }
+                    else if (weapon.currentAmmo <= 0)
+                    {
+                        state = ShootState.RELOADING;
+                        yield return new WaitForSeconds(1f);
+                        weapon.Reload();
+                    }
+                }
+            }
+        }
+    }
     IEnumerator ShootOnGame()
     {
         if (pw.IsMine)
         {
-            if (AimState.Instance.isAiming)
+            if (activeWeapon.mainIsActive)
             {
+
+                rigController.SetBool("holsterSecondary", false);
                 rigController.SetBool("holsterWeapon", true);
                 if (!weapon.isAutomatic)
                 {
@@ -232,14 +370,17 @@ public class Weapons : MonoBehaviour, IPunObservable
                     }
                 }
             }
-            else
+            else 
             {
+                rigController.SetBool("holsterSecondary", false);
+                yield return new WaitForSeconds(0.3f);
                 rigController.SetBool("holsterWeapon", false);
             }
+
         }
 
-        
-        
+
+
     }
     public void RecoilShake()
     {

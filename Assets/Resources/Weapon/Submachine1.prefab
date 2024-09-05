@@ -5886,7 +5886,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -9889,7 +9889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2914442335674937921
 Transform:
   m_ObjectHideFlags: 0
@@ -9932,7 +9932,7 @@ MonoBehaviour:
   - {fileID: 4235458037671725856}
   state: 0
   anim: {fileID: 0}
-  type: 2
+  type: 0
   weaponName: Submachine1
   ammo: 20
   firerate: 0.08
@@ -9945,6 +9945,7 @@ MonoBehaviour:
   weaponBarrel: {fileID: 2769521001555252689}
   weaponAnimation: {fileID: 7400000, guid: 3421598f5577c2a49867a475c101b476, type: 2}
   rigController: {fileID: 0}
+  newAimState: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &7896497010632661112
 MonoBehaviour:
@@ -9961,7 +9962,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 1
+  Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -10934,7 +10935,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -30239,7 +30240,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -35078,7 +35079,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2

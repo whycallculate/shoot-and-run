@@ -15226,7 +15226,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -19229,7 +19229,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6353012908069182919
 Transform:
   m_ObjectHideFlags: 0
@@ -19272,7 +19272,7 @@ MonoBehaviour:
   - {fileID: 2118458076209231733}
   state: 0
   anim: {fileID: 0}
-  type: 3
+  type: 0
   weaponName: Shotgun_Short
   ammo: 4
   firerate: 0.2
@@ -19285,6 +19285,7 @@ MonoBehaviour:
   weaponBarrel: {fileID: 3972177167874600236}
   weaponAnimation: {fileID: 7400000, guid: f2ed66b38680f5442a71581aab5cddaa, type: 2}
   rigController: {fileID: 0}
+  newAimState: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &2931544742641762782
 MonoBehaviour:
@@ -19301,8 +19302,8 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 1
-  OwnershipTransfer: 1
+  Synchronization: 3
+  OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
   - {fileID: 2737258146680761692}
@@ -25244,7 +25245,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -39934,7 +39935,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2

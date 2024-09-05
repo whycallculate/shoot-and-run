@@ -63,6 +63,10 @@ public class Data
     public int costume_index;
     public int character_level;
 
+    public int mainWeapon;
+    public int secondaryWeapon;
+    public int meeleWeapon;
+
 
 
 }

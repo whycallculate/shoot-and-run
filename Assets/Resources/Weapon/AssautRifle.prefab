@@ -9820,7 +9820,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5577433945659576502
 Transform:
   m_ObjectHideFlags: 0
@@ -9863,7 +9863,7 @@ MonoBehaviour:
   - {fileID: 6977675210698763679}
   state: 0
   anim: {fileID: 0}
-  type: 1
+  type: 0
   weaponName: AssautRifle
   ammo: 30
   firerate: 0.1
@@ -9876,6 +9876,7 @@ MonoBehaviour:
   weaponBarrel: {fileID: 2465822564137893601}
   weaponAnimation: {fileID: 7400000, guid: a411dac9f09a04a44a207c0ac505a6b2, type: 2}
   rigController: {fileID: 0}
+  newAimState: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &4868197903094629332
 MonoBehaviour:
@@ -9892,7 +9893,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 1
+  Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -20550,7 +20551,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -25465,7 +25466,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -40010,7 +40011,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
