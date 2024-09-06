@@ -9877,6 +9877,7 @@ MonoBehaviour:
   weaponAnimation: {fileID: 7400000, guid: a411dac9f09a04a44a207c0ac505a6b2, type: 2}
   rigController: {fileID: 0}
   newAimState: {fileID: 0}
+  activeWeapon: {fileID: 0}
   pw: {fileID: 0}
 --- !u!114 &4868197903094629332
 MonoBehaviour:

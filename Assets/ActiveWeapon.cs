@@ -1,27 +1,30 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 public class ActiveWeapon : MonoBehaviour, IPunObservable
 {
     [SerializeField] Weapons[] mainWeapon;
-    Weapons mainWeaponObject;
+    public Weapons mainWeaponObject;
 
     int setMainIndexRPC;
     int setMainIndex;
     int getIndexRPC;
     public bool mainIsActive;
     [SerializeField] Weapons[] secondaryWeapon;
-    Weapons secondaryWeaponObject;
+    public Weapons secondaryWeaponObject;
     int setSecondaryIndexRPC;
     int setSecondaryIndex;
     int getSecondaryIndexRPC;
     public bool secondaryIsActive;
     [SerializeField] Weapons[] meeleWeapon;
 
-    public bool nonWeapon;
+    int[] setIndex;
+    int[] getIndex;
+
 
 
     [SerializeField] Transform crossHairTarget;
@@ -58,11 +61,30 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
     {
         Debug.Log(secondaryIsActive);
         Debug.Log(mainIsActive);
-        Debug.Log(nonWeapon);
 
 
         if(pw.IsMine)
         {
+            if (mainWeaponObject && secondaryWeaponObject)
+            {
+                if (mainIsActive && !secondaryIsActive)
+                {
+                    if(!mainWeaponObject.notShooting)
+                    {
+                        StartCoroutine(mainWeaponObject.ShootMain());
+
+                    }
+                }
+                if (secondaryWeaponObject && !mainIsActive)
+                {
+                    if (!mainWeaponObject.notShooting)
+                    {
+                        StartCoroutine(secondaryWeaponObject.ShootSecondary());
+
+                    }
+
+                }
+            }
             GetWeaponOnHand();
             if (Input.GetKeyDown(KeyCode.B))
             {
@@ -79,50 +101,48 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
 
     }
 
+
     public void GetWeaponOnHand()
     {
         if (pw.IsMine)
         {
-            if (mainWeaponObject || secondaryWeaponObject)
+            if (mainWeaponObject)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1) && !mainIsActive && !nonWeapon && !secondaryIsActive)
+                if (Input.GetKeyDown(KeyCode.Alpha1) && !mainIsActive && !secondaryIsActive)
                 {
 
                     mainIsActive = true;
                     secondaryIsActive = false;
-                    nonWeapon = false;
+                    mainWeaponObject.CheckWeapon();
+                    rigController.Play("equip" + mainWeaponObject.weaponName);
+
                 }
-                else if (Input.GetKeyDown(KeyCode.Alpha1) && mainIsActive && !nonWeapon && !secondaryIsActive)
+                else if (Input.GetKeyDown(KeyCode.Alpha1) && mainIsActive && !secondaryIsActive)
                 {
                     mainIsActive = false;
                     secondaryIsActive = false;
-                    nonWeapon = false;
+                    mainWeaponObject.CheckWeapon();
                 }
-                if (Input.GetKeyDown(KeyCode.Alpha2) && !secondaryIsActive && !nonWeapon && !mainIsActive)
+            }
+            if (secondaryWeaponObject)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha2) && !secondaryIsActive && !mainIsActive)
                 {
                     mainIsActive = false;
                     secondaryIsActive = true;
-                    nonWeapon = false;
+                    secondaryWeaponObject.CheckWeapon();
+
+                    rigController.Play("equip" + secondaryWeaponObject.weaponName);
                 }
-                else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryIsActive && !nonWeapon && !mainIsActive)
+                else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryIsActive && !mainIsActive)
                 {
                     mainIsActive = false;
                     secondaryIsActive = false;
-                    nonWeapon = false;
-                }
-                if (Input.GetKeyDown(KeyCode.X) && !nonWeapon)
-                {
-                    nonWeapon = true;
-                    secondaryIsActive = false;
-                    mainIsActive = false;
-                }
-                else if (Input.GetKeyDown(KeyCode.X) && nonWeapon)
-                {
-                    nonWeapon = false;
-                    secondaryIsActive = false;
-                    mainIsActive = false;
+                    secondaryWeaponObject.CheckWeapon();
                 }
             }
+
+            
         }
         else
         {
@@ -257,17 +277,19 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(setMainIndexRPC);
-            stream.SendNext(setSecondaryIndexRPC);
+
+            setIndex[0] = setMainIndexRPC;
+            setIndex[1] = setSecondaryIndexRPC;
+            stream.SendNext(setIndex);
         }
         else
         {
             if (!pw.IsMine)
             {
-                getIndexRPC = (int)stream.ReceiveNext();
-                EquipMainWeaponOtherPlayer(getIndexRPC);
-                getSecondaryIndexRPC = (int)stream.ReceiveNext();
-                EquipSecondaryWeaponOtherPlayer(getSecondaryIndexRPC);
+                getIndex = (int[])stream.ReceiveNext();
+                EquipMainWeaponOtherPlayer(getIndex[0]);
+
+                EquipSecondaryWeaponOtherPlayer(getIndex[1]);
             }
 
         }
