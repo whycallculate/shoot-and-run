@@ -57,6 +57,12 @@ MonoBehaviour:
   - OnTriggerRpcMethod
   - SetWeaponForPlayer_RPC
   - TestMethodViewId
+  - EquipSecondaryWeaponOtherPlayer
+  - EquipMainWeaponOtherPlayer
+  - PlayEquipMainWeapon
+  - PlayEquipSecondaryWeapon
+  - ShootOtherClient
+  - ShootOtherClientBlood
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

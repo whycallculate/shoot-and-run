@@ -8,6 +8,7 @@ using UnityEngine.Animations.Rigging;
 using System.Threading;
 using UnityEngineInternal;
 using Unity.VisualScripting;
+using Unity.Burst.CompilerServices;
 public enum ShootState
 {
     IDLE,
@@ -50,7 +51,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     public PhotonView pw;
     public bool notShooting = false;
 
-    private void Start()
+    private void Awake()
     {
         pw = GetComponent<PhotonView>();
         if (pw.IsMine)
@@ -239,6 +240,97 @@ public class Weapons : MonoBehaviour, IPunObservable
         rigController.Play("weaponRecoil" + weapon.weaponType.ToString(), 1, 0.0f);
 
     }
+    public void MakeVFXShoot()
+    {
+        if(weapon.layerAndTagIndex == 0)
+        {
+
+            particleEffect[0].Emit(1);
+            particleEffect[1].Emit(1);
+
+            particleEffect[2].transform.position = weapon.hitpoint;
+            particleEffect[2].transform.forward = weapon.hitnormal;
+
+            particleEffect[2].Emit(1);
+
+            particleEffect[3].transform.position = weapon.hitpoint;
+            particleEffect[3].transform.forward = weapon.hitnormal;
+            particleEffect[3].Emit(1);
+
+            particleEffect[4].transform.position = weapon.hitpoint;
+            particleEffect[4].transform.forward = weapon.hitnormal;
+            particleEffect[4].Emit(1);
+
+            particleEffect[5].transform.position = weapon.hitpoint;
+            particleEffect[5].transform.forward = weapon.hitnormal;
+            particleEffect[5].Emit(1);
+            pw.RPC("ShootOtherClient", RpcTarget.Others, weapon.hitpoint, weapon.hitnormal);
+        }
+        else if(weapon.layerAndTagIndex == 1)
+        {
+            particleEffect[6].Emit(1);
+            particleEffect[6].transform.position = weapon.hitpoint;
+            particleEffect[6].transform.forward = weapon.hitnormal;
+
+            particleEffect[7].Emit(1);
+            particleEffect[7].transform.position = weapon.hitpoint;
+            particleEffect[7].transform.forward = weapon.hitnormal;
+
+            particleEffect[8].Emit(1);
+            particleEffect[8].transform.position = weapon.hitpoint;
+            particleEffect[8].transform.forward = weapon.hitnormal;
+            pw.RPC("ShootOtherClientBlood", RpcTarget.Others, weapon.hitpoint, weapon.hitnormal);
+
+        }
+    }
+    [PunRPC]
+    public void ShootOtherClient(Vector3 hitpoint, Vector3 hitnormal)
+    {
+        if (!pw.IsMine)
+        {
+            particleEffect[0].Emit(1);
+            particleEffect[1].Emit(1);
+
+            particleEffect[2].transform.position = hitpoint;
+            particleEffect[2].transform.forward = hitnormal;
+            particleEffect[2].Emit(1);
+
+            particleEffect[3].transform.position = hitpoint;
+            particleEffect[3].transform.forward = hitnormal;
+            particleEffect[3].Emit(1);
+
+            particleEffect[4].transform.position = hitpoint;
+            particleEffect[4].transform.forward = hitnormal;
+            particleEffect[4].Emit(1);
+
+            particleEffect[5].transform.position = hitpoint;
+            particleEffect[5].transform.forward = hitnormal;
+            particleEffect[5].Emit(1);
+        }
+
+    }
+
+
+
+    [PunRPC]
+    public void ShootOtherClientBlood(Vector3 hitpoint, Vector3 hitnormal)
+    {
+        if (!pw.IsMine)
+        {
+            particleEffect[6].Emit(1);
+            particleEffect[6].transform.position = hitpoint;
+            particleEffect[6].transform.forward = hitnormal;
+
+            particleEffect[7].Emit(1);
+            particleEffect[7].transform.position = hitpoint;
+            particleEffect[7].transform.forward = hitnormal;
+
+            particleEffect[8].Emit(1);
+            particleEffect[8].transform.position = hitpoint;
+            particleEffect[8].transform.forward = hitnormal;
+        }
+
+    }
     IEnumerator ReloadOnGame()
     {
         if (weapon.currentAmmo != weapon.maxAmmo)
@@ -266,8 +358,9 @@ public class Weapons : MonoBehaviour, IPunObservable
                             GenerateRecoil();
                             state = ShootState.SHOOTING;
                             notShooting = true;
-                            yield return new WaitForSeconds(weapon.fireRate);
                             weapon.Shoot();
+                            MakeVFXShoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
                             notShooting = false;
 
                         }
@@ -289,8 +382,9 @@ public class Weapons : MonoBehaviour, IPunObservable
                             GenerateRecoil();
                             state = ShootState.SHOOTING;
                             notShooting = true;
-                            yield return new WaitForSeconds(weapon.fireRate);
                             weapon.Shoot();
+                            MakeVFXShoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
                             notShooting = false;
                         }
                         else if (weapon.currentAmmo <= 0)
@@ -323,6 +417,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
+                            MakeVFXShoot();
                             notShooting = false;
 
                         }
@@ -346,6 +441,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
+                            MakeVFXShoot();
                             notShooting = false;
                         }
                         else if (weapon.currentAmmo <= 0)
@@ -399,7 +495,8 @@ public class Weapons : MonoBehaviour, IPunObservable
 
 class Rifle : WeaponBase
 {
-    public Rifle(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Rifle(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime
+        , string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -446,53 +543,32 @@ class Rifle : WeaponBase
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
-                particleEffect[0].Emit(1);
-                particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
-
-                particleEffect[2].transform.position = hit.point;
-                particleEffect[2].transform.forward = hit.normal;
-                particleEffect[2].Emit(1);
-
-                particleEffect[3].transform.position = hit.point;
-                particleEffect[3].transform.forward = hit.normal;
-                particleEffect[3].Emit(1);
-
-                particleEffect[4].transform.position = hit.point;
-                particleEffect[4].transform.forward = hit.normal;
-                particleEffect[4].Emit(1);
-
-                particleEffect[5].transform.position = hit.point;
-                particleEffect[5].transform.forward = hit.normal;
-                particleEffect[5].Emit(1);
+                if (hit.collider.gameObject.layer == 7 || hit.collider.gameObject.layer == 6)
+                {
+                    layerAndTagIndex = 0;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
                         hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                        particleEffect[6].Emit(1);
-                        particleEffect[7].Emit(1);
-                        particleEffect[8].Emit(1);
+                        layerAndTagIndex = 1;
+                        hitpoint = hit.point;
+                        hitnormal = hit.normal;
                     }
-
                 }
-
-                {
-
-                }
-
-
-
             }
         }
     }
-
-
+   
 }
 class Sniper : WeaponBase
 {
-    public Sniper(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Sniper(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime
+        , string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -507,7 +583,6 @@ class Sniper : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
-
     }
 
     public override void Reload()
@@ -539,43 +614,23 @@ class Sniper : WeaponBase
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
-                particleEffect[0].Emit(1);
-                particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
-
-                particleEffect[2].transform.position = hit.point;
-                particleEffect[2].transform.forward = hit.normal;
-                particleEffect[2].Emit(1);
-
-                particleEffect[3].transform.position = hit.point;
-                particleEffect[3].transform.forward = hit.normal;
-                particleEffect[3].Emit(1);
-
-                particleEffect[4].transform.position = hit.point;
-                particleEffect[4].transform.forward = hit.normal;
-                particleEffect[4].Emit(1);
-
-                particleEffect[5].transform.position = hit.point;
-                particleEffect[5].transform.forward = hit.normal;
-                particleEffect[5].Emit(1);
+                if (hit.collider.gameObject.layer == 7 || hit.collider.gameObject.layer == 6)
+                {
+                    layerAndTagIndex = 0;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
                         hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                        particleEffect[6].Emit(1);
-                        particleEffect[7].Emit(1);
-                        particleEffect[8].Emit(1);
+                        layerAndTagIndex = 1;
+                        hitpoint = hit.point;
+                        hitnormal = hit.normal;
                     }
                 }
-
-                {
-
-                }
-
-
-
             }
         }
     }
@@ -583,7 +638,8 @@ class Sniper : WeaponBase
 }
 class Smg : WeaponBase
 {
-    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Smg(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime
+        , string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -629,43 +685,23 @@ class Smg : WeaponBase
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
-                particleEffect[0].Emit(1);
-                particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
-
-                particleEffect[2].transform.position = hit.point;
-                particleEffect[2].transform.forward = hit.normal;
-                particleEffect[2].Emit(1);
-
-                particleEffect[3].transform.position = hit.point;
-                particleEffect[3].transform.forward = hit.normal;
-                particleEffect[3].Emit(1);
-
-                particleEffect[4].transform.position = hit.point;
-                particleEffect[4].transform.forward = hit.normal;
-                particleEffect[4].Emit(1);
-
-                particleEffect[5].transform.position = hit.point;
-                particleEffect[5].transform.forward = hit.normal;
-                particleEffect[5].Emit(1);
+                if (hit.collider.gameObject.layer == 7 || hit.collider.gameObject.layer == 6)
+                {
+                    layerAndTagIndex = 0;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
                         hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                        particleEffect[6].Emit(1);
-                        particleEffect[7].Emit(1);
-                        particleEffect[8].Emit(1);
+                        layerAndTagIndex = 1;
+                        hitpoint = hit.point;
+                        hitnormal = hit.normal;
                     }
                 }
-
-                {
-
-                }
-
-
-
             }
         }
 
@@ -680,7 +716,8 @@ class Smg : WeaponBase
 
 class Pistol : WeaponBase
 {
-    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Pistol(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime
+        , string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -726,40 +763,23 @@ class Pistol : WeaponBase
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
-                particleEffect[0].Emit(1);
-                particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
-
-                particleEffect[2].transform.position = hit.point;
-                particleEffect[2].transform.forward = hit.normal;
-                particleEffect[2].Emit(1);
-
-                particleEffect[3].transform.position = hit.point;
-                particleEffect[3].transform.forward = hit.normal;
-                particleEffect[3].Emit(1);
-
-                particleEffect[4].transform.position = hit.point;
-                particleEffect[4].transform.forward = hit.normal;
-                particleEffect[4].Emit(1);
-
-                particleEffect[5].transform.position = hit.point;
-                particleEffect[5].transform.forward = hit.normal;
-                particleEffect[5].Emit(1);
+                if (hit.collider.gameObject.layer == 7 || hit.collider.gameObject.layer == 6)
+                {
+                    layerAndTagIndex = 0;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
                         hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                        particleEffect[6].Emit(1);
-                        particleEffect[7].Emit(1);
-                        particleEffect[8].Emit(1);
+                        layerAndTagIndex = 1;
+                        hitpoint = hit.point;
+                        hitnormal = hit.normal;
                     }
                 }
-
-
-
-
             }
         }
     }
@@ -772,7 +792,8 @@ class Pistol : WeaponBase
 }
 class Shotgun : WeaponBase
 {
-    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime, string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
+    public Shotgun(string weaponName, int ammo, float firerate, float recoil, bool isAutomatic, float reloadTime
+        , string bullet, Transform firePointnew, ParticleSystem[] particleEffect, Transform raycastDestination)
     {
         base.particleEffect = particleEffect;
         base.weaponName = weaponName;
@@ -796,8 +817,8 @@ class Shotgun : WeaponBase
 
     public override void Shoot()
     {
-        int pelletCount = 1;
-        float spreadAngle = 1f;
+        int pelletCount = 5;
+        float spreadAngle = 2f;
         currentAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
@@ -818,41 +839,23 @@ class Shotgun : WeaponBase
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
-                particleEffect[0].Emit(1);
-                particleEffect[1].Emit(1);
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 4f);
-
-                particleEffect[2].transform.position = hit.point;
-                particleEffect[2].transform.forward = hit.normal;
-                particleEffect[2].Emit(1);
-
-                particleEffect[3].transform.position = hit.point;
-                particleEffect[3].transform.forward = hit.normal;
-                particleEffect[3].Emit(1);
-
-                particleEffect[4].transform.position = hit.point;
-                particleEffect[4].transform.forward = hit.normal;
-                particleEffect[4].Emit(1);
-
-                particleEffect[5].transform.position = hit.point;
-                particleEffect[5].transform.forward = hit.normal;
-                particleEffect[5].Emit(1);
+                if (hit.collider.gameObject.layer == 7 || hit.collider.gameObject.layer == 6)
+                {
+                    layerAndTagIndex = 0;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
 
                 if (hit.collider.CompareTag("Playerr"))
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
                         hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
-                        particleEffect[6].Emit(1);
-                        particleEffect[7].Emit(1);
-                        particleEffect[8].Emit(1);
+                        layerAndTagIndex = 1;
+                        hitpoint = hit.point;
+                        hitnormal = hit.normal;
                     }
                 }
-
-             
-
-
-
             }
         }
     }
