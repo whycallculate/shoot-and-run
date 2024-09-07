@@ -5,21 +5,18 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class ActiveWeapon : MonoBehaviour, IPunObservable
+public class ActiveWeapon : MonoBehaviour,IPunObservable
 {
     [SerializeField] Weapons[] mainWeapon;
     public Weapons mainWeaponObject;
-
-    int setMainIndexRPC;
     int setMainIndex;
-    int getIndexRPC;
     public bool mainIsActive;
+
     [SerializeField] Weapons[] secondaryWeapon;
     public Weapons secondaryWeaponObject;
-    int setSecondaryIndexRPC;
     int setSecondaryIndex;
-    int getSecondaryIndexRPC;
     public bool secondaryIsActive;
+
     [SerializeField] Weapons[] meeleWeapon;
 
     int[] setIndex;
@@ -41,18 +38,18 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
 
     public PhotonView pw;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         pw = GetComponent<PhotonView>();
+        setIndex = new int[2];
+        getIndex = new int[2];
         if (pw.IsMine)
         {
+
             anim = GetComponent<Animator>();
-            Weapons newWeapons = GetComponentInChildren<Weapons>();
-            if (newWeapons)
-            {
-                EquipMainWeapon(0);
-                EquipSecondaryWeapon(0);
-            }
+
+            EquipMainWeapon(0);
+            EquipSecondaryWeapon(0);
         }
 
 
@@ -63,13 +60,15 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
         Debug.Log(mainIsActive);
 
 
-        if(pw.IsMine)
+        if (pw.IsMine)
         {
+
+            
             if (mainWeaponObject && secondaryWeaponObject)
             {
                 if (mainIsActive && !secondaryIsActive)
                 {
-                    if(!mainWeaponObject.notShooting)
+                    if (!mainWeaponObject.notShooting)
                     {
                         StartCoroutine(mainWeaponObject.ShootMain());
 
@@ -77,7 +76,7 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 }
                 if (secondaryWeaponObject && !mainIsActive)
                 {
-                    if (!mainWeaponObject.notShooting)
+                    if (!secondaryWeaponObject.notShooting)
                     {
                         StartCoroutine(secondaryWeaponObject.ShootSecondary());
 
@@ -86,16 +85,7 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 }
             }
             GetWeaponOnHand();
-            if (Input.GetKeyDown(KeyCode.B))
-            {
 
-                EquipMainWeapon(setMainIndex);
-
-            }
-            else if (Input.GetKeyDown(KeyCode.D))
-            {
-                EquipSecondaryWeapon(setSecondaryIndex);
-            }
 
         }
 
@@ -115,6 +105,8 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                     secondaryIsActive = false;
                     mainWeaponObject.CheckWeapon();
                     rigController.Play("equip" + mainWeaponObject.weaponName);
+                    string equipName = "equip" + mainWeaponObject.weaponName;
+                    pw.RPC("PlayEquipMainWeapon" ,RpcTarget.OthersBuffered, equipName);
 
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha1) && mainIsActive && !secondaryIsActive)
@@ -133,6 +125,8 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                     secondaryWeaponObject.CheckWeapon();
 
                     rigController.Play("equip" + secondaryWeaponObject.weaponName);
+                    string equipName = "equip" + secondaryWeaponObject.weaponName;
+                    pw.RPC("PlayEquipSecondaryWeapon", RpcTarget.OthersBuffered, equipName);
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryIsActive && !mainIsActive)
                 {
@@ -142,56 +136,74 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 }
             }
 
-            
+
         }
         else
         {
             return;
         }
     }
-
+    [PunRPC]
+    public void PlayEquipMainWeapon(string i)
+    {
+        if(!pw.IsMine)
+        {
+            rigController.Play(i);
+        }
+    }
+    [PunRPC]
+    public void PlayEquipSecondaryWeapon(string i)
+    {
+        if (!pw.IsMine)
+        {
+            rigController.Play(i);
+        }
+    }
 
     public void EquipMainWeapon(int mainWeaponIndex)
     {
         if (pw.IsMine)
         {
             
-            if (mainWeaponIndex == 0 && mainWeapon[mainWeapon.Length -1].gameObject.activeSelf == true)
+            if (mainWeaponIndex == 0 && mainWeapon[mainWeapon.Length - 1].gameObject.activeSelf == true)
             {
-                mainWeapon[mainWeapon.Length -1].gameObject.SetActive(false);
-                setMainIndexRPC = mainWeaponIndex;
+                mainWeapon[mainWeapon.Length - 1].gameObject.SetActive(false);
                 mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
             }
+            else if(mainWeaponIndex == 0)
+            {
+                mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
+            }
+            
+                 
+            
             if (mainWeaponIndex < mainWeapon.Length && mainWeaponIndex != 0)
             {
                 mainWeapon[mainWeaponIndex - 1].gameObject.SetActive(false);
-                setMainIndexRPC = mainWeaponIndex;
                 mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
             }
             if (mainWeaponIndex == mainWeapon.Length)
             {
-                mainWeapon[mainWeaponIndex -1].gameObject.SetActive(false);
+                mainWeapon[mainWeaponIndex - 1].gameObject.SetActive(false);
                 mainWeaponIndex = 0;
                 setMainIndex = 0;
-                setMainIndexRPC = mainWeaponIndex;
                 mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
 
             }
-            Debug.Log(mainWeaponIndex);
             mainWeaponObject = mainWeapon[mainWeaponIndex];
             setMainIndex++;
             rigController.Play("equip" + mainWeapon[mainWeaponIndex].weaponName);
+            pw.RPC("EquipMainWeaponOtherPlayer",RpcTarget.OthersBuffered, mainWeaponIndex);
         }
 
 
 
 
-
     }
-   
+    [PunRPC]
     public void EquipMainWeaponOtherPlayer(int mainWeaponIndex)
     {
-        if(!pw.IsMine)
+        if (!pw.IsMine)
         {
             if (mainWeaponIndex == 0 && mainWeapon[mainWeapon.Length - 1].gameObject.activeSelf == true)
             {
@@ -199,6 +211,10 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
 
             }
+            else if (mainWeaponIndex == 0)
+            {
+                mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
+            }
             if (mainWeaponIndex < mainWeapon.Length && mainWeaponIndex != 0)
             {
                 mainWeapon[mainWeaponIndex - 1].gameObject.SetActive(false);
@@ -211,7 +227,6 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 mainWeaponIndex = 0;
                 mainWeapon[mainWeaponIndex].gameObject.SetActive(true);
 
-                setMainIndexRPC = 0;
             }
             rigController.Play("equip" + mainWeapon[mainWeaponIndex].weaponName);
         }
@@ -221,13 +236,16 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
     }
     public void EquipSecondaryWeapon(int secondaryWeaponIndex)
     {
-        if(pw.IsMine)
+        if (pw.IsMine)
         {
-            Debug.Log(secondaryWeaponIndex);
 
             if (secondaryWeaponIndex == 0 && secondaryWeapon[secondaryWeapon.Length - 1].gameObject.activeSelf == true)
             {
                 secondaryWeapon[mainWeapon.Length - 1].gameObject.SetActive(false);
+            }
+            else if (secondaryWeaponIndex == 0)
+            {
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             if (secondaryWeaponIndex < mainWeapon.Length && secondaryWeaponIndex != 0)
             {
@@ -238,24 +256,32 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
                 secondaryWeapon[secondaryWeaponIndex - 1].gameObject.SetActive(false);
                 secondaryWeaponIndex = 0;
                 setSecondaryIndex = 0;
-                setSecondaryIndexRPC = secondaryWeaponIndex;
 
                 secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
 
             }
+
             secondaryWeaponObject = secondaryWeapon[secondaryWeaponIndex];
             setSecondaryIndex++;
             rigController.Play("equip" + secondaryWeapon[secondaryWeaponIndex].weaponName);
+            
+            pw.RPC("EquipSecondaryWeaponOtherPlayer",RpcTarget.OthersBuffered, secondaryWeaponIndex);
         }
 
     }
+    [PunRPC]
     public void EquipSecondaryWeaponOtherPlayer(int secondaryWeaponIndex)
+
     {
         if (!pw.IsMine)
         {
             if (secondaryWeaponIndex == 0 && secondaryWeapon[secondaryWeapon.Length - 1].gameObject.activeSelf == true)
             {
                 secondaryWeapon[secondaryWeapon.Length - 1].gameObject.SetActive(false);
+            }
+            else if (secondaryWeaponIndex == 0)
+            {
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             if (secondaryWeaponIndex < secondaryWeapon.Length && secondaryWeaponIndex != 0)
             {
@@ -265,7 +291,6 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
             {
                 secondaryWeapon[secondaryWeaponIndex - 1].gameObject.SetActive(false);
                 secondaryWeaponIndex = 0;
-                setSecondaryIndexRPC = 0;
                 secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
 
             }
@@ -275,24 +300,5 @@ public class ActiveWeapon : MonoBehaviour, IPunObservable
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        if (stream.IsWriting)
-        {
-
-            setIndex[0] = setMainIndexRPC;
-            setIndex[1] = setSecondaryIndexRPC;
-            stream.SendNext(setIndex);
-        }
-        else
-        {
-            if (!pw.IsMine)
-            {
-                getIndex = (int[])stream.ReceiveNext();
-                EquipMainWeaponOtherPlayer(getIndex[0]);
-
-                EquipSecondaryWeaponOtherPlayer(getIndex[1]);
-            }
-
-        }
-
     }
 }

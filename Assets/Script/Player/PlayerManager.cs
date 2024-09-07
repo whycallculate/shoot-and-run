@@ -31,11 +31,7 @@ public class PlayerManager : MonoBehaviour
 
     [Header("Player Info")]
     public float currentHP;
-    float maxHP = 100;
-
-    int currentWeapon = 0;
-    int nextWeapon;
-    [SerializeField] Weapons[] weaponList;
+    float maxHP = 200;
     [SerializeField] Data playerData;
     [SerializeField] AimState playerAim;
     [SerializeField] PlayerMovement playerMovement;
@@ -57,7 +53,7 @@ public class PlayerManager : MonoBehaviour
             mainCamera.enabled = false;
             mainCamera.GetComponent<AudioListener>().enabled = false;
             mainCamera.GetComponent<CinemachineBrain>().enabled = false;
-            gameObject.transform.GetChild(1).GetComponent<AudioSource>().enabled = false;
+            gameObject.GetComponent<AudioSource>().enabled = false;   
 
         }
 
@@ -65,33 +61,43 @@ public class PlayerManager : MonoBehaviour
     }
     private void Update()
     {
+        if (!pw.IsMine)
+        {
+            Debug.Log(currentHP);
+        }
         if (pw.IsMine)
         {
+            Debug.Log(currentHP);
         }
     }
 
 
     public IEnumerator IsDeath()
     {
-        if(currentHP <= 0)
+        if(!pw.IsMine)
         {
-
-            playerMovement.animator.SetBool("Death", true);
-
-
-
-            yield return new WaitForSeconds(10f);
-            PhotonNetwork.Destroy(gameObject);
+            if (currentHP <= 0)
+            {
+                playerMovement.animator.SetBool("Death", true);
+                yield return new WaitForSeconds(5f);
+                PhotonNetwork.Destroy(player.gameObject);
+            }
 
         }
+
     }
 
 
     public void TakeDamage(float damage)
     {
-        pw.RPC("TakeDamageRPC", RpcTarget.All,damage);
-        TakeDamageMethod(damage);
-        StartCoroutine(IsDeath());
+        if(!pw.IsMine)
+        {
+            Debug.Log("Current Hp TakeDamage" + currentHP);
+            pw.RPC("TakeDamageRPC", RpcTarget.Others, damage);
+            TakeDamageMethod(damage);
+            StartCoroutine(IsDeath());
+        }
+
 
     }
     [PunRPC]

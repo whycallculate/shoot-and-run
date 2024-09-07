@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,10 @@ public abstract class WeaponBase
 {
     public ParticleSystem[] particleEffect;
     public TrailRenderer trailRenderer;
+    public Vector3 hitpoint;
+    public Vector3 hitnormal;
+    public int layerAndTagIndex;
+
     public string weaponName ;
     public WeaponType weaponType ;
     public int currentAmmo;
@@ -26,9 +31,11 @@ public abstract class WeaponBase
     public bool isAutomatic ;
     public float reloadTime;
     public string bullet;
+    public int weaponDamage;
+
     public Transform firePointnew;
     public Transform raycastDestination;
-    public int weaponDamage;
+    public PhotonView pw;
 
 
     public abstract void Shoot();
