@@ -10,7 +10,9 @@ public enum MovementState
     WALK,
     SPRINTING,
     AIR,
-    CROUCHING
+    CROUCHING,
+    SLIDEStart,
+    SLIDEStop
 }
 
 
@@ -74,7 +76,7 @@ public class PlayerMovement : MonoBehaviour
             startYScale = transform.localScale.y;
         }
 
-        
+
     }
 
     private void Update()
@@ -86,7 +88,7 @@ public class PlayerMovement : MonoBehaviour
             SpeedControl();
             JumpCheck();
             CrouchingPlayer();
-            
+
         }
 
 
@@ -101,14 +103,14 @@ public class PlayerMovement : MonoBehaviour
             StateHandler();
 
         }
-        
+
 
     }
 
     private void StateHandler()
     {
         //Kosma
-        if(grounded && Input.GetKey(InputManager.sprintkey))
+        if (grounded && Input.GetKey(InputManager.sprintkey))
         {
             state = MovementState.SPRINTING;
             PlayerMoveSpeed = playerSprintSpeed;
@@ -116,7 +118,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Running", true);
             animator.SetBool("Walking", false);
             animator.SetBool("Jump", false);
-            
+
         }
         //yurume
         else if (grounded)
@@ -138,14 +140,15 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Walking", true);
             animator.SetBool("Jump", false);
         }
-        if(!grounded)
+        if (!grounded)
         {
             state = MovementState.AIR;
-            animator.SetBool("Running",false);
-            animator.SetBool("Crouching",false);
-            animator.SetBool("Walking",false);
+            animator.SetBool("Running", false);
+            animator.SetBool("Crouching", false);
+            animator.SetBool("Walking", false);
             animator.SetBool("Jump", true);
         }
+
     }
 
     private void PlayerMove()
@@ -158,19 +161,19 @@ public class PlayerMovement : MonoBehaviour
         horizantalInput = InputManager.HorizontalPos;
         verticalInput = InputManager.VerticalPos;
         moveDirection = orientation.forward * verticalInput + orientation.right * horizantalInput;
-        
+
         if (grounded)
         {
             //Yerdeyken uyguladigimiz hareket islemi Hava Surtunmesi olmadan.
             PlayerRb.AddForce(moveDirection.normalized * PlayerMoveSpeed * 10f, ForceMode.Force);
-            
+
         }
         else if (!grounded)
         {
             //Eger yerde degil isek burada hava degiskeni ve gerekli animasyon islemleri devreye giriyor.
 
             PlayerRb.AddForce(moveDirection.normalized * PlayerMoveSpeed * 10f * airMultiplier, ForceMode.Force);
-            
+
         }
 
     }
@@ -178,11 +181,14 @@ public class PlayerMovement : MonoBehaviour
     private void GroundCheckRayCast()
     {
         //Karakterimizin ayaklari yere degiyor mu diye isin islemini kullaniyoruz.
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.4f + 0.2f, whatIsGround);
-        
+        RaycastHit hit;
+        grounded = Physics.Raycast(transform.position, Vector3.down, out hit, playerHeight * 0.4f + 0.2f, whatIsGround);
+
+
         if (grounded)
         {
             PlayerRb.drag = groundDrag;
+
         }
         else
         {
@@ -205,10 +211,10 @@ public class PlayerMovement : MonoBehaviour
     private void Jump()
     {
         //Ziplama Methodu
-        
+
         PlayerRb.velocity = new Vector3(PlayerRb.velocity.x, 0f, PlayerRb.velocity.z);
         PlayerRb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        
+
     }
     private IEnumerator ResetJump()
     {
@@ -218,29 +224,29 @@ public class PlayerMovement : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         readyToJump = true;
-        
-        
+
+
     }
     private void JumpCheck()
     {
         //Burada Ziplamaya hazir miyiz yere degiyor muyuz ve cooldown suresi dolmus mu kontrolleri
-        if (Input.GetKeyDown(KeyCode.Space) && readyToJump && grounded)
+        if (Input.GetKey(KeyCode.Space) && readyToJump && grounded)
         {
-            
+
             readyToJump = false;
             Jump();
             StartCoroutine(ResetJump());
-            
+
         }
     }
 
     private void CrouchingPlayer()
-    { 
+    {
         if (Input.GetKeyDown(InputManager.crouchingKey))
         {
             animator.SetBool("Crouching", true);
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
-            PlayerRb.AddForce(Vector3.down * 5f,ForceMode.Impulse);
+            PlayerRb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
         }
         if (Input.GetKeyDown(InputManager.crouchingKey))
         {
@@ -251,3 +257,4 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 }
+
