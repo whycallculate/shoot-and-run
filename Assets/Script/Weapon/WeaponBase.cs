@@ -16,16 +16,20 @@ public enum WeaponType
 
 public abstract class WeaponBase
 {
+    //Burada belirli indexlerle hata dondurecegiz.
+    //Ornek olarak clipsammo 0`a ulastigi vakit ' 3 ' hatasini donderecek ve biz gerekli islemlerimizi ona gore yapacagiz.
+    public int returnWarningIndex;
+
+    //Particle effect islemleri 
     public ParticleSystem[] particleEffect;
     public TrailRenderer trailRenderer;
     public Vector3 hitpoint;
     public Vector3 hitnormal;
     public int layerAndTagIndex;
 
+    //Silah Temel ozellikleri
     public string weaponName ;
     public WeaponType weaponType ;
-    public int currentAmmo;
-    public int maxAmmo ;
     public float fireRate;
     public float recoil ;
     public bool isAutomatic ;
@@ -33,6 +37,12 @@ public abstract class WeaponBase
     public string bullet;
     public int weaponDamage;
 
+    //Mermi islemleri 
+    public int currentAmmo;
+    public int maxAmmo;
+    public int clipsAmmo;
+
+    //Raycast ve Photon islemleri.
     public Transform firePointnew;
     public Transform raycastDestination;
     public PhotonView pw;

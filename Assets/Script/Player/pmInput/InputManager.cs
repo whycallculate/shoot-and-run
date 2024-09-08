@@ -11,7 +11,8 @@ public static class InputManager
     public static float HorizontalPos;
     public const KeyCode jumpKey = KeyCode.Space;
     public const KeyCode sprintkey = KeyCode.LeftShift;
-    public const KeyCode crouchingKey = KeyCode.LeftControl;
+    public const KeyCode crouchingKey = KeyCode.C;
+    public const KeyCode slideKey = KeyCode.LeftControl;
     public const KeyCode getWeaponOnHand = KeyCode.X;
     
 

@@ -36,6 +36,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] AimState playerAim;
     [SerializeField] PlayerMovement playerMovement;
     [SerializeField] GameObject player;
+    [SerializeField] ActiveWeapon activeWeapon;
     [SerializeField] Camera mainCamera;
     PhotonView pw;
     private void Awake()
@@ -74,10 +75,13 @@ public class PlayerManager : MonoBehaviour
 
     public IEnumerator IsDeath()
     {
-        if(!pw.IsMine)
+        if(pw.IsMine)
         {
             if (currentHP <= 0)
             {
+                activeWeapon.mainIsActive = false;
+                activeWeapon.secondaryIsActive = false;
+                activeWeapon.mainWeaponObject.CheckWeapon();
                 playerMovement.animator.SetBool("Death", true);
                 yield return new WaitForSeconds(5f);
                 PhotonNetwork.Destroy(player.gameObject);

@@ -48,7 +48,7 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
 
             anim = GetComponent<Animator>();
 
-            EquipMainWeapon(0);
+            EquipMainWeapon(3);
             EquipSecondaryWeapon(0);
         }
 
@@ -73,6 +73,11 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
                         StartCoroutine(mainWeaponObject.ShootMain());
 
                     }
+                    if (Input.GetKeyDown(KeyCode.R))
+                    {
+
+                        StartCoroutine(mainWeaponObject.ReloadOnGame());
+                    }
                 }
                 if (secondaryWeaponObject && !mainIsActive)
                 {
@@ -81,7 +86,11 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
                         StartCoroutine(secondaryWeaponObject.ShootSecondary());
 
                     }
+                    if (Input.GetKeyDown(KeyCode.R))
+                    {
 
+                        StartCoroutine(secondaryWeaponObject.ReloadOnGame());
+                    }
                 }
             }
             GetWeaponOnHand();

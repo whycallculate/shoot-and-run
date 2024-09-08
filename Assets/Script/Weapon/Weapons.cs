@@ -108,11 +108,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                 StartCoroutine(CheckWeapon());
 
             }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
 
-                StartCoroutine(ReloadOnGame());
-            }
             StateAnimUpdate(state);
         }
 
@@ -310,8 +306,6 @@ public class Weapons : MonoBehaviour, IPunObservable
 
     }
 
-
-
     [PunRPC]
     public void ShootOtherClientBlood(Vector3 hitpoint, Vector3 hitnormal)
     {
@@ -331,16 +325,31 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
 
     }
-    IEnumerator ReloadOnGame()
+    public IEnumerator ReloadOnGame()
     {
         if (weapon.currentAmmo != weapon.maxAmmo)
         {
-            
-            state = ShootState.RELOADING;
-            yield return new WaitForSeconds(1f);
-            weapon.Reload();
-            
+            if(weapon.returnWarningIndex == 0)
+            {
+                state = ShootState.RELOADING;
+                rigController.Play("weaponReload" + weapon.weaponType.ToString(), 2, 0.0f);
+                pw.RPC("ReloadOnOtherPlayer", RpcTarget.Others);
+                yield return new WaitForSeconds(1f);
+                weapon.Reload();
+            }
+            else if(weapon.returnWarningIndex == 1)
+            {
+                yield return null;
+            }
+        }
+    }
 
+    [PunRPC]
+    public void ReloadOnOtherPlayer()
+    {
+        if (!pw.IsMine)
+        {
+            rigController.Play("weaponReload" + weapon.weaponType.ToString(), 2, 0.0f);
         }
     }
     public IEnumerator ShootMain()
@@ -364,13 +373,6 @@ public class Weapons : MonoBehaviour, IPunObservable
                             notShooting = false;
 
                         }
-                        else if (weapon.currentAmmo <= 0)
-                        {
-                            state = ShootState.RELOADING;
-                            yield return new WaitForSeconds(1f);
-                            weapon.Reload();
-                        }
-
                     }
                 }
                 else if (weapon.isAutomatic)
@@ -386,12 +388,6 @@ public class Weapons : MonoBehaviour, IPunObservable
                             MakeVFXShoot();
                             yield return new WaitForSeconds(weapon.fireRate);
                             notShooting = false;
-                        }
-                        else if (weapon.currentAmmo <= 0)
-                        {
-                            state = ShootState.RELOADING;
-                            yield return new WaitForSeconds(1f);
-                            weapon.Reload();
                         }
 
                     }
@@ -418,17 +414,10 @@ public class Weapons : MonoBehaviour, IPunObservable
                             notShooting = true;
                             weapon.Shoot();
                             MakeVFXShoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
                             notShooting = false;
 
                         }
-                        else if (weapon.currentAmmo <= 0)
-                        {
-                            state = ShootState.RELOADING;
-                            yield return new WaitForSeconds(1f);
-                            weapon.Reload();
-                        }
-                        yield return new WaitForSeconds(weapon.fireRate);
-
                     }
                 }
                 else if (weapon.isAutomatic)
@@ -442,16 +431,9 @@ public class Weapons : MonoBehaviour, IPunObservable
                             notShooting = true;
                             weapon.Shoot();
                             MakeVFXShoot();
+                            yield return new WaitForSeconds(weapon.fireRate);
                             notShooting = false;
                         }
-                        else if (weapon.currentAmmo <= 0)
-                        {
-                            state = ShootState.RELOADING;
-                            yield return new WaitForSeconds(1f);
-                            weapon.Reload();
-                        }
-                        yield return new WaitForSeconds(weapon.fireRate);
-
                     }
                 }
             }
@@ -511,12 +493,25 @@ class Rifle : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
+        clipsAmmo = 4;
 
     }
 
     public override void Reload()
     {
-        base.currentAmmo = maxAmmo;
+        if (clipsAmmo > 0)
+        {
+            currentAmmo = maxAmmo;
+            base.clipsAmmo--;
+            base.returnWarningIndex = 0;
+
+        }
+        else if (clipsAmmo == 0)
+        {
+            //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
+            base.returnWarningIndex = 1;
+
+        }
     }
 
     public override void Shoot()
@@ -583,11 +578,22 @@ class Sniper : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
+        clipsAmmo = 4;
     }
 
     public override void Reload()
     {
-        base.currentAmmo = maxAmmo;
+        if (clipsAmmo > 0)
+        {
+            currentAmmo = maxAmmo;
+            base.clipsAmmo--;
+
+        }
+        else if (clipsAmmo == 0)
+        {
+            //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
+            base.returnWarningIndex = 1;
+        }
     }
 
     public override void Shoot()
@@ -604,7 +610,7 @@ class Sniper : WeaponBase
 
             Ray ray = new Ray();
             RaycastHit hit;
-
+            
             ray.origin = firePointnew.position;
             ray.direction = raycastDestination.position - firePointnew.position;
             if (Physics.Raycast(ray, out hit))
@@ -654,11 +660,22 @@ class Smg : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
+        clipsAmmo = 4;
     }
 
     public override void Reload()
     {
+        if (clipsAmmo > 0)
+        {
+            currentAmmo = maxAmmo;
+            base.clipsAmmo--;
 
+        }
+        else if (clipsAmmo == 0)
+        {
+            //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
+            base.returnWarningIndex = 1;
+        }
     }
 
     public override void Shoot()
@@ -732,11 +749,22 @@ class Pistol : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
+        clipsAmmo = 5;
     }
 
     public override void Reload()
     {
+        if (clipsAmmo > 0)
+        {
+            currentAmmo = maxAmmo;
+            base.clipsAmmo--;
 
+        }
+        else if (clipsAmmo == 0)
+        {
+            //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
+            base.returnWarningIndex = 1;
+        }
     }
 
     public override void Shoot()
@@ -808,11 +836,22 @@ class Shotgun : WeaponBase
         base.weaponDamage = 20;
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
+        clipsAmmo = 5;
     }
 
     public override void Reload()
     {
-        currentAmmo = maxAmmo;
+        if(clipsAmmo > 0)
+        {
+            currentAmmo = maxAmmo;
+            base.clipsAmmo--;
+
+        }
+        else if(clipsAmmo == 0)
+        {
+            //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
+            base.returnWarningIndex = 1;
+        }
     }
 
     public override void Shoot()
@@ -832,10 +871,10 @@ class Shotgun : WeaponBase
 
             ray.origin = firePointnew.position;
             ray.direction = raycastDestination.position - firePointnew.position;
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out hit,50f))
             {
 
-                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal) * randomRotation);
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
