@@ -83,7 +83,9 @@ public class PlayerManager : MonoBehaviour
                 activeWeapon.secondaryIsActive = false;
                 activeWeapon.mainWeaponObject.CheckWeapon();
                 playerMovement.animator.SetBool("Death", true);
+                playerMovement.rigAnimator.SetBool("SetWeight", true);
                 yield return new WaitForSeconds(5f);
+                playerMovement.rigAnimator.SetBool("SetWeight", false);
                 PhotonNetwork.Destroy(player.gameObject);
             }
 

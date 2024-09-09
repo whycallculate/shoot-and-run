@@ -11,15 +11,16 @@ public enum MovementState
     SPRINTING,
     AIR,
     CROUCHING,
-    SLIDEStart,
-    SLIDEStop
+    DASH,
+    
 }
 
 
 public class PlayerMovement : MonoBehaviour
 {
+
     [Header("Movement")]
-    private float PlayerMoveSpeed = 5f;
+    public float PlayerMoveSpeed = 5f;
     public float playerWalkSpeed;
     public float playerSprintSpeed;
     public MovementState state;
@@ -35,9 +36,11 @@ public class PlayerMovement : MonoBehaviour
     public float jumpCooldown;
     public float airMultiplier;
     bool readyToJump = true;
+    bool secondJump;
 
     [Header("Animation")]
     [SerializeField] public Animator animator;
+    [SerializeField] public Animator rigAnimator;
     PhotonView pw;
     PhotonAnimatorView animpw;
 
@@ -53,14 +56,28 @@ public class PlayerMovement : MonoBehaviour
     Vector3 moveDirection;
     Rigidbody PlayerRb;
 
+    [Header("Dash")]
+    public float dashForce;
+    public bool dashToReady;
+    public float DashTime;
+    public bool isInDash;
+    [SerializeField] ParticleSystem dashparticle;
+    public CinemachineImpulseSource impSource;
+
 
 
 
 
     private void Awake()
     {
-        PlayerRb = GetComponent<Rigidbody>();
         pw = GetComponent<PhotonView>();
+
+        if (pw.IsMine)
+        {
+            PlayerRb = GetComponent<Rigidbody>();
+            impSource =  GetComponent<CinemachineImpulseSource>();
+        }
+
         // Eğer bu oyuncu local oyuncu değilse, script'i devre dışı bırak
         if (!pw.IsMine)
         {
@@ -72,6 +89,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (pw.IsMine)
         {
+            isInDash = false;
+            dashToReady = true;
             // Hareket kodlarınız burada
             startYScale = transform.localScale.y;
         }
@@ -88,6 +107,7 @@ public class PlayerMovement : MonoBehaviour
             SpeedControl();
             JumpCheck();
             CrouchingPlayer();
+            DashCheck();
 
         }
 
@@ -117,9 +137,9 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             animator.SetBool("Running", true);
             animator.SetBool("Walking", false);
-            animator.SetBool("Jump", false);
 
         }
+
         //yurume
         else if (grounded)
         {
@@ -128,7 +148,6 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Running", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Walking", true);
-            animator.SetBool("Jump", false);
 
         }
         if (Input.GetKey(InputManager.crouchingKey))
@@ -138,15 +157,19 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Running", false);
             animator.SetBool("Crouching", true);
             animator.SetBool("Walking", true);
-            animator.SetBool("Jump", false);
         }
         if (!grounded)
         {
             state = MovementState.AIR;
+
             animator.SetBool("Running", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Walking", false);
-            animator.SetBool("Jump", true);
+
+        }
+        if (!dashToReady && Input.GetKey(InputManager.dashKey))
+        {
+            state = MovementState.DASH;
         }
 
     }
@@ -202,7 +225,7 @@ public class PlayerMovement : MonoBehaviour
         //Karakterimizin durmadan hizlanmamasi icin yaptigimiz kontroller
         Vector3 flatVel = new Vector3(PlayerRb.velocity.x, 0f, PlayerRb.velocity.z);
 
-        if (flatVel.magnitude > PlayerMoveSpeed)
+        if (flatVel.magnitude > PlayerMoveSpeed && !isInDash)
         {
             Vector3 limetedVel = flatVel.normalized * PlayerMoveSpeed;
             PlayerRb.velocity = new Vector3(limetedVel.x, PlayerRb.velocity.y, limetedVel.z);
@@ -211,32 +234,64 @@ public class PlayerMovement : MonoBehaviour
     private void Jump()
     {
         //Ziplama Methodu
-
+        secondJump = true;
         PlayerRb.velocity = new Vector3(PlayerRb.velocity.x, 0f, PlayerRb.velocity.z);
         PlayerRb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        StartCoroutine(ResetJump(secondJump));
+
+
 
     }
-    private IEnumerator ResetJump()
+    private IEnumerator ResetJump(bool secondjump)
     {
-        //Animasyon icin ufak Time checkleri attiriyoruz ki animasyon daha iyi gozuksun ve burasi cooldown kismi
-        yield return new WaitForSeconds(0.5f);
-        animator.SetBool("Jump", false);
+        yield return new WaitForSeconds(0.1f);
+        Debug.Log("0.05f");
+        float time =+ 0.5f;
+        while(time >= 0 ) 
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && secondjump)
+            {
+                animator.SetBool("SecondJump", true);
+                animator.SetBool("Jump", false);
+                rigAnimator.SetBool("SetWeight", true);
 
+                PlayerRb.velocity = new Vector3(PlayerRb.velocity.x, PlayerRb.velocity.y, PlayerRb.velocity.z);
+                PlayerRb.AddForce(transform.up * jumpForce / 2f, ForceMode.Impulse);
+                secondJump = false;
+                Debug.Log("SecondJump true");
+
+                yield return new WaitForSeconds(0.5f);
+                break;
+            }
+            if(time <= 0)
+            {
+                break;
+            }
+            time -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        //Animasyon icin ufak Time checkleri attiriyoruz ki animasyon daha iyi gozuksun ve burasi cooldown kismi
+        animator.SetBool("SecondJump", false);
+        rigAnimator.SetBool("SetWeight", false);
+        secondJump = false;
+        animator.SetBool("Jump", false);
         yield return new WaitForSeconds(0.1f);
         readyToJump = true;
 
 
     }
+
     private void JumpCheck()
     {
         //Burada Ziplamaya hazir miyiz yere degiyor muyuz ve cooldown suresi dolmus mu kontrolleri
-        if (Input.GetKey(KeyCode.Space) && readyToJump && grounded)
+        if (Input.GetKeyDown(KeyCode.Space) && readyToJump && grounded)
         {
 
             readyToJump = false;
-            Jump();
-            StartCoroutine(ResetJump());
+            animator.SetBool("Jump", true);
 
+            Jump();
         }
     }
 
@@ -255,6 +310,35 @@ public class PlayerMovement : MonoBehaviour
 
 
         }
+    }
+    public void DashCheck()
+    {
+        if (Input.GetKeyDown(KeyCode.C) && dashToReady && state == MovementState.SPRINTING)
+        {
+            isInDash = true;
+
+            Debug.Log("DashCheck");
+            DashingPlayer();
+            StartCoroutine(ResetDash());
+        }
+    }
+
+    private void DashingPlayer()
+    {
+        dashToReady = false;
+        dashparticle.Emit(100);
+        animator.SetBool("Dashing", true);
+        impSource.GenerateImpulse();
+        PlayerRb.AddForce(transform.forward * dashForce, ForceMode.Impulse);
+    }
+    private IEnumerator ResetDash()
+    {
+        yield return new WaitForSeconds(DashTime / 2f);
+        isInDash = false;
+        animator.SetBool("Dashing", false);
+        yield return new WaitForSeconds(DashTime);
+        dashToReady = true;
+
     }
 }
 
