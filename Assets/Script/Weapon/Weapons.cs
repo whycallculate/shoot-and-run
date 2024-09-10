@@ -31,7 +31,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     [SerializeField] ParticleSystem[] particleEffect;
     [SerializeField] ShootState state;
     [SerializeField] public Animator anim;
-    [SerializeField] WeaponType type;
+    [SerializeField] public WeaponType type;
     [SerializeField] public string weaponName;
     [SerializeField] int ammo;
     [SerializeField] float firerate;
@@ -195,30 +195,7 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
         if(state == ShootState.SHOOTING)
         {
-            if(weapon.weaponType == WeaponType.SHOTGUN)
-            {
-                pw.RPC("GetSFXVolumeRPC", RpcTarget.All,3);
-            }
-            else if(weapon.weaponType == WeaponType.RIFLE)
-            {
-                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 0);
-
-            }
-            else if(weapon.weaponType == WeaponType.SMG)
-            {
-                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 4);
-
-            }
-            else if(weapon.weaponType == WeaponType.PISTOL)
-            {
-                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 1);
-
-            }
-            else if(weapon.weaponType == WeaponType.SNIPER)
-            {
-                pw.RPC("GetSFXVolumeRPC", RpcTarget.All, 2);
-
-            }
+            
             weaponBarrel.enabled = true;
             RecoilShake();
 
@@ -238,7 +215,8 @@ public class Weapons : MonoBehaviour, IPunObservable
     }
     public void MakeVFXShoot()
     {
-        if(weapon.layerAndTagIndex == 0)
+
+        if (weapon.layerAndTagIndex == 0)
         {
 
             particleEffect[0].Emit(1);
@@ -275,6 +253,30 @@ public class Weapons : MonoBehaviour, IPunObservable
             particleEffect[8].Emit(1);
             particleEffect[8].transform.position = weapon.hitpoint;
             particleEffect[8].transform.forward = weapon.hitnormal;
+
+            particleEffect[9].Emit(200);
+            particleEffect[9].transform.position = weapon.hitpoint;
+            particleEffect[9].transform.forward = weapon.hitnormal;
+            pw.RPC("ShootOtherClientBlood", RpcTarget.Others, weapon.hitpoint, weapon.hitnormal);
+
+        }
+        else if (weapon.layerAndTagIndex == 2)
+        {
+            particleEffect[6].Emit(5);
+            particleEffect[6].transform.position = weapon.hitpoint;
+            particleEffect[6].transform.forward = weapon.hitnormal;
+
+            particleEffect[7].Emit(15);
+            particleEffect[7].transform.position = weapon.hitpoint;
+            particleEffect[7].transform.forward = weapon.hitnormal;
+
+            particleEffect[8].Emit(2);
+            particleEffect[8].transform.position = weapon.hitpoint;
+            particleEffect[8].transform.forward = weapon.hitnormal;
+
+            particleEffect[9].Emit(200);
+            particleEffect[9].transform.position = weapon.hitpoint;
+            particleEffect[9].transform.forward = weapon.hitnormal;
             pw.RPC("ShootOtherClientBlood", RpcTarget.Others, weapon.hitpoint, weapon.hitnormal);
 
         }
@@ -302,6 +304,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             particleEffect[5].transform.position = hitpoint;
             particleEffect[5].transform.forward = hitnormal;
             particleEffect[5].Emit(1);
+
         }
 
     }
@@ -322,6 +325,10 @@ public class Weapons : MonoBehaviour, IPunObservable
             particleEffect[8].Emit(1);
             particleEffect[8].transform.position = hitpoint;
             particleEffect[8].transform.forward = hitnormal;
+
+            particleEffect[9].Emit(200);
+            particleEffect[9].transform.position = hitnormal;
+            particleEffect[9].transform.forward = hitnormal;
         }
 
     }
@@ -331,6 +338,30 @@ public class Weapons : MonoBehaviour, IPunObservable
         {
             if(weapon.returnWarningIndex == 0)
             {
+                if (weapon.weaponType == WeaponType.SHOTGUN)
+                {
+                    SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 3, 0.4f);
+                }
+                else if (weapon.weaponType == WeaponType.RIFLE)
+                {
+                    SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 0, 0.4f);
+
+                }
+                else if (weapon.weaponType == WeaponType.SMG)
+                {
+                    SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 4, 0.4f);
+
+                }
+                else if (weapon.weaponType == WeaponType.PISTOL)
+                {
+                    SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 1, 0.4f);
+
+                }
+                else if (weapon.weaponType == WeaponType.SNIPER)
+                {
+                    SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 2, 0.4f);
+
+                }
                 state = ShootState.RELOADING;
                 rigController.Play("weaponReload" + weapon.weaponType.ToString(), 2, 0.0f);
                 pw.RPC("ReloadOnOtherPlayer", RpcTarget.Others);
@@ -339,7 +370,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             }
             else if(weapon.returnWarningIndex == 1)
             {
-                yield return null;
+                SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON_RELOAD, 5, 0.4f);
             }
         }
     }
@@ -365,6 +396,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                         if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                         {
                             GenerateRecoil();
+                            ShootSoundEffect();
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
@@ -382,6 +414,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                         if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                         {
                             GenerateRecoil();
+                            ShootSoundEffect();
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
@@ -396,7 +429,7 @@ public class Weapons : MonoBehaviour, IPunObservable
             
         }
     }
-    
+
     public IEnumerator ShootSecondary()
     {
         if (pw.IsMine)
@@ -410,6 +443,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                         if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                         {
                             GenerateRecoil();
+                            ShootSoundEffect();
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
@@ -427,6 +461,7 @@ public class Weapons : MonoBehaviour, IPunObservable
                         if (weapon.currentAmmo == weapon.maxAmmo || weapon.currentAmmo > 0)
                         {
                             GenerateRecoil();
+                            ShootSoundEffect();
                             state = ShootState.SHOOTING;
                             notShooting = true;
                             weapon.Shoot();
@@ -440,6 +475,44 @@ public class Weapons : MonoBehaviour, IPunObservable
         }
     }
 
+    public void ShootSoundEffect()
+    {
+        if (weapon.weaponType == WeaponType.SHOTGUN)
+        {
+            SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, 3, 0.4f);
+            pw.RPC("GetSFXVolumeRPC", RpcTarget.Others, 3);
+        }
+        else if (weapon.weaponType == WeaponType.RIFLE)
+        {
+            SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, 0, 0.4f);
+            pw.RPC("GetSFXVolumeRPC", RpcTarget.Others, 0);
+
+        }
+        else if (weapon.weaponType == WeaponType.SMG)
+        {
+            SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, 4, 0.4f);
+            pw.RPC("GetSFXVolumeRPC", RpcTarget.Others, 4);
+
+        }
+        else if (weapon.weaponType == WeaponType.PISTOL)
+        {
+            SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, 1, 0.4f);
+            pw.RPC("GetSFXVolumeRPC", RpcTarget.Others, 1);
+
+        }
+        else if (weapon.weaponType == WeaponType.SNIPER)
+        {
+            SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, 2, 0.4f);
+            pw.RPC("GetSFXVolumeRPC", RpcTarget.Others, 2);
+
+        }
+
+    }
+    [PunRPC]
+    public void GetSFXVolumeRPC(int sound)
+    {
+        SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, sound, 0.4f);
+    }
     public void RecoilShake()
     {
         if (pw.IsMine)
@@ -450,11 +523,7 @@ public class Weapons : MonoBehaviour, IPunObservable
 
     }
 
-    [PunRPC]
-    public void GetSFXVolumeRPC(int sound)
-    {
-        SoundManager.PlayerPlaySoundOneShot(SoundType.WEAPON, sound, 0.4f);
-    }
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -555,6 +624,12 @@ class Rifle : WeaponBase
                         hitnormal = hit.normal;
                     }
                 }
+                if (hit.collider.CompareTag("PlayerBody"))
+                {
+                    layerAndTagIndex = 2;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
             }
         }
     }
@@ -636,6 +711,12 @@ class Sniper : WeaponBase
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
                     }
+                }
+                if (hit.collider.CompareTag("PlayerBody"))
+                {
+                    layerAndTagIndex = 2;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
                 }
             }
         }
@@ -719,6 +800,12 @@ class Smg : WeaponBase
                         hitnormal = hit.normal;
                     }
                 }
+                if (hit.collider.CompareTag("PlayerBody"))
+                {
+                    layerAndTagIndex = 2;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
             }
         }
 
@@ -766,7 +853,6 @@ class Pistol : WeaponBase
             base.returnWarningIndex = 1;
         }
     }
-
     public override void Shoot()
     {
         int pelletCount = 1;
@@ -808,9 +894,17 @@ class Pistol : WeaponBase
                         hitnormal = hit.normal;
                     }
                 }
+                if (hit.collider.CompareTag("PlayerBody"))
+                {
+                    layerAndTagIndex = 2;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
+                }
             }
         }
+
     }
+
     public IEnumerator DestroySelfBullet(GameObject bullet)
     {
         yield return new WaitForSeconds(0.4f);
@@ -856,12 +950,15 @@ class Shotgun : WeaponBase
 
     public override void Shoot()
     {
-        int pelletCount = 5;
-        float spreadAngle = 2f;
+        int pelletCount = 8; // Pompalı için birden fazla saçma
+        float spreadAngle = 1f; // Saçmaların yayılma açısı
+        float maxRange = 50f; // Maksimum menzil
         currentAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
         {
+            Debug.Log("SHOTGUN KAC KERE ATES ETTI");
+            // Saçma yayılma açısını rastgele oluştur
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
             Quaternion randomRotation = Quaternion.Euler(firePointnew.rotation.eulerAngles + new Vector3(randomX, randomY, 0));
@@ -870,11 +967,16 @@ class Shotgun : WeaponBase
             RaycastHit hit;
 
             ray.origin = firePointnew.position;
-            ray.direction = raycastDestination.position - firePointnew.position;
-            if (Physics.Raycast(ray, out hit,50f))
-            {
+            ray.direction = randomRotation * (raycastDestination.position - firePointnew.position).normalized;
 
-                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal) * randomRotation);
+
+            if (Physics.Raycast(ray, out hit, maxRange))
+            {
+                Debug.DrawLine(firePointnew.position, hit.point, Color.green, 1f); 
+
+
+                // Merminin çarpma noktası ve kuvveti
+                GameObject tracers = PhotonNetwork.Instantiate(Path.Combine("bullet", bullet), firePointnew.position, Quaternion.LookRotation(hit.normal));
                 Rigidbody rb = tracers.GetComponent<Rigidbody>();
                 rb.AddForce(randomRotation * Vector3.forward * 30f, ForceMode.Impulse);
 
@@ -894,6 +996,13 @@ class Shotgun : WeaponBase
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
                     }
+                }
+
+                if (hit.collider.CompareTag("PlayerBody"))
+                {
+                    layerAndTagIndex = 2;
+                    hitpoint = hit.point;
+                    hitnormal = hit.normal;
                 }
             }
         }

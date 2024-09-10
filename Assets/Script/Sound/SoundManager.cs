@@ -10,6 +10,7 @@ public enum SoundType
     UI_BUTTON,
     UI_NEXT,
     WEAPON,
+    WEAPON_RELOAD,
     PLAYER_FOOT_STEP,
     PLAYER_DAMAGE,
     PLAYER_STUFF

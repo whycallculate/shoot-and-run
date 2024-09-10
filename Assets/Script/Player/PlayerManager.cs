@@ -24,11 +24,6 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        currentHP = maxHP;
-    }
-
     [Header("Player Info")]
     public float currentHP;
     float maxHP = 200;
@@ -39,13 +34,19 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] ActiveWeapon activeWeapon;
     [SerializeField] Camera mainCamera;
     PhotonView pw;
+    [SerializeField] ParticleSystem[] playerParticle;
+    private void OnEnable()
+    {
+        currentHP = maxHP;
+    }
+
     private void Awake()
     {
         pw = GetComponent<PhotonView>();
         if (pw.IsMine)
         {
 
-            SoundManager.playerSfx = transform.GetChild(1).GetComponent<AudioSource>();
+            SoundManager.playerSfx = transform.GetComponent<AudioSource>();
 
 
         }
