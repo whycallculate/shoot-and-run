@@ -22,11 +22,14 @@ public class GameManager : MonoBehaviourPunCallbacks
     Vector3 spawnPosition;
     public void Start()
     {
-
         PhotonNetwork.ConnectUsingSettings();
         //spawnPosition = new Vector3(Random.Range(-21, -100f), transform.position.y, transform.position.z);
         //GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), spawnPosition, Quaternion.identity);
         //SoundManager.Instance.StopBackgroundMusic();
+        //if (player.transform.GetChild(1).GetComponent<PhotonView>().IsMine)
+        //{
+        //    GameUI.Instance.GetPlayerData(player);
+        //}
     }
     public override void OnConnectedToMaster()
     {

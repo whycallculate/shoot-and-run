@@ -245,7 +245,6 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator ResetJump(bool secondjump)
     {
         yield return new WaitForSeconds(0.1f);
-        Debug.Log("0.05f");
         float time =+ 0.5f;
         while(time >= 0 ) 
         {
@@ -258,7 +257,6 @@ public class PlayerMovement : MonoBehaviour
                 PlayerRb.velocity = new Vector3(PlayerRb.velocity.x, PlayerRb.velocity.y, PlayerRb.velocity.z);
                 PlayerRb.AddForce(transform.up * jumpForce / 2f, ForceMode.Impulse);
                 secondJump = false;
-                Debug.Log("SecondJump true");
 
                 yield return new WaitForSeconds(0.5f);
                 break;

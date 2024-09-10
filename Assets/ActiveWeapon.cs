@@ -48,8 +48,8 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
 
             anim = GetComponent<Animator>();
 
-            EquipMainWeapon(3);
-            EquipSecondaryWeapon(0);
+            EquipMainWeapon(1);
+            EquipSecondaryWeapon(4);
         }
 
 
@@ -71,7 +71,6 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
                     if (!mainWeaponObject.notShooting)
                     {
                         StartCoroutine(mainWeaponObject.ShootMain());
-
                     }
                     if (Input.GetKeyDown(KeyCode.R))
                     {
@@ -84,6 +83,8 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
                     if (!secondaryWeaponObject.notShooting)
                     {
                         StartCoroutine(secondaryWeaponObject.ShootSecondary());
+
+
 
                     }
                     if (Input.GetKeyDown(KeyCode.R))
@@ -99,7 +100,6 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
         }
 
     }
-
 
     public void GetWeaponOnHand()
     {
@@ -251,6 +251,7 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
             if (secondaryWeaponIndex == 0 && secondaryWeapon[secondaryWeapon.Length - 1].gameObject.activeSelf == true)
             {
                 secondaryWeapon[mainWeapon.Length - 1].gameObject.SetActive(false);
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             else if (secondaryWeaponIndex == 0)
             {
@@ -259,6 +260,7 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
             if (secondaryWeaponIndex < mainWeapon.Length && secondaryWeaponIndex != 0)
             {
                 secondaryWeapon[secondaryWeaponIndex - 1].gameObject.SetActive(false);
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             if (secondaryWeaponIndex == secondaryWeapon.Length)
             {
@@ -287,6 +289,7 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
             if (secondaryWeaponIndex == 0 && secondaryWeapon[secondaryWeapon.Length - 1].gameObject.activeSelf == true)
             {
                 secondaryWeapon[secondaryWeapon.Length - 1].gameObject.SetActive(false);
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             else if (secondaryWeaponIndex == 0)
             {
@@ -295,6 +298,7 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
             if (secondaryWeaponIndex < secondaryWeapon.Length && secondaryWeaponIndex != 0)
             {
                 secondaryWeapon[secondaryWeaponIndex - 1].gameObject.SetActive(false);
+                secondaryWeapon[secondaryWeaponIndex].gameObject.SetActive(true);
             }
             if (secondaryWeaponIndex == secondaryWeapon.Length)
             {
