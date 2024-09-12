@@ -11,6 +11,7 @@ public class ModelGetData : MonoBehaviour
     [SerializeField]public SkinnedMeshRenderer Feet;
     [SerializeField]public SkinnedMeshRenderer Head;
     [SerializeField]public SkinnedMeshRenderer Legs;
+    [SerializeField] public SkinnedMeshRenderer Backpack;
     public int costumIndex;
     
 

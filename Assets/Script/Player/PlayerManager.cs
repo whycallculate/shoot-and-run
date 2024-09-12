@@ -93,7 +93,15 @@ public class PlayerManager : MonoBehaviour
         }
 
     }
+    public void GiveDamage(float damage)
+    {
+        if (pw.IsMine)
+        {
+            pw.RPC("GiveDamageRPC", RpcTarget.Others, damage);
+            GiveDamageMethod(damage);
+        }
 
+    }
 
     public void TakeDamage(float damage)
     {
@@ -121,6 +129,15 @@ public class PlayerManager : MonoBehaviour
 
         Debug.Log(currentHP +PhotonNetwork.NickName);
     }
+    [PunRPC]
+    public void GiveDamageRPC(float damage)
+    {
+        if (!pw.IsMine)
+        {
+            currentHP -= damage;
+            StartCoroutine(IsDeath());
+        }
+    }
     public void TakeDamageMethod(float damage)
     {
         if (!pw.IsMine)
@@ -131,6 +148,13 @@ public class PlayerManager : MonoBehaviour
 
         }
 
+    }
+    public void GiveDamageMethod(float damage)
+    {
+        if (pw.IsMine)
+        {
+            currentHP -= damage;
+        }
     }
 
     public IEnumerator HittingCoroutine()
