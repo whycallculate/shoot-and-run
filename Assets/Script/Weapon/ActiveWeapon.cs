@@ -48,8 +48,8 @@ public class ActiveWeapon : MonoBehaviour,IPunObservable
 
             anim = GetComponent<Animator>();
 
-            EquipMainWeapon(1);
-            EquipSecondaryWeapon(4);
+            EquipMainWeapon(3);
+            EquipSecondaryWeapon(1);
         }
 
 
