@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
 {
 
     [Header("Movement")]
-    public float PlayerMoveSpeed = 5f;
+    public float PlayerMoveSpeed = 20f;
     public float playerWalkSpeed;
     public float playerSprintSpeed;
     public MovementState state;
@@ -49,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
     public float playerHeight;
     public LayerMask whatIsGround;
     bool grounded;
+    float airTime;
 
     public Transform orientation;
     float horizantalInput;
@@ -56,11 +57,14 @@ public class PlayerMovement : MonoBehaviour
     Vector3 moveDirection;
     Rigidbody PlayerRb;
 
+
+
     [Header("Dash")]
     public float dashForce;
     public bool dashToReady;
     public float DashTime;
     public bool isInDash;
+    public float playerDashSpeed;
     [SerializeField] ParticleSystem dashparticle;
     public CinemachineImpulseSource impSource;
 
@@ -93,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
             dashToReady = true;
             // Hareket kodlarınız burada
             startYScale = transform.localScale.y;
+            airTime = 0;
         }
 
 
@@ -108,9 +113,7 @@ public class PlayerMovement : MonoBehaviour
             JumpCheck();
             CrouchingPlayer();
             DashCheck();
-
         }
-
 
     }
 
@@ -130,7 +133,16 @@ public class PlayerMovement : MonoBehaviour
     private void StateHandler()
     {
         //Kosma
-        if (grounded && Input.GetKey(InputManager.sprintkey))
+        if (isInDash)
+        {
+            state = MovementState.DASH;
+            PlayerMoveSpeed = playerDashSpeed;
+            if (!grounded)
+            {
+                PlayerRb.drag = 1f;
+            }
+        }
+        else if (grounded && Input.GetKey(InputManager.sprintkey))
         {
             state = MovementState.SPRINTING;
             PlayerMoveSpeed = playerSprintSpeed;
@@ -161,19 +173,59 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded)
         {
             state = MovementState.AIR;
-
+            
             animator.SetBool("Running", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Walking", false);
+            StartCoroutine(AirCheck());
+            
+        }
 
-        }
-        if (!dashToReady && Input.GetKey(InputManager.dashKey))
-        {
-            state = MovementState.DASH;
-        }
 
     }
+    IEnumerator AirCheck()
+    {
+        
+        while (true)
+        {
+            airTime += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+            if (grounded)
+            {
 
+                if(airTime > 100 && airTime < 200)
+                {
+                    animator.SetBool("Downing", true);
+                    animator.SetFloat("land", 0);
+                    rigAnimator.SetBool("SetWeight", true);
+                    GetComponent<PlayerManager>().GiveDamage(10);
+                    airTime = 0;
+                    yield return new WaitForSeconds(0.2f);
+                    rigAnimator.SetBool("SetWeight", false);
+                    animator.SetBool("Downing", false);
+                    break;
+                }
+                else if(airTime > 201)
+                {
+                    animator.SetBool("Downing", true);
+                    animator.SetFloat("land", 1);
+                    rigAnimator.SetBool("SetWeight", true);
+                    GetComponent<PlayerManager>().GiveDamage(50);
+                    airTime = 0;
+                    yield return new WaitForSeconds(0.2f);
+                    rigAnimator.SetBool("SetWeight", false);
+                    animator.SetBool("Downing", false);
+                    break;
+                }
+                else
+                {
+                    airTime = 0;
+                    animator.SetBool("Downing", false);
+                    break;
+                }
+            }
+        }
+    }
     private void PlayerMove()
     {
         //Animasyon icin gerekli bilgiler.
@@ -215,8 +267,10 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            
             //ayaklarim yere degmiyor.
             PlayerRb.drag = 0;
+
         }
 
     }
@@ -244,7 +298,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private IEnumerator ResetJump(bool secondjump)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.01f);
         float time =+ 0.5f;
         while(time >= 0 ) 
         {
@@ -266,15 +320,16 @@ public class PlayerMovement : MonoBehaviour
                 break;
             }
             time -= Time.deltaTime;
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(Time.deltaTime);
         }
 
         //Animasyon icin ufak Time checkleri attiriyoruz ki animasyon daha iyi gozuksun ve burasi cooldown kismi
         animator.SetBool("SecondJump", false);
-        rigAnimator.SetBool("SetWeight", false);
+
         secondJump = false;
         animator.SetBool("Jump", false);
         yield return new WaitForSeconds(0.1f);
+        rigAnimator.SetBool("SetWeight", false);
         readyToJump = true;
 
 
@@ -314,7 +369,7 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C) && dashToReady && state == MovementState.SPRINTING)
         {
             isInDash = true;
-
+            playerDashSpeed = 14f;
             Debug.Log("DashCheck");
             DashingPlayer();
             StartCoroutine(ResetDash());
@@ -327,7 +382,7 @@ public class PlayerMovement : MonoBehaviour
         dashparticle.Emit(100);
         animator.SetBool("Dashing", true);
         impSource.GenerateImpulse();
-        PlayerRb.AddForce(transform.forward * dashForce, ForceMode.Impulse);
+
     }
     private IEnumerator ResetDash()
     {
@@ -338,5 +393,6 @@ public class PlayerMovement : MonoBehaviour
         dashToReady = true;
 
     }
+
 }
 

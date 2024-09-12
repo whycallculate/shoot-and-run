@@ -825,7 +825,7 @@ RectTransform:
   m_GameObject: {fileID: 267583295}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.9999997, y: 0.9999997, z: 0.9999997}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1498913907}
@@ -834,7 +834,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -575.79, y: 826}
+  m_AnchoredPosition: {x: -556.3, y: 834.3}
   m_SizeDelta: {x: 229.871, y: 73.5489}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &267583297
@@ -31123,10 +31123,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01f08222636409458e2f283456f9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHandTarget: {fileID: 8502052857267115404}
-  leftHandRig: {fileID: 0}
+  duration: 0
+  particleEffect: []
   state: 0
-  muzzle: {fileID: 7198164831401276859}
   anim: {fileID: 615076042730521279}
   type: 3
   weaponName: Shotgun
@@ -31136,8 +31135,15 @@ MonoBehaviour:
   isAutomatic: 0
   reloadTime: 1
   bullet: ShotgunBullet
-  firePoint: {fileID: 4955814971077689896}
+  firePointnew: {fileID: 0}
+  raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 4071228931089864451}
+  weaponAnimation: {fileID: 0}
+  rigController: {fileID: 0}
+  newAimState: {fileID: 0}
+  activeWeapon: {fileID: 0}
+  pw: {fileID: 0}
+  notShooting: 0
 --- !u!1 &7270444841144997144
 GameObject:
   m_ObjectHideFlags: 0
@@ -31722,10 +31728,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01f08222636409458e2f283456f9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHandTarget: {fileID: 8653429281628415549}
-  leftHandRig: {fileID: 0}
+  duration: 0
+  particleEffect: []
   state: 0
-  muzzle: {fileID: 5469469706393951236}
   anim: {fileID: 615076042730521279}
   type: 1
   weaponName: Rifle_01
@@ -31735,8 +31740,15 @@ MonoBehaviour:
   isAutomatic: 1
   reloadTime: 3
   bullet: RifleBullet
-  firePoint: {fileID: 3496549618613907449}
+  firePointnew: {fileID: 0}
+  raycastDestination: {fileID: 0}
   weaponBarrel: {fileID: 4908836909771237744}
+  weaponAnimation: {fileID: 0}
+  rigController: {fileID: 0}
+  newAimState: {fileID: 0}
+  activeWeapon: {fileID: 0}
+  pw: {fileID: 0}
+  notShooting: 0
 --- !u!198 &7935017099908912557
 ParticleSystem:
   m_ObjectHideFlags: 0

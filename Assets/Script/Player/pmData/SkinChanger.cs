@@ -28,13 +28,18 @@ public class SkinChanger : MonoBehaviour, IPunObservable
     private void Awake()
     {
         pw = gameObject.GetComponent<PhotonView>();
+        if(pw.IsMine)
+        {
+
+        }
+
 
     }
     private void Start()
     {
 
         //Eger TestScenedeysen buradaki degeri 1 verebilirsin Yoksa Bunu vereceksin PlayerData.Instance.playerData.user.costume_index
-        SkinChangeMethod(1);
+        SkinChangeMethod(3);
     }
     private void Update()
     {
@@ -53,7 +58,9 @@ public class SkinChanger : MonoBehaviour, IPunObservable
         if (pw.IsMine)
         {
             playerModelObject[i].SetActive(true);
-
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.gameObject.SetActive(true);
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
             playerModelObject[i].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);
@@ -83,7 +90,11 @@ public class SkinChanger : MonoBehaviour, IPunObservable
     {
         if(!pw.IsMine)
         {
-
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.gameObject.SetActive(true);
+            playerModelObject[0].GetComponent<ModelGetData>().Body.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.gameObject.SetActive(true);
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
             playerModelObject[getIndex].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
             playerModelObject[getIndex].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
             playerModelObject[getIndex].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);
