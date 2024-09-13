@@ -66,6 +66,9 @@ MonoBehaviour:
   - ReloadOnOtherPlayer
   - GiveDamage
   - GiveDamageRPC
+  - PlayerDeathRPC
+  - isDeathRPC
+  - GetTime
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

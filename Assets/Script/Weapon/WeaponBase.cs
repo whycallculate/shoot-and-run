@@ -41,18 +41,19 @@ public abstract class WeaponBase
     public int currentAmmo;
     public int maxAmmo;
     public int clipsAmmo;
+    public int totalAmmo;
 
     //Raycast ve Photon islemleri.
     public Transform firePointnew;
     public Transform raycastDestination;
     public PhotonView pw;
 
-
+    public abstract void GetPhotonView(PhotonView pw);
     public abstract void Shoot();
 
     public abstract void Reload();
 
-
+    public abstract void AddBullet();
 
 }
 
