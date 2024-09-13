@@ -47,7 +47,7 @@ public class Weapons : MonoBehaviour, IPunObservable
     public Animator rigController;
     public AimState newAimState;
     public ActiveWeapon activeWeapon;
-    WeaponBase weapon;
+    public WeaponBase weapon;
     public PhotonView pw;
     public bool notShooting = false;
 
@@ -87,6 +87,14 @@ public class Weapons : MonoBehaviour, IPunObservable
             weapon = sniper;
         }
 
+    }
+    private void Start()
+    {
+        if (pw.IsMine)
+        {
+            weapon.GetPhotonView(pw);
+            Debug.Log("Pw isMine True Weapon");
+        }
     }
     private void Update()
     {
@@ -142,7 +150,6 @@ public class Weapons : MonoBehaviour, IPunObservable
             }
             while (rigController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f);
             HoldingWeapon();
-            Debug.Log("1.");
         }
         else if (!activeWeapon.mainIsActive && !activeWeapon.secondaryIsActive)
         {
@@ -156,7 +163,6 @@ public class Weapons : MonoBehaviour, IPunObservable
                 yield return new WaitForEndOfFrame();
             }
             while (rigController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f);
-            Debug.Log("2.");
         }
         else if (activeWeapon.secondaryIsActive && !activeWeapon.mainIsActive)
         {
@@ -563,31 +569,46 @@ class Rifle : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
         clipsAmmo = 4;
+        base.totalAmmo = clipsAmmo * maxAmmo;
+
 
     }
-
+    public override void GetPhotonView(PhotonView pw)
+    {
+        if (PlayerManager.Instance.pw.IsMine)
+        {
+            base.pw = pw;
+        }
+    }
     public override void Reload()
     {
-        if (clipsAmmo > 0)
+        if (currentAmmo >= 0 && currentAmmo < maxAmmo && totalAmmo > 0)
         {
+            totalAmmo += currentAmmo - maxAmmo;
             currentAmmo = maxAmmo;
             base.clipsAmmo--;
             base.returnWarningIndex = 0;
+            
 
         }
-        else if (clipsAmmo == 0)
+        else if (totalAmmo <= 0)
         {
+            totalAmmo= 0;
             //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
             base.returnWarningIndex = 1;
 
         }
     }
-
+    public override void AddBullet()
+    {
+        totalAmmo += maxAmmo;
+    }
     public override void Shoot()
     {
         int pelletCount = 1;
         float spreadAngle = 1f;
         currentAmmo--;
+        totalAmmo--;
 
         for (int i = 0; i < pelletCount; i++)
         {
@@ -618,7 +639,7 @@ class Rifle : WeaponBase
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
-                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage, base.pw.OwnerActorNr);
                         layerAndTagIndex = 1;
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
@@ -654,29 +675,45 @@ class Sniper : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
         clipsAmmo = 4;
-    }
+        base.totalAmmo = clipsAmmo * maxAmmo;
 
+    }
+    public override void GetPhotonView(PhotonView pw)
+    {
+        if (PlayerManager.Instance.pw.IsMine)
+        {
+            base.pw = pw;
+        }
+    }
     public override void Reload()
     {
-        if (clipsAmmo > 0)
+        if (currentAmmo >= 0 && currentAmmo < maxAmmo && totalAmmo > 0)
         {
+            totalAmmo += currentAmmo - maxAmmo;
             currentAmmo = maxAmmo;
             base.clipsAmmo--;
+            base.returnWarningIndex = 0;
+
 
         }
-        else if (clipsAmmo == 0)
+        else if (totalAmmo <= 0)
         {
+            totalAmmo = 0;
             //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
             base.returnWarningIndex = 1;
+
         }
     }
-
+    public override void AddBullet()
+    {
+        totalAmmo += maxAmmo;
+    }
     public override void Shoot()
     {
         int pelletCount = 1;
         float spreadAngle = 1f;
         currentAmmo--;
-
+        
         for (int i = 0; i < pelletCount; i++)
         {
             float randomX = Random.Range(-spreadAngle, spreadAngle);
@@ -706,7 +743,7 @@ class Sniper : WeaponBase
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
-                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage, base.pw.OwnerActorNr);
                         layerAndTagIndex = 1;
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
@@ -742,23 +779,39 @@ class Smg : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
         clipsAmmo = 4;
-    }
+        base.totalAmmo = clipsAmmo * maxAmmo;
 
+    }
+    public override void GetPhotonView(PhotonView pw)
+    {
+        if (PlayerManager.Instance.pw.IsMine)
+        {
+            base.pw = pw;
+        }
+    }
     public override void Reload()
     {
-        if (clipsAmmo > 0)
+        if (currentAmmo >= 0 && currentAmmo < maxAmmo && totalAmmo > 0)
         {
+            totalAmmo += currentAmmo - maxAmmo;
             currentAmmo = maxAmmo;
             base.clipsAmmo--;
+            base.returnWarningIndex = 0;
+
 
         }
-        else if (clipsAmmo == 0)
+        else if (totalAmmo <= 0)
         {
+            totalAmmo = 0;
             //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
             base.returnWarningIndex = 1;
+
         }
     }
-
+    public override void AddBullet()
+    {
+        totalAmmo += maxAmmo;
+    }
     public override void Shoot()
     {
         int pelletCount = 1;
@@ -794,7 +847,7 @@ class Smg : WeaponBase
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
-                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage, base.pw.OwnerActorNr);
                         layerAndTagIndex = 1;
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
@@ -837,22 +890,40 @@ class Pistol : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
         clipsAmmo = 5;
-    }
+        base.totalAmmo = clipsAmmo * maxAmmo;
 
+    }
+    public override void GetPhotonView(PhotonView pw)
+    {
+        if (PlayerManager.Instance.pw.IsMine)
+        {
+            base.pw = pw;
+        }
+    }
     public override void Reload()
     {
-        if (clipsAmmo > 0)
+        if (currentAmmo >= 0 && currentAmmo < maxAmmo && totalAmmo > 0)
         {
+            totalAmmo += currentAmmo - maxAmmo;
             currentAmmo = maxAmmo;
             base.clipsAmmo--;
+            base.returnWarningIndex = 0;
+
 
         }
-        else if (clipsAmmo == 0)
+        else if (totalAmmo <= 0)
         {
+            totalAmmo = 0;
             //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
             base.returnWarningIndex = 1;
+
         }
     }
+    public override void AddBullet()
+    {
+        totalAmmo += maxAmmo;
+    }
+
     public override void Shoot()
     {
         int pelletCount = 1;
@@ -888,7 +959,7 @@ class Pistol : WeaponBase
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
-                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage, base.pw.OwnerActorNr);
                         layerAndTagIndex = 1;
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
@@ -931,21 +1002,37 @@ class Shotgun : WeaponBase
         base.firePointnew = firePointnew;
         base.raycastDestination = raycastDestination;
         clipsAmmo = 5;
+        base.totalAmmo = clipsAmmo * maxAmmo;
     }
-
+    public override void GetPhotonView(PhotonView pw)
+    {
+        if (PlayerManager.Instance.pw.IsMine)
+        {
+            base.pw = pw;
+        }
+    }
     public override void Reload()
     {
-        if(clipsAmmo > 0)
+        if (currentAmmo >= 0 && currentAmmo < maxAmmo && totalAmmo > 0)
         {
+            totalAmmo += currentAmmo - maxAmmo;
             currentAmmo = maxAmmo;
             base.clipsAmmo--;
+            base.returnWarningIndex = 0;
+
 
         }
-        else if(clipsAmmo == 0)
+        else if (totalAmmo <= 0)
         {
+            totalAmmo = 0;
             //Hata Indexini 1'e ayarliyoruz ki burada clipsin bittigini gorelim.
             base.returnWarningIndex = 1;
+
         }
+    }
+    public override void AddBullet()
+    {
+        totalAmmo += maxAmmo;
     }
 
     public override void Shoot()
@@ -957,7 +1044,6 @@ class Shotgun : WeaponBase
 
         for (int i = 0; i < pelletCount; i++)
         {
-            Debug.Log("SHOTGUN KAC KERE ATES ETTI");
             // Saçma yayılma açısını rastgele oluştur
             float randomX = Random.Range(-spreadAngle, spreadAngle);
             float randomY = Random.Range(-spreadAngle, spreadAngle);
@@ -991,7 +1077,7 @@ class Shotgun : WeaponBase
                 {
                     if (!hit.collider.GetComponent<PhotonView>().IsMine)
                     {
-                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage);
+                        hit.transform.GetComponent<PlayerManager>().TakeDamage(weaponDamage,base.pw.OwnerActorNr);
                         layerAndTagIndex = 1;
                         hitpoint = hit.point;
                         hitnormal = hit.normal;
