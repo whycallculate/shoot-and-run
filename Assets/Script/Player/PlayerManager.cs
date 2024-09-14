@@ -94,11 +94,10 @@ public class PlayerManager : MonoBehaviour
             PhotonNetwork.LocalPlayer.SetCustomProperties(stats);
         }
     }
-
     void OnPlayerKilled(Player killer, Player victim)
     {
-        
-        int currentKills = (int)PhotonNetwork.LocalPlayer.CustomProperties[KILLS];
+
+        int currentKills = (int)killer.CustomProperties[KILLS];
         Hashtable killerStats = new Hashtable
         {
             { KILLS, currentKills + 1 }
@@ -114,8 +113,6 @@ public class PlayerManager : MonoBehaviour
 
 
     }
-
-
 
     public IEnumerator IsDeath()
     {

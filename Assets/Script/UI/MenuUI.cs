@@ -161,7 +161,15 @@ public class MenuUI : MonoBehaviour
     public void RPCGameInitiate()
     {
         
-        PhotonNetwork.LoadLevel(2);
+        if((int)PhotonNetwork.CurrentRoom.CustomProperties[MatchMakingRoomProperties.GAME_MOD] == 1)
+        {
+            SceneAnimImage.GetComponent<UIAnim>().ChangeScene(SceneAnimImage, 2);
+        }
+        else if((int)PhotonNetwork.CurrentRoom.CustomProperties[MatchMakingRoomProperties.GAME_MOD] == 2)
+        {
+            SceneAnimImage.GetComponent<UIAnim>().ChangeScene(SceneAnimImage, 3);
+        }
+        
     }
     #endregion
     #region chatSide
@@ -204,7 +212,7 @@ public class MenuUI : MonoBehaviour
         acceptOrDecline = false;
         playerBoolCheck.Add(acceptOrDecline);
     }
-    public void FindMatchMakingButton()
+    public void FindMatchMakingButtonDM()
     {
         // Eger oyuncunun ismi belirli bir aralikta ise Arama yapilacak kontrol kismi.
         if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
@@ -215,8 +223,22 @@ public class MenuUI : MonoBehaviour
         {
             Debug.Log("set you nickname");
         }
-        
-        
+
+
+    }
+    public void FindMatchMakingButtonTDM()
+    {
+        // Eger oyuncunun ismi belirli bir aralikta ise Arama yapilacak kontrol kismi.
+        if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
+        {
+            StartCoroutine(SearchingMatch(1, 2, 2));
+        }
+        else
+        {
+            Debug.Log("set you nickname");
+        }
+
+
     }
     public void CancelMatchMakingButton()
     {
@@ -226,7 +248,7 @@ public class MenuUI : MonoBehaviour
     }
 
 
-    IEnumerator SearchingMatch(byte mapType, byte playerLevel, int expectedPlayers)
+    IEnumerator SearchingMatch(byte mapType, int gameMode, int expectedPlayers)
     {
         int waitForSecond = 1;
         
@@ -243,7 +265,7 @@ public class MenuUI : MonoBehaviour
                     if (PhotonNetwork.CurrentRoom != null)
                     {
 
-
+                        
                         //Yeterli oyuncu gelene kadar Bekledigimiz kisim Oyuncu arama kismi
                         if (PhotonNetwork.CurrentRoom.PlayerCount != PhotonNetwork.CurrentRoom.MaxPlayers)
                         {
@@ -276,7 +298,8 @@ public class MenuUI : MonoBehaviour
                     }
                     else if (PhotonNetwork.CurrentRoom == null)
                     {
-                        MatchMaking.Instance.CreateRoomForMatchmaking(mapType, playerLevel, expectedPlayers);
+                        
+                        MatchMaking.Instance.JoinRandomRoomMatchMaking(mapType, gameMode, expectedPlayers);
                         MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
                         MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
                         playerBoolCheck.Clear();

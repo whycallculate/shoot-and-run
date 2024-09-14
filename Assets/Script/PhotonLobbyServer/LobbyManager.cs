@@ -24,42 +24,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public PhotonView pw;
     public Player Player;
-
-
-
     private void Start()
     {
         pw = GetComponent<PhotonView>();
         
-    }
-    private void Update()
-    {
-
-    }
-
-    public override void OnConnectedToMaster()
-    {
-        PhotonNetwork.JoinLobby();
-        Debug.Log("OnConnectedToMaster");
-    }
-    public override void OnJoinedLobby()
-    {
-
-
-        Debug.Log(PhotonNetwork.NickName);
-        
-    }
-
-    public override void OnJoinedRoom()
-    {
-        //PlayerListItem.Instance.ClearPlayerList();
-        //ChatUI.Instance.ClearMessage();
-        //PlayerListItem.Instance.playerList.Add(PhotonNetwork.LocalPlayer);
-
-    }
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        //PlayerListItem.Instance.playerList.Add(newPlayer);
     }
     public override void OnLeftRoom()
     {
