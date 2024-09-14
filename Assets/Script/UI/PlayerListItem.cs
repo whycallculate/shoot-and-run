@@ -74,21 +74,28 @@ public class PlayerListItem : MonoBehaviourPunCallbacks
     public void AddPlayerToList(Player player)
     {
 
-        //Burasi biraz karisik gibi ama degil soyle anlatayim.
-        // contentLeft.childCount <= contentRight.childCount burada bu iki durumu degerlendiriyoruz
-        //Eger contentleft kucuk ve esit durumu false eger buyuk ise true donduruyor.
-        //Eger kosul True ise Left , False ise Right seciliyor.
-
 
         Transform targetContent = contentLeft.childCount <= contentRight.childCount ? contentLeft : contentRight;
         GameObject newPlayerName = Instantiate(playerItemPrefab, targetContent);
         newPlayerName.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = player.NickName;
         newPlayerName.name = "Player_" + player.ActorNumber;
+        if(targetContent == contentLeft)
+        {
+            GetPlayerTeam(PhotonNetwork.LocalPlayer, Team.Blue);
+        }
+        else if(targetContent == contentRight)
+        {
+            GetPlayerTeam(PhotonNetwork.LocalPlayer, Team.Red);
 
+        }
 
 
     }
-
+    
+    public void GetPlayerTeam(Player player,Team team)
+    {
+        PlayerData.Instance.playerTeams[player] = team;
+    }
     private void RemovePlayerFromList(Player player)
     {
         //Cok saglikli degil ama Find ile Content gameobjectlerin icini gezip varmi yokmu diye bakiyor.

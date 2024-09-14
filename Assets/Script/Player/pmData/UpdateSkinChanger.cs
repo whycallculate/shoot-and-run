@@ -13,7 +13,9 @@ public class UpdateSkinChanger : MonoBehaviour
         {
             i++;
             playerModelObject[i].SetActive(true);
-
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.gameObject.SetActive(true);
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
             playerModelObject[i].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);
@@ -45,7 +47,9 @@ public class UpdateSkinChanger : MonoBehaviour
         {
             i--;
             playerModelObject[i].SetActive(true);
-
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.gameObject.SetActive(true);
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.bones = playerModelObject[0].GetComponent<ModelGetData>().Body.bones;
+            playerModelObject[0].GetComponent<ModelGetData>().Backpack.rootBone = playerModelObject[0].GetComponent<ModelGetData>().modelRoot;
             playerModelObject[i].GetComponent<ModelGetData>().Body.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Feet.gameObject.SetActive(true);
             playerModelObject[i].GetComponent<ModelGetData>().Head.gameObject.SetActive(true);

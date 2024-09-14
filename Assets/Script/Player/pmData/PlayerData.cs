@@ -1,9 +1,15 @@
+using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
-
+public enum Team
+{
+    Blue,
+    Red
+}
 public class PlayerData : MonoBehaviour
 {
     #region singliton
@@ -21,6 +27,8 @@ public class PlayerData : MonoBehaviour
     }
     #endregion
     public LoginResponse playerData;
+
+    public Dictionary<Player, Team> playerTeams = new Dictionary<Player, Team>();
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -51,6 +59,7 @@ public class PlayerData : MonoBehaviour
             }
         }
     }
+
 
 }
 [System.Serializable]
