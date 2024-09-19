@@ -28,11 +28,6 @@ public class SkinChanger : MonoBehaviour, IPunObservable
     private void Awake()
     {
         pw = gameObject.GetComponent<PhotonView>();
-        if(pw.IsMine)
-        {
-
-        }
-
 
     }
     private void Start()
@@ -41,18 +36,6 @@ public class SkinChanger : MonoBehaviour, IPunObservable
         //Eger TestScenedeysen buradaki degeri 1 verebilirsin Yoksa Bunu vereceksin PlayerData.Instance.playerData.user.costume_index
         SkinChangeMethod(PlayerData.Instance.playerData.user.costume_index);
     }
-    private void Update()
-    {
-
-
-        //if
-        //{
-        //    Debug.Log(setIndex + getIndex + i);
-
-        //}
-
-    }
-
     public void SkinChangeMethod(int i )
     {
         if (pw.IsMine)
@@ -102,11 +85,6 @@ public class SkinChanger : MonoBehaviour, IPunObservable
                 playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
             }
 
-
-            //AimState.Instance.rig.Clear();
-            //AimState.Instance.rig.Build();
-            //AimState.Instance.anim.Rebind();
-            //AimState.Instance.anim.Update(0f);
         }
 
     }
@@ -159,10 +137,6 @@ public class SkinChanger : MonoBehaviour, IPunObservable
                 playerModelObject[0].GetComponent<ModelGetData>().Legs.gameObject.SetActive(false);
             }
 
-            //AimState.Instance.rig.Clear();
-            //AimState.Instance.rig.Build();
-            //AimState.Instance.anim.Rebind();
-            //AimState.Instance.anim.Update(0f);
         }
     }
 

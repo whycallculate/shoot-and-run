@@ -101,7 +101,7 @@ public class UIAnim : MonoBehaviour
     public void OnEnabledWithUp() 
     {
         gameObject.SetActive(true);
-        gameObject.transform.localPosition = new Vector2(0,-Screen.height);
+        gameObject.transform.localPosition = new Vector2(transform.localPosition.x,-Screen.height);
         gameObject.LeanMoveLocalY(0, 0.5f).setEase(LeanTweenType.easeInOutExpo);
 
     }

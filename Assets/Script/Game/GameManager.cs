@@ -27,15 +27,32 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 
     public bool gameTimeUp = false;
 
-    private void Awake()
+
+
+    public override void OnConnectedToMaster()
     {
+        PhotonNetwork.JoinLobby();
+
+    }
+    public override void OnJoinedLobby()
+    {
+        PhotonNetwork.JoinRandomOrCreateRoom();
+    }
+    public override void OnJoinedRoom()
+    {
+        //Eger Test ekraninda isek DeathMatch.Instance.StartOnDeathMatch(); Calistirmaliyiz
+        DeathMatch.Instance.StartOnDeathMatch();
+        //Test Ekrani Disinda Calistirmamiz gereken
+        //StartCoroutine(StartGame());
+        pw.RPC("allPlayerInGame", RpcTarget.AllBuffered);
+        Debug.Log(playerindex);
     }
     public void Start()
     {
         pw = GetComponent<PhotonView>();
-        pw.RPC("AllPlayerisInGame", RpcTarget.AllBuffered);
+        PhotonNetwork.ConnectUsingSettings();
 
-        StartCoroutine(StartGame());
+
     }
     public IEnumerator StartGame()
     {
@@ -64,6 +81,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
     [PunRPC]
+    public void allPlayerInGame()
+    {
+        playerindex++;
+    }
+    [PunRPC]
     public void GameEnd()
     {
         if (gameTimeUp)
@@ -73,22 +95,22 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
 
-    [PunRPC]
-    public void AllPlayerisInGame()
-    {
-        playerindex++;
-    }
+
     public void PlayerDeath(GameObject player)
     {
         if ((int)PhotonNetwork.CurrentRoom.CustomProperties[MatchMakingRoomProperties.GAME_MOD] == 1)
         {
-            StartCoroutine(DeathMatch.Instance.DeathMatchRevive(player));
             Debug.Log("DUZ OLUM KALIM");
 
         }
         else if((int)PhotonNetwork.CurrentRoom.CustomProperties[MatchMakingRoomProperties.GAME_MOD] == 2)
         {
             Debug.Log("TAKIMLI OLUM KALIM");
+        }
+        else
+        {
+            StartCoroutine(DeathMatch.Instance.DeathMatchRevive(player));
+
         }
         player.SetActive(false);
     }
@@ -103,10 +125,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         if (stream.IsWriting)
         {
             stream.SendNext(gameTimeUp);
+            stream.SendNext(playerindex);
         }
         else
         {
             gameTimeUp = (bool)stream.ReceiveNext();
+            playerindex = (int)stream.ReceiveNext();
         }
  
     }
