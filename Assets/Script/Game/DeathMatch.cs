@@ -32,8 +32,6 @@ public class DeathMatch : MonoBehaviour
 
         Vector3 pos = spawnPoint[Random.Range(0, 9)].transform.position;
         GameObject player = PhotonNetwork.Instantiate(Path.Combine("PlayerPrefabs", "Player"), pos, Quaternion.identity);
-        player.transform.GetChild(1).position = pos;
-
         SoundManager.Instance.StopBackgroundMusic();
 
         if (player.transform.GetChild(1).GetComponent<PhotonView>().IsMine)
@@ -65,8 +63,10 @@ public class DeathMatch : MonoBehaviour
         {
             if (PhotonNetwork.CurrentRoom.MaxPlayers != GameManager.Instance.playerindex)
             {
-                GameUI.Instance.GameWaitingPlayers();
-                yield return new WaitForSeconds(1f);
+                GameUI.Instance.GameOnUI();
+                StartCoroutine(StartTimer());
+                break;
+                //yield return new WaitForSeconds(1f);
             }
             else if (PhotonNetwork.CurrentRoom.MaxPlayers == GameManager.Instance.playerindex)
             {
@@ -74,6 +74,7 @@ public class DeathMatch : MonoBehaviour
                 StartCoroutine(StartTimer());
                 break;
             }
+            yield return new WaitForSeconds(1f);
         }
     }
 

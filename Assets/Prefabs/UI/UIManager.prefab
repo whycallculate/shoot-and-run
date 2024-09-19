@@ -51,17 +51,17 @@ MonoBehaviour:
   SceneAnimImage: {fileID: 0}
   playerListParentLeft: {fileID: 0}
   playerListParentRight: {fileID: 0}
-  playerItemList: {fileID: 4825647446233554989, guid: f4e108668969b8f4cb66ebdf3905c399,
+  playerItemList: {fileID: 8189238904031154569, guid: 3e360d020ecf5794ba5d614ce683333d,
     type: 3}
   pw: {fileID: 0}
+  settingsMenu: {fileID: 0}
   chatSide: {fileID: 0}
   console: {fileID: 0}
   MatchFoundUI: {fileID: 0}
   acceptOrDecline: 0
   cancelMatchMaking: 0
   profilSide: {fileID: 0}
-  playerObject: {fileID: 5637190378807021222, guid: 9f3ad95429b77ac4782a70d0a9e2f7d8,
-    type: 3}
+  playerObject: {fileID: 0}
   PmCustomize: {fileID: 4140054454116567336, guid: cf11caa68bd6f1d41b33f85d61da31a0,
     type: 3}
   defaultColors:
@@ -106,6 +106,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentLeft: {fileID: 0}
   contentRight: {fileID: 0}
-  playerItemPrefab: {fileID: 4825647446233554989, guid: f4e108668969b8f4cb66ebdf3905c399,
+  playerItemPrefab: {fileID: 8189238904031154569, guid: 3e360d020ecf5794ba5d614ce683333d,
     type: 3}
   RoomUI: {fileID: 0}

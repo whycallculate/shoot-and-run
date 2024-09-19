@@ -30,6 +30,9 @@ public class MenuUI : MonoBehaviour
     [SerializeField] public GameObject menuSide;
     [SerializeField] public GameObject roomSide;
     [SerializeField] public GameObject SceneAnimImage;
+    [SerializeField] public GameObject playButton;
+    [SerializeField] public GameObject dmButton;
+    [SerializeField] public GameObject tdmButton;
 
     [Header("RoomSide")]
     [SerializeField] public Transform playerListParentLeft;
@@ -114,7 +117,24 @@ public class MenuUI : MonoBehaviour
 
 
     }
+    public void PlayButtonPress()
+    {
+        CancelMatchMakingButton();
 
+        if (dmButton.activeSelf == false && tdmButton.activeSelf == false)
+        {
+            cancelMatchMaking = false;
+            dmButton.GetComponent<UIAnim>().OnEnabledWithUp();
+            tdmButton.GetComponent<UIAnim>().OnEnabledWithUp();
+        }
+        else if(dmButton.activeSelf == true && tdmButton.activeSelf == true)
+        {
+            dmButton.GetComponent<UIAnim>().OnDisabledWithDown();
+            tdmButton.GetComponent<UIAnim>().OnDisabledWithDown();
+        }
+
+
+    }
     public void RoomSideInitiate()
     {
         // oda yukleme ekrani
@@ -217,6 +237,8 @@ public class MenuUI : MonoBehaviour
         // Eger oyuncunun ismi belirli bir aralikta ise Arama yapilacak kontrol kismi.
         if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
         {
+            dmButton.GetComponent<UIAnim>().OnDisabledWithDown();
+            tdmButton.GetComponent<UIAnim>().OnDisabledWithDown();
             StartCoroutine(SearchingMatch(1, 1, 2));
         }
         else
@@ -231,6 +253,8 @@ public class MenuUI : MonoBehaviour
         // Eger oyuncunun ismi belirli bir aralikta ise Arama yapilacak kontrol kismi.
         if (PhotonNetwork.NickName.Length >= 4 && PhotonNetwork.NickName.Length <= 14)
         {
+            tdmButton.GetComponent<UIAnim>().OnDisabledWithDown();
+            dmButton.GetComponent<UIAnim>().OnDisabledWithDown();
             StartCoroutine(SearchingMatch(1, 2, 2));
         }
         else
@@ -316,9 +340,13 @@ public class MenuUI : MonoBehaviour
             }
             else if (cancelMatchMaking) 
             {
+                if(PhotonNetwork.CurrentRoom != null)
+                {
+                    PhotonNetwork.LeaveRoom();
+                }
                 MatchFoundUI.transform.GetChild(0).GetComponent<UIAnim>().OnDisabled();
                 MatchFoundUI.transform.GetChild(1).GetComponent<UIAnim>().OnDisabled();
-                PhotonNetwork.LeaveRoom();
+                
                 cancelMatchMaking = false;
                 break;
             }
